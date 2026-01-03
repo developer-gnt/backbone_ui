@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
 
-import { GlobeIcon } from "@/assets/icons";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DatePickerOne from "@/components/FormElements/DatePicker/DatePickerOne";
 import DatePickerTwo from "@/components/FormElements/DatePicker/DatePickerTwo";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { TextAreaGroup } from "@/components/FormElements/InputGroup/text-area";
-import MultiSelect from "@/components/FormElements/MultiSelect";
 import { Checkbox } from "@/components/FormElements/checkbox";
 import { RadioInput } from "@/components/FormElements/radio";
-import { Select } from "@/components/FormElements/select";
 import { Switch } from "@/components/FormElements/switch";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 
@@ -98,7 +95,7 @@ export default function FormElementsPage() {
             />
           </ShowcaseSection>
 
-          <ShowcaseSection title="Select input" className="space-y-5.5 !p-6.5">
+          {/* <ShowcaseSection title="Select input" className="space-y-5.5 !p-6.5">
             <Select
               label="Select Country"
               items={[
@@ -108,12 +105,11 @@ export default function FormElementsPage() {
               ]}
               // defaultValue="USA"
               value="USA"
-              onChange={() => ({})}
+              // onChange={() => ({})}
               placeholder="Select Country"
-              prefixIcon={<GlobeIcon />}
-            />
+                   />
             <MultiSelect id="multiSelect" />
-          </ShowcaseSection>
+          </ShowcaseSection> */}
 
           <ShowcaseSection
             title="Checkbox and radio"
