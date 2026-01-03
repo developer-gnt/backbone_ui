@@ -106,7 +106,10 @@ export default function FormElementsPage() {
                 { label: "United Kingdom", value: "UK" },
                 { label: "Canada", value: "Canada" },
               ]}
-              defaultValue="USA"
+              // defaultValue="USA"
+              value="USA"
+              onChange={() => ({})}
+              placeholder="Select Country"
               prefixIcon={<GlobeIcon />}
             />
             <MultiSelect id="multiSelect" />
