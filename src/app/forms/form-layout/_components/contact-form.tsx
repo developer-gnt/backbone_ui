@@ -37,7 +37,7 @@ export function ContactForm() {
           placeholder="Enter your subject"
           className="mb-4.5"
         />
-
+{/* 
         <Select
           label="Subject"
           placeholder="Select your subject"
@@ -49,7 +49,7 @@ export function ContactForm() {
           ]}
           value="USA"
           onChange={() => {}}
-        />
+        /> */}
 
         <TextAreaGroup label="Message" placeholder="Type your message" />
 
