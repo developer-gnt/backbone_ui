@@ -47,6 +47,8 @@ export function ContactForm() {
             { label: "United Kingdom", value: "UK" },
             { label: "Canada", value: "Canada" },
           ]}
+          value="USA"
+          onChange={() => {}}
         />
 
         <TextAreaGroup label="Message" placeholder="Type your message" />
