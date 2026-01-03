@@ -1,11 +1,10 @@
 "use client";
 
 import { EmailIcon, PasswordIcon } from "@/assets/icons";
-import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import InputGroup from "../FormElements/InputGroup";
 import { loginUser } from "./authService";
-import axios from "axios";
 
 export default function SigninWithPassword() {
   const router = useRouter();

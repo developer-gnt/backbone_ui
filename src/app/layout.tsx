@@ -32,7 +32,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
               {children}
             </main>
           ) : (
-            <RequireAuth>
+            // <RequireAuth>
               <div className="flex min-h-screen">
                 <Sidebar />
                 <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
@@ -42,7 +42,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                   </main>
                 </div>
               </div>
-            </RequireAuth>
+            // </RequireAuth>
           )}
         </Providers>
       </body>
