@@ -15,6 +15,8 @@ import { PreviewIcon } from "@/components/Tables/icons";
 
 import axiosInstance from "@/lib/axiosInstance";
 import ReferenceModal from "./ReferenceModal";
+import { referenceData } from "@/data/frontendDummyData";
+
 
 interface ReferenceModel {
   id: string;
@@ -24,7 +26,7 @@ interface ReferenceModel {
 const ReferencePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<ReferenceModel | null>(null);
-  const [references, setReferences] = useState<ReferenceModel[]>([]);
+  const [references, setReferences] = useState<ReferenceModel[]>(referenceData);
 
   const fetchReferences = async () => {
     try {

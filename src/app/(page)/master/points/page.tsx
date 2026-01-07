@@ -13,6 +13,7 @@ import {
 import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
 import axiosInstance from "@/lib/axiosInstance";
 import PointsModal from "./PointsModal";
+import { pointData } from "@/data/frontendDummyData";
 
 interface PointsModel {
   id: string;
@@ -23,7 +24,7 @@ interface PointsModel {
 const PointsPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [editData, setEditData] = useState<PointsModel | null>(null);
-  const [pointsData, setPointsData] = useState<PointsModel[]>([]);
+  const [pointsData, setPointsData] = useState<PointsModel[]>(pointData);
 
   const fetchPoints = async () => {
     try {

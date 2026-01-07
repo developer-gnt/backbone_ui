@@ -13,6 +13,7 @@ import {
 import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
 import axiosInstance from "@/lib/axiosInstance";
 import OrderTypeModal from "./OrderTypeModal";
+import { orderTypeData } from "@/data/frontendDummyData";
 
 interface OrderTypeModel {
   id: string;
@@ -23,7 +24,7 @@ interface OrderTypeModel {
 const OrderTypePage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<OrderTypeModel | null>(null);
-  const [orderTypes, setOrderTypes] = useState<OrderTypeModel[]>([]);
+  const [orderTypes, setOrderTypes] = useState<OrderTypeModel[]>(orderTypeData);
 
   const fetchOrderTypes = async () => {
     try {

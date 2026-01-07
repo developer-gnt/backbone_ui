@@ -13,6 +13,7 @@ import {
 import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
 import axiosInstance from "@/lib/axiosInstance";
 import FormModal from "./FormModal";
+import { formsData } from "@/data/frontendDummyData";
 
 interface FormsModel {
   id: string;
@@ -23,7 +24,7 @@ interface FormsModel {
 const FormsPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<FormsModel | null>(null);
-  const [formsList, setFormsList] = useState<FormsModel[]>([]);
+  const [formsList, setFormsList] = useState<FormsModel[]>(formsData);
 
   const fetchForms = async () => {
     try {

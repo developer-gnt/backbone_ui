@@ -13,6 +13,7 @@ import {
 import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
 import axiosInstance from "@/lib/axiosInstance";
 import TransactionModal from "./TransactionModal";
+import { transactionData } from "@/data/frontendDummyData";
 
 interface TransactionModel {
   id: string;
@@ -24,7 +25,7 @@ interface TransactionModel {
 const TransactionPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<TransactionModel | null>(null);
-  const [transactions, setTransactions] = useState<TransactionModel[]>([]);
+  const [transactions, setTransactions] = useState<TransactionModel[]>(transactionData);
 
   const fetchTransactions = async () => {
     try {

@@ -13,6 +13,7 @@ import { PencilSquareIcon, TrashIcon } from "@/assets/icons";
 import { PreviewIcon } from "@/components/Tables/icons";
 import AddStateModal from "./AddStateModal";
 import axiosInstance from "@/lib/axiosInstance";
+import { statesData } from "@/data/frontendDummyData";
 
 interface StateModel {
   id: string;
@@ -22,12 +23,12 @@ interface StateModel {
 const States = () => {
   const [openModal, setOpenModal] = useState(false);
   const [editData, setEditData] = useState<StateModel | null>(null);
-  const [stateData, setStateData] = useState<StateModel[]>([]);
+  const [stateData, setStateData] = useState<StateModel[]>(statesData);
 
   const fetchStates = async () => {
     try {
       const response = await axiosInstance.get("/masters/state");
-      setStateData(response.data);
+      // setStateData(response.data);
     } catch (error) {
       console.log("Failed to fetch states", error);
     }

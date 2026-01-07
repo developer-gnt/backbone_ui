@@ -13,6 +13,7 @@ import {
 import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
 import axiosInstance from "@/lib/axiosInstance";
 import CreditModal from "./CreditModal";
+import { creditData } from "@/data/frontendDummyData";
 
 interface CreditModel {
   id: string;
@@ -23,7 +24,7 @@ interface CreditModel {
 const CreditPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<CreditModel | null>(null);
-  const [credits, setCredits] = useState<CreditModel[]>([]);
+  const [credits, setCredits] = useState<CreditModel[]>(creditData);
 
   const fetchCredits = async () => {
     try {

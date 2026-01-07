@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { newOrdersData } from "@/data/frontendDummyData";
 
 const dummyData = [
   {
@@ -52,7 +53,7 @@ const dummyData = [
 ];
 
 const OrdersTable = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>(newOrdersData);
 
   const handleGetData = () => {
     // Simulate API call

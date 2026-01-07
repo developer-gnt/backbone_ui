@@ -13,6 +13,7 @@ import {
 import { PencilSquareIcon, TrashIcon } from "@/assets/icons";
 import axiosInstance from "@/lib/axiosInstance";
 import AlertAvailabilityModal from "./AlertAvailabilityModal";
+import { alertAvailabilityData } from "@/data/frontendDummyData";
 
 interface AlertAvailabilityModel {
   id: string;
@@ -23,7 +24,7 @@ interface AlertAvailabilityModel {
 const AlertAvailabilityPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<AlertAvailabilityModel | null>(null);
-  const [alertList, setAlertList] = useState<AlertAvailabilityModel[]>([]);
+  const [alertList, setAlertList] = useState<AlertAvailabilityModel[]>(alertAvailabilityData);
 
   const fetchAlerts = async () => {
     try {

@@ -32,9 +32,9 @@ export const creditData = [
 export const transactionData = [
   {
     id: "TX001",
-    status: "Completed",
+    name: "Amaan",
     amount: 150,
-    credits: 10,
+    credit_core: 10,
     transaction_id: "TXN-001",
     refill_date: "2025-02-01",
     user_name: "Amaan",
@@ -42,7 +42,7 @@ export const transactionData = [
   },
 ];
 
-export const pointsData = [
+export const pointData = [
   { id: "PT001", user_name: "Amaan", point: 120 },
 ];
 

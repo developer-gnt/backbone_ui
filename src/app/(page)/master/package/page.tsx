@@ -13,6 +13,7 @@ import {
 import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
 import PackageModal from "./PackageModal";
 import axiosInstance from "@/lib/axiosInstance";
+import { packageData } from "@/data/frontendDummyData";
 
 interface PackageModel {
   id: string;
@@ -24,7 +25,7 @@ interface PackageModel {
 const PackagesPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<PackageModel | null>(null);
-  const [packages, setPackages] = useState<PackageModel[]>([]);
+  const [packages, setPackages] = useState<PackageModel[]>(packageData);
 
   const fetchPackages = async () => {
     try {
