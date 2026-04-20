@@ -1,23 +1,36 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useAuth } from "@/components/Auth/AuthProvider";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [checked, setChecked] = useState(false);
+  const pathname = usePathname();
+  const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    if (!isLoading && !isAuthenticated) {
+      const nextPath =
+        pathname && pathname !== "/"
+          ? `?next=${encodeURIComponent(pathname)}`
+          : "";
 
-    if (!token) {
-      router.replace("/auth/sign-in");
-    } else {
-      setChecked(true);
+      router.replace(`/auth/sign-in${nextPath}`);
     }
-  }, [router]);
+  }, [isAuthenticated, isLoading, pathname, router]);
 
-  if (!checked) {
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="rounded-lg bg-white px-4 py-3 text-sm text-dark shadow-1 dark:bg-gray-dark dark:text-white">
+          Checking your session...
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
     return null;
   }
 

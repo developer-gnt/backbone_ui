@@ -15,12 +15,11 @@ const THEMES = [
 ];
 
 export function ThemeToggleSwitch() {
-  const { setTheme, theme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    setTheme("dark")
   }, []);
 
   if (!mounted) {
@@ -29,16 +28,21 @@ export function ThemeToggleSwitch() {
 
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "dark" : "light")}
-      className="group rounded-full bg-gray-3 p-[5px] text-[#111928] outline-1 outline-primary focus-visible:outline dark:bg-[#020D1A] dark:text-current"
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      className="group rounded-full bg-gray-3 p-[5px] text-dark outline-1 outline-primary focus-visible:outline dark:bg-dark-2 dark:text-white"
     >
       <span className="sr-only">
-        Switch to {theme === "light" ? "dark" : "light"} mode
+        Switch to {resolvedTheme === "light" ? "dark" : "light"} mode
       </span>
 
       <span aria-hidden className="relative flex gap-2.5">
         {/* Indicator */}
-        <span className="absolute size-[38px] rounded-full border border-gray-200 bg-white transition-all dark:translate-x-[48px] dark:border-none dark:bg-dark-2 dark:group-hover:bg-dark-3" />
+        <span
+          className={cn(
+            "absolute size-[38px] rounded-full border border-gray-200 bg-white transition-all dark:border-none dark:bg-dark-3",
+            resolvedTheme === "dark" && "translate-x-[48px]",
+          )}
+        />
 
         {THEMES.map(({ name, Icon }) => (
           <span

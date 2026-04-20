@@ -14,6 +14,13 @@ export default function Signin() {
       <div>
         <SigninWithPassword />
       </div>
+
+      <p className="mt-4 text-center text-sm text-dark-5 dark:text-dark-6">
+        New client?{" "}
+        <Link href="/client-registration" className="font-medium text-primary">
+          Create an account
+        </Link>
+      </p>
     </>
   );
 }

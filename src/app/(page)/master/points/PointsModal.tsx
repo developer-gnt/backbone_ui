@@ -7,10 +7,14 @@ interface PointsModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (
-    data: { user_name: string; point: number },
-    id?: string
+    data: { registration_id: number; points: number; wallet_amount?: number },
+    id?: number,
   ) => void;
-  editData?: { id: string; user_name: string; point: number } | null;
+  editData?: {
+    id: number;
+    points: number | string | null;
+    wallete_balance?: number | string | null;
+  } | null;
 }
 
 export default function PointsModal({
@@ -19,16 +23,19 @@ export default function PointsModal({
   onSubmit,
   editData,
 }: PointsModalProps) {
-  const [userName, setUserName] = useState("");
-  const [point, setPoint] = useState<number>(0);
+  const [registrationId, setRegistrationId] = useState<number>(0);
+  const [points, setPoints] = useState<number>(0);
+  const [walletAmount, setWalletAmount] = useState<number>(0);
 
   useEffect(() => {
     if (editData) {
-      setUserName(editData.user_name);
-      setPoint(editData.point);
+      setRegistrationId(editData.id);
+      setPoints(Number(editData.points || 0));
+      setWalletAmount(0);
     } else {
-      setUserName("");
-      setPoint(0);
+      setRegistrationId(0);
+      setPoints(0);
+      setWalletAmount(0);
     }
   }, [editData]);
 
@@ -37,27 +44,33 @@ export default function PointsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-xl border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2">
-
         <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">
           {editData ? "Edit Points" : "Add Points"}
         </h3>
 
         <div className="space-y-4">
-
           <InputGroup
-            label="User Name"
-            type="text"
-            placeholder="Enter user name"
-            value={userName}
-            handleChange={(e) => setUserName(e.target.value)}
+            label="Registration ID"
+            type="number"
+            placeholder="Enter registration id"
+            value={String(registrationId || "")}
+            handleChange={(e) => setRegistrationId(Number(e.target.value))}
           />
 
           <InputGroup
             label="Points"
             type="number"
             placeholder="Enter points"
-            value={String(point)}
-            handleChange={(e) => setPoint(Number(e.target.value))}
+            value={String(points)}
+            handleChange={(e) => setPoints(Number(e.target.value))}
+          />
+
+          <InputGroup
+            label="Wallet Amount (optional)"
+            type="number"
+            placeholder="Use when converting or adjusting wallet"
+            value={String(walletAmount)}
+            handleChange={(e) => setWalletAmount(Number(e.target.value))}
           />
         </div>
 
@@ -72,8 +85,12 @@ export default function PointsModal({
           <button
             onClick={() =>
               onSubmit(
-                { user_name: userName, point },
-                editData?.id
+                {
+                  registration_id: registrationId,
+                  points,
+                  wallet_amount: walletAmount,
+                },
+                editData?.id,
               )
             }
             className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
@@ -81,7 +98,6 @@ export default function PointsModal({
             {editData ? "Update" : "Add"}
           </button>
         </div>
-
       </div>
     </div>
   );

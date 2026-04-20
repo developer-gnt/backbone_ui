@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { type HTMLInputTypeAttribute, useId } from "react";
+import { type HTMLInputTypeAttribute } from "react";
 
 type InputGroupProps = {
   className?: string;
@@ -12,6 +12,7 @@ type InputGroupProps = {
   active?: boolean;
   handleChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string;
+  id?: string;
   name?: string;
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
@@ -31,12 +32,19 @@ const InputGroup: React.FC<InputGroupProps> = ({
   icon,
   ...props
 }) => {
-  const id = useId();
+  const inputId =
+    props.id ||
+    props.name ||
+    `${type}-${label}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") ||
+    "input-field";
 
   return (
     <div className={className}>
       <label
-        htmlFor={id}
+        htmlFor={inputId}
         className="text-body-sm font-medium text-dark dark:text-white"
       >
         {label}
@@ -52,7 +60,7 @@ const InputGroup: React.FC<InputGroupProps> = ({
         )}
       >
         <input
-          id={id}
+          id={inputId}
           type={type}
           name={props.name}
           placeholder={placeholder}

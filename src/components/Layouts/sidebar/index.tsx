@@ -4,23 +4,43 @@ import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { NAV_DATA } from "./data";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/Auth/AuthProvider";
+import { CLIENT_NAV_DATA, NAV_DATA, SUPERVISOR_NAV_DATA, TEAM_MEMBER_NAV_DATA } from "./data";
 import { ArrowLeftIcon, ChevronUp } from "./icons";
 import { MenuItem } from "./menu-item";
 import { useSidebarContext } from "./sidebar-context";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  const navData = useMemo(() => {
+    const role = (user?.role ?? "").toLowerCase();
+
+    if (role === "client") {
+      return CLIENT_NAV_DATA;
+    }
+
+    if (role === "supervisor") {
+      return SUPERVISOR_NAV_DATA;
+    }
+
+    if (role === "team member") {
+      return TEAM_MEMBER_NAV_DATA;
+    }
+
+    return NAV_DATA;
+  }, [user?.role]);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
   };
 
   useEffect(() => {
-    NAV_DATA.some((section) => {
+    navData.some((section) => {
       return section.items.some((item) => {
         return item.items.some((subItem) => {
           if (subItem.url === pathname) {
@@ -33,7 +53,7 @@ export function Sidebar() {
         });
       });
     });
-  }, [pathname]);
+  }, [navData, pathname]);
 
   return (
     <>
@@ -80,7 +100,7 @@ export function Sidebar() {
 
           {/* Navigation */}
           <div className="custom-scrollbar mt-6 flex-1 overflow-y-auto pr-3 min-[850px]:mt-10">
-            {NAV_DATA.map((section) => (
+            {navData.map((section) => (
               <div key={section.label} className="mb-6">
                 <h2 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
                   {section.label}

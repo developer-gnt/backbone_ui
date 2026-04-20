@@ -1,147 +1,80 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
+import React, { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
-import CreditModal from "./CreditModal";
-import { creditData } from "@/data/frontendDummyData";
-
-interface CreditModel {
-  id: string;
-  name: string;
-  credit: number;
-}
+import InputGroup from "@/components/FormElements/InputGroup";
 
 const CreditPage = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editData, setEditData] = useState<CreditModel | null>(null);
-  const [credits, setCredits] = useState<CreditModel[]>(creditData);
+  const [username, setUsername] = useState("");
+  const [credits, setCredits] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const fetchCredits = async () => {
-    try {
-      const response = await axiosInstance.get("/masters/credit");
-      setCredits(response.data);
-    } catch (error) {
-      console.log("Error fetching credits", error);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!username.trim()) {
+      alert("Please enter the client user name or email.");
+      return;
     }
-  };
 
-  useEffect(() => {
-    fetchCredits();
-  }, []);
+    const creditValue = Number(credits);
+    if (!Number.isFinite(creditValue) || creditValue < 0) {
+      alert("Please enter a valid credit amount.");
+      return;
+    }
 
-  const handleSubmit = async (
-    data: { name: string; credit: number },
-    id?: string
-  ) => {
     try {
-      if (id) {
-        await axiosInstance.patch(`/masters/credit/${id}`, data);
-      } else {
-        await axiosInstance.post("/masters/credit", data);
-      }
+      setSubmitting(true);
+      const response = await axiosInstance.post("/masters/wallet/credit", {
+        username: username.trim(),
+        credits: creditValue,
+        remarks: "Manual bonus by admin",
+      });
 
-      fetchCredits();
-      setModalOpen(false);
-      setEditData(null);
+      alert(response?.data?.message || "Credit updated successfully.");
+      setUsername("");
+      setCredits("");
     } catch (error) {
       console.log("Error saving credit", error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this credit?")) return;
-
-    try {
-      await axiosInstance.delete(`/masters/credit/${id}`);
-      fetchCredits();
-    } catch (error) {
-      console.log("Error deleting credit", error);
+      alert("Unable to update wallet credit.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
-
-      <CreditModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditData(null);
-        }}
-        onSubmit={handleSubmit}
-        editData={editData}
-      />
-
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-dark dark:text-white">Credits</h2>
-
-        <button
-          className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
-          onClick={() => {
-            setEditData(null);
-            setModalOpen(true);
-          }}
-        >
-          Add Credit
-        </button>
+    <div className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold text-dark dark:text-white">Add Credit</h2>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
-            <TableHead>#</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Credit</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+      <form onSubmit={handleSubmit} className="max-w-2xl space-y-5">
+        <InputGroup
+          label="User Name"
+          type="text"
+          placeholder="Enter client user name or email"
+          value={username}
+          handleChange={(e) => setUsername(e.target.value)}
+        />
 
-        <TableBody>
-          {credits.map((item, index) => (
-            <TableRow key={item.id} className="border-[#eee] dark:border-dark-3">
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.credit}</TableCell>
+        <InputGroup
+          label="Add Credit"
+          type="number"
+          placeholder="Enter credit amount"
+          value={credits}
+          handleChange={(e) => setCredits(e.target.value)}
+        />
 
-              <TableCell>
-                <div className="flex items-center justify-end gap-x-3.5">
-
-                  {/* EDIT */}
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => {
-                      setEditData(item);
-                      setModalOpen(true);
-                    }}
-                  >
-                    <PencilSquareIcon />
-                  </button>
-
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    <TrashIcon />
-                  </button>
-
-                </div>
-              </TableCell>
-
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
+        <div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-md bg-primary px-5 py-2 text-white hover:bg-primary/90 disabled:opacity-60"
+          >
+            {submitting ? "Adding..." : "Add Credit"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

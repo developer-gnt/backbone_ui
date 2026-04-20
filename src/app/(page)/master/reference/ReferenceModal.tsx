@@ -6,8 +6,8 @@ import InputGroup from "@/components/FormElements/InputGroup";
 interface ReferenceModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (source: string, id?: string) => void;
-  editData?: { id: string; source: string } | null;
+  onSubmit: (referenceSource: string, id?: number) => void;
+  editData?: { id: number; reference_source: string } | null;
 }
 
 export default function ReferenceModal({
@@ -16,13 +16,13 @@ export default function ReferenceModal({
   onSubmit,
   editData,
 }: ReferenceModalProps) {
-  const [source, setSource] = useState("");
+  const [referenceSource, setReferenceSource] = useState("");
 
   useEffect(() => {
     if (editData) {
-      setSource(editData.source);
+      setReferenceSource(editData.reference_source || "");
     } else {
-      setSource("");
+      setReferenceSource("");
     }
   }, [editData]);
 
@@ -40,8 +40,8 @@ export default function ReferenceModal({
             label="Reference Source"
             type="text"
             placeholder="Enter reference source"
-            value={source}
-            handleChange={(e) => setSource(e.target.value)}
+            value={referenceSource}
+            handleChange={(e) => setReferenceSource(e.target.value)}
           />
         </div>
 
@@ -54,7 +54,7 @@ export default function ReferenceModal({
           </button>
 
           <button
-            onClick={() => onSubmit(source, editData?.id)}
+            onClick={() => onSubmit(referenceSource.trim(), editData?.id)}
             className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
           >
             {editData ? "Update Reference" : "Add Reference"}

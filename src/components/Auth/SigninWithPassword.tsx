@@ -1,13 +1,26 @@
 "use client";
 
 import { EmailIcon, PasswordIcon } from "@/assets/icons";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { API_BASE_URL } from "@/lib/axiosInstance";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
 import InputGroup from "../FormElements/InputGroup";
-import { loginUser } from "./authService";
+import { useAuth } from "./AuthProvider";
 
 export default function SigninWithPassword() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { login, isAuthenticated, user } = useAuth();
+
+  const nextUrl = useMemo(() => {
+    const requestedNext = searchParams.get("next");
+
+    if (requestedNext) {
+      return requestedNext;
+    }
+
+    return (user?.role ?? "").toLowerCase() === "client" ? "/client/new-order" : "/";
+  }, [searchParams, user?.role]);
 
   const [data, setData] = useState({
     email: "",
@@ -18,11 +31,19 @@ export default function SigninWithPassword() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace(nextUrl);
+    }
+  }, [isAuthenticated, nextUrl, router]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setData({
-      ...data,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, type, checked } = e.target;
+
+    setData((current) => ({
+      ...current,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,16 +52,15 @@ export default function SigninWithPassword() {
     setErrorMessage("");
 
     try {
-      const res = await loginUser(data.email, data.password);
-      const token = res?.access_token;
-      if (token) {
-        localStorage.setItem("token", token);
-      }
-      router.push("/");
+      const currentUser = await login(data.email.trim(), data.password);
+      const destination =
+        searchParams.get("next") ||
+        ((currentUser?.role ?? "").toLowerCase() === "client"
+          ? "/client/new-order"
+          : "/");
+      router.replace(destination);
     } catch (error: any) {
-      let msg = error.message;
-
-      setErrorMessage(msg);
+      setErrorMessage(error?.message || "Unable to sign in.");
     } finally {
       setLoading(false);
     }
@@ -48,18 +68,19 @@ export default function SigninWithPassword() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      
 
       {errorMessage && (
-        <p className="rounded-md bg-red-100 text-red-700 p-3 text-sm">
+        <p className="rounded-md bg-red-100 p-3 text-sm text-red-700">
           {errorMessage}
         </p>
       )}
 
       <InputGroup
-        type="email"
-        label="Email"
+        type="text"
+        label="Email / Username"
         className="mb-4 [&_input]:py-[15px]"
-        placeholder="Enter your email"
+        placeholder="Enter your email or username"
         name="email"
         handleChange={handleChange}
         value={data.email}
@@ -69,7 +90,7 @@ export default function SigninWithPassword() {
       <InputGroup
         type="password"
         label="Password"
-        className="mb-5 [&_input]:py-[15px]"
+        className="mb-4 [&_input]:py-[15px]"
         placeholder="Enter your password"
         name="password"
         handleChange={handleChange}
@@ -77,10 +98,22 @@ export default function SigninWithPassword() {
         icon={<PasswordIcon />}
       />
 
+      <label className="flex items-center gap-2 text-sm text-dark-5 dark:text-dark-6">
+        <input
+          type="checkbox"
+          name="remember"
+          checked={data.remember}
+          onChange={handleChange}
+          className="accent-primary"
+        />
+        Keep me signed in on this device
+      </label>
+
       <div>
         <button
           type="submit"
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
+          disabled={loading}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary p-4 font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-80"
         >
           Sign In
           {loading && (

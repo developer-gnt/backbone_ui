@@ -9,29 +9,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
 import axiosInstance from "@/lib/axiosInstance";
-import PointsModal from "./PointsModal";
-import { pointData } from "@/data/frontendDummyData";
+import InputGroup from "@/components/FormElements/InputGroup";
 
 interface PointsModel {
-  id: string;
-  user_name: string;
-  point: number;
+  id: number;
+  username: string | null;
+  points: number | string | null;
 }
 
 const PointsPage = () => {
-  const [openModal, setOpenModal] = useState(false);
-  const [editData, setEditData] = useState<PointsModel | null>(null);
-  const [pointsData, setPointsData] = useState<PointsModel[]>(pointData);
+  const [pointsData, setPointsData] = useState<PointsModel[]>([]);
+  const [bonusUsername, setBonusUsername] = useState("");
+  const [points, setPoints] = useState("");
+  const [creditUsername, setCreditUsername] = useState("");
+  const [submittingBonus, setSubmittingBonus] = useState(false);
+  const [submittingCredit, setSubmittingCredit] = useState(false);
 
   const fetchPoints = async () => {
     try {
       const response = await axiosInstance.get("/masters/points");
-      setPointsData(response.data);
+      const items = Array.isArray(response.data) ? response.data : [];
+      setPointsData(items.filter((item) => item?.username));
     } catch (error) {
       console.log("Failed to fetch points", error);
+      setPointsData([]);
     }
   };
 
@@ -39,110 +41,166 @@ const PointsPage = () => {
     fetchPoints();
   }, []);
 
-  const handleSubmit = async (
-    data: { user_name: string; point: number },
-    id?: string
-  ) => {
-    try {
-      if (id) {
-        await axiosInstance.patch(`/masters/points/${id}`, data); // PATCH
-      } else {
-        await axiosInstance.post("/masters/points", data);
-      }
+  const handleAddPoints = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-      fetchPoints();
-      setOpenModal(false);
-      setEditData(null);
+    if (!bonusUsername.trim()) {
+      alert("Please enter user name.");
+      return;
+    }
+
+    const pointValue = Number(points);
+    if (!Number.isFinite(pointValue) || pointValue < 0) {
+      alert("Please enter valid bonus points.");
+      return;
+    }
+
+    try {
+      setSubmittingBonus(true);
+      const response = await axiosInstance.post("/masters/points/add", {
+        username: bonusUsername.trim(),
+        points: pointValue,
+      });
+
+      alert(response?.data?.message || "Points Add Successfully");
+      setBonusUsername("");
+      setPoints("");
+      await fetchPoints();
     } catch (error) {
       console.log("Error saving points", error);
+      alert("Unable to add points.");
+    } finally {
+      setSubmittingBonus(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this entry?")) return;
+  const handleAddCredit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!creditUsername.trim()) {
+      alert("Please enter user name.");
+      return;
+    }
 
     try {
-      await axiosInstance.delete(`/masters/points/${id}`);
-      fetchPoints();
+      setSubmittingCredit(true);
+      const response = await axiosInstance.post("/masters/points/credit", {
+        username: creditUsername.trim(),
+      });
+
+      alert(response?.data?.message || "Credit Add Successfully");
+      setCreditUsername("");
+      await fetchPoints();
     } catch (error) {
-      console.log("Error deleting points", error);
+      console.log("Error adding credit", error);
+      alert("Unable to add credits against bonus points.");
+    } finally {
+      setSubmittingCredit(false);
     }
   };
 
   return (
-    <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+    <div className="space-y-6">
+      <div className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+        <div className="mb-6">
+          <p className="text-sm text-dark-5">Overview</p>
+          <h2 className="text-xl font-semibold text-dark dark:text-white">
+            Master <span className="font-normal">Add bonus points</span>
+          </h2>
+        </div>
 
-      <PointsModal
-        open={openModal}
-        onClose={() => {
-          setOpenModal(false);
-          setEditData(null);
-        }}
-        onSubmit={handleSubmit}
-        editData={editData}
-      />
+        <form onSubmit={handleAddPoints} className="grid gap-5 md:grid-cols-3 md:items-end">
+          <InputGroup
+            label="User Name"
+            type="text"
+            placeholder="Enter user name"
+            value={bonusUsername}
+            handleChange={(e) => setBonusUsername(e.target.value)}
+          />
 
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-dark dark:text-white">
-          Points
-        </h2>
+          <InputGroup
+            label="Add Points"
+            type="number"
+            placeholder="Enter points"
+            value={points}
+            handleChange={(e) => setPoints(e.target.value)}
+          />
 
-        <button
-          className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
-          onClick={() => {
-            setEditData(null);
-            setOpenModal(true);
-          }}
-        >
-          Add Points
-        </button>
+          <div>
+            <button
+              type="submit"
+              disabled={submittingBonus}
+              className="rounded-md bg-primary px-5 py-2 text-white hover:bg-primary/90 disabled:opacity-60"
+            >
+              {submittingBonus ? "Adding..." : "Add Points"}
+            </button>
+          </div>
+        </form>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
-            <TableHead>#</TableHead>
-            <TableHead>User Name</TableHead>
-            <TableHead>Points</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+      <div className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-dark dark:text-white">
+            Add Credit Against bonus points
+          </h2>
+          <hr className="mt-3 border-stroke dark:border-dark-3" />
+        </div>
 
-        <TableBody>
-          {pointsData.map((item, index) => (
-            <TableRow key={item.id} className="border-[#eee] dark:border-dark-3">
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{item.user_name}</TableCell>
-              <TableCell>{item.point}</TableCell>
+        <form onSubmit={handleAddCredit} className="grid gap-5 md:grid-cols-3 md:items-end">
+          <InputGroup
+            label="User Name"
+            type="text"
+            placeholder="Enter user name"
+            value={creditUsername}
+            handleChange={(e) => setCreditUsername(e.target.value)}
+          />
 
-              <TableCell>
-                <div className="flex items-center justify-end gap-x-3.5">
-                  
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => {
-                      setEditData(item);
-                      setOpenModal(true);
-                    }}
-                  >
-                    <PencilSquareIcon />
-                  </button>
+          <div className="md:col-span-2">
+            <button
+              type="submit"
+              disabled={submittingCredit}
+              className="rounded-md bg-primary px-5 py-2 text-white hover:bg-primary/90 disabled:opacity-60"
+            >
+              {submittingCredit ? "Adding..." : "Add Credits"}
+            </button>
+          </div>
+        </form>
+      </div>
 
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    <TrashIcon />
-                  </button>
+      <div className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-dark dark:text-white">
+            Clients Points
+          </h2>
+          <hr className="mt-3 border-stroke dark:border-dark-3" />
+        </div>
 
-                </div>
-              </TableCell>
-
+        <Table>
+          <TableHeader>
+            <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
+              <TableHead>Sr. No.</TableHead>
+              <TableHead>User Name</TableHead>
+              <TableHead>Bonus Points</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
 
+          <TableBody>
+            {pointsData.map((item, index) => (
+              <TableRow key={item.id} className="border-[#eee] dark:border-dark-3">
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{item.username || "-"}</TableCell>
+                <TableCell>{item.points ?? 0}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {pointsData.length === 0 && (
+          <p className="mt-4 text-center text-gray-500 dark:text-gray-300">
+            No Data Found !
+          </p>
+        )}
+      </div>
     </div>
   );
 };

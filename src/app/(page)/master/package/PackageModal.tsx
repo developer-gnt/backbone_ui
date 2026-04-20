@@ -7,10 +7,16 @@ interface PackageModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (
-    data: { title: string; duration: number; price: number },
-    id?: string
+    data: { title: string; duration: string; price: number; credit: number },
+    id?: number,
   ) => void;
-  editData?: { id: string; title: string; duration: number; price: number } | null;
+  editData?: {
+    id: number;
+    title: string;
+    duration?: string;
+    price: number | string;
+    credit: number | string;
+  } | null;
 }
 
 export default function PackageModal({
@@ -20,18 +26,21 @@ export default function PackageModal({
   editData,
 }: PackageModalProps) {
   const [title, setTitle] = useState("");
-  const [duration, setDuration] = useState<number>(0);
+  const [duration, setDuration] = useState("");
   const [price, setPrice] = useState<number>(0);
+  const [credit, setCredit] = useState<number>(0);
 
   useEffect(() => {
     if (editData) {
-      setTitle(editData.title);
-      setDuration(editData.duration);
-      setPrice(Number(editData.price));
+      setTitle(editData.title || "");
+      setDuration(editData.duration || "");
+      setPrice(Number(editData.price || 0));
+      setCredit(Number(editData.credit || 0));
     } else {
       setTitle("");
-      setDuration(0);
+      setDuration("");
       setPrice(0);
+      setCredit(0);
     }
   }, [editData]);
 
@@ -40,7 +49,6 @@ export default function PackageModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-xl border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2">
-
         <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">
           {editData ? "Edit Package" : "Add Package"}
         </h3>
@@ -55,19 +63,27 @@ export default function PackageModal({
           />
 
           <InputGroup
-            label="Duration (Days)"
-            type="number"
-            placeholder="Enter duration"
-            value={String(duration)}          // 🔥 FIX
-            handleChange={(e) => setDuration(Number(e.target.value))}
+            label="Duration"
+            type="text"
+            placeholder='Example: "$1.00/ Credit" or "30 days"'
+            value={duration}
+            handleChange={(e) => setDuration(e.target.value)}
           />
 
           <InputGroup
             label="Price"
             type="number"
             placeholder="Enter price"
-            value={String(price)}             // 🔥 FIX
+            value={String(price)}
             handleChange={(e) => setPrice(Number(e.target.value))}
+          />
+
+          <InputGroup
+            label="Credits"
+            type="number"
+            placeholder="Enter included credits"
+            value={String(credit)}
+            handleChange={(e) => setCredit(Number(e.target.value))}
           />
         </div>
 
@@ -80,13 +96,14 @@ export default function PackageModal({
           </button>
 
           <button
-            onClick={() => onSubmit({ title, duration, price }, editData?.id)}
+            onClick={() =>
+              onSubmit({ title: title.trim(), duration: duration.trim(), price, credit }, editData?.id)
+            }
             className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
           >
             {editData ? "Update Package" : "Add Package"}
           </button>
         </div>
-
       </div>
     </div>
   );

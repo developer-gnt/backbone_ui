@@ -6,18 +6,23 @@ import InputGroup from "@/components/FormElements/InputGroup";
 interface AddStateModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (name: string, id?: string) => void;
-  editData?: { id: string; name: string } | null;
+  onSubmit: (city: string, id?: number) => void;
+  editData?: { id: number; city: string } | null;
 }
 
-export default function AddStateModal({ open, onClose, onSubmit, editData }: AddStateModalProps) {
-  const [name, setName] = useState("");
+export default function AddStateModal({
+  open,
+  onClose,
+  onSubmit,
+  editData,
+}: AddStateModalProps) {
+  const [city, setCity] = useState("");
 
   useEffect(() => {
     if (editData) {
-      setName(editData.name);
+      setCity(editData.city || "");
     } else {
-      setName("");
+      setCity("");
     }
   }, [editData]);
 
@@ -26,18 +31,17 @@ export default function AddStateModal({ open, onClose, onSubmit, editData }: Add
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-xl border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2">
-        
         <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">
-          {editData ? "Edit State" : "Add New State"}
+          {editData ? "Edit Location" : "Add New Location"}
         </h3>
 
         <div className="space-y-4">
           <InputGroup
-            label="State Name"
+            label="City / State"
             type="text"
-            value={name}
-            handleChange={(e) => setName(e.target.value)}
-            placeholder="Enter state name"
+            value={city}
+            handleChange={(e) => setCity(e.target.value)}
+            placeholder="Enter city or state name"
           />
         </div>
 
@@ -50,7 +54,7 @@ export default function AddStateModal({ open, onClose, onSubmit, editData }: Add
           </button>
 
           <button
-            onClick={() => onSubmit(name, editData?.id)}
+            onClick={() => onSubmit(city.trim(), editData?.id)}
             className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
           >
             {editData ? "Update" : "Add"}

@@ -1,37 +1,34 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import { PencilSquareIcon, TrashIcon } from "@/assets/icons";
+import React, { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
-import AlertAvailabilityModal from "./AlertAvailabilityModal";
-import { alertAvailabilityData } from "@/data/frontendDummyData";
 
 interface AlertAvailabilityModel {
-  id: string;
-  eta: string;
-  availability_status: string;
+  package: string;
+  msg: string;
 }
 
+const ETA_OPTIONS = ["24", "12", "06"];
+
 const AlertAvailabilityPage = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editData, setEditData] = useState<AlertAvailabilityModel | null>(null);
-  const [alertList, setAlertList] = useState<AlertAvailabilityModel[]>(alertAvailabilityData);
+  const [selectedEta, setSelectedEta] = useState("24");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [alertList, setAlertList] = useState<AlertAvailabilityModel[]>([]);
+
+  const selectedRecord = useMemo(
+    () => alertList.find((item) => `${item.package}` === selectedEta) ?? null,
+    [alertList, selectedEta],
+  );
 
   const fetchAlerts = async () => {
     try {
       const res = await axiosInstance.get("/masters/alert-availability");
-      setAlertList(res.data);
+      setAlertList(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.log("Failed to fetch alert availability", error);
+      setAlertList([]);
     }
   };
 
@@ -39,119 +36,96 @@ const AlertAvailabilityPage = () => {
     fetchAlerts();
   }, []);
 
-  const handleSubmit = async (
-    data: { eta: string; availability_status: string },
-    id?: string
-  ) => {
-    try {
-      if (id) {
-        await axiosInstance.patch(`/masters/alert-availability/${id}`, data);
-      } else {
-        await axiosInstance.post("/masters/alert-availability", data);
-      }
+  useEffect(() => {
+    setMessage(selectedRecord?.msg || "");
+  }, [selectedRecord]);
 
-      fetchAlerts();
-      setModalOpen(false);
-      setEditData(null);
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      setSubmitting(true);
+      setStatusMessage("");
+
+      const response = selectedRecord
+        ? await axiosInstance.patch(`/masters/alert-availability/${selectedEta}`, {
+            package: selectedEta,
+            msg: message,
+          })
+        : await axiosInstance.post("/masters/alert-availability", {
+            package: selectedEta,
+            msg: message,
+          });
+
+      const successText =
+        response?.data?.message || "updation done successfully";
+      setStatusMessage(successText);
+      alert(successText);
+      await fetchAlerts();
     } catch (error) {
       console.log("Error saving alert availability", error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this record?")) return;
-
-    try {
-      await axiosInstance.delete(`/masters/alert-availability/${id}`);
-      fetchAlerts();
-    } catch (error) {
-      console.log("Error deleting record", error);
+      alert("Unable to update availability status.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 
-      dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
-
-      <AlertAvailabilityModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditData(null);
-        }}
-        onSubmit={handleSubmit}
-        editData={editData}
-      />
-
-      <div className="mb-5 flex items-center justify-between">
+    <div className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+      <div className="mb-6">
+        <p className="text-sm text-dark-5">Overview</p>
         <h2 className="text-xl font-semibold text-dark dark:text-white">
-          Alert Availability
+          Change availability status
         </h2>
-
-        <button
-          className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
-          onClick={() => {
-            setEditData(null);
-            setModalOpen(true);
-          }}
-        >
-          Add Alert
-        </button>
+        <p className="mt-2 text-sm text-red-500">{statusMessage}</p>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 
-            [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
-            <TableHead>#</TableHead>
-            <TableHead>ETA</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid gap-3 md:grid-cols-12 md:items-center">
+          <label className="text-sm font-medium text-dark dark:text-white md:col-span-3">
+            ETA
+          </label>
+          <div className="md:col-span-6">
+            <select
+              value={selectedEta}
+              onChange={(e) => setSelectedEta(e.target.value)}
+              className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5.5 py-3 text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
+            >
+              {ETA_OPTIONS.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-        <TableBody>
-          {alertList.map((item, index) => (
-            <TableRow key={item.id} className="border-[#eee] dark:border-dark-3">
-              
-              <TableCell>{index + 1}</TableCell>
+        <div className="grid gap-3 md:grid-cols-12 md:items-start">
+          <label className="pt-3 text-sm font-medium text-dark dark:text-white md:col-span-3">
+            Availability Status
+          </label>
+          <div className="md:col-span-6">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={5}
+              className="w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5.5 py-3 text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
+            />
+          </div>
+        </div>
 
-              <TableCell>
-                {new Date(item.eta).toLocaleString()}
-              </TableCell>
-
-              <TableCell>{item.availability_status}</TableCell>
-
-              <TableCell>
-                <div className="flex items-center justify-end gap-x-3.5">
-
-                  {/* EDIT */}
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => {
-                      setEditData(item);
-                      setModalOpen(true);
-                    }}
-                  >
-                    <PencilSquareIcon />
-                  </button>
-
-                  {/* DELETE */}
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    <TrashIcon />
-                  </button>
-
-                </div>
-              </TableCell>
-
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
+        <div className="grid md:grid-cols-12">
+          <div className="md:col-span-6 md:col-start-4">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-md bg-primary px-5 py-2 text-white hover:bg-primary/90 disabled:opacity-60"
+            >
+              {submitting ? "Updating..." : "Update Status"}
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 };

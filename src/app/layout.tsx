@@ -19,7 +19,8 @@ import RequireAuth from "@/components/Auth/RequireAuth";
 
 export default function RootLayout({ children }: PropsWithChildren) {
   const pathname = usePathname();
-  const isAuthPage = pathname?.startsWith("/auth");
+  const isPublicPage =
+    pathname?.startsWith("/auth") || pathname?.startsWith("/client-registration");
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -27,12 +28,12 @@ export default function RootLayout({ children }: PropsWithChildren) {
         <Providers>
           <NextTopLoader color="#5750F1" showSpinner={false} />
 
-          {isAuthPage ? (
+          {isPublicPage ? (
             <main className="flex min-h-screen items-center justify-center bg-gray-2 p-4 dark:bg-[#020d1a]">
               {children}
             </main>
           ) : (
-            // <RequireAuth>
+            <RequireAuth>
               <div className="flex min-h-screen">
                 <Sidebar />
                 <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
@@ -42,7 +43,7 @@ export default function RootLayout({ children }: PropsWithChildren) {
                   </main>
                 </div>
               </div>
-            // </RequireAuth>
+            </RequireAuth>
           )}
         </Providers>
       </body>

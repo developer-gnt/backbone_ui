@@ -1,151 +1,151 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-import { TrashIcon, PencilSquareIcon } from "@/assets/icons";
+import React, { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
-import TransactionModal from "./TransactionModal";
-import { transactionData } from "@/data/frontendDummyData";
+import InputGroup from "@/components/FormElements/InputGroup";
 
-interface TransactionModel {
-  id: string;
-  name: string;
-  credit_core: number;
-  amount: number;
-}
+type PackageOption = {
+  id: number | string;
+  title?: string;
+  duration?: string;
+  price?: number | string;
+  credit?: number | string;
+};
 
 const TransactionPage = () => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editData, setEditData] = useState<TransactionModel | null>(null);
-  const [transactions, setTransactions] = useState<TransactionModel[]>(transactionData);
-
-  const fetchTransactions = async () => {
-    try {
-      const response = await axiosInstance.get("/masters/transaction");
-      setTransactions(response.data);
-    } catch (error) {
-      console.log("Error fetching transactions", error);
-    }
-  };
+  const [username, setUsername] = useState("");
+  const [packages, setPackages] = useState<PackageOption[]>([]);
+  const [selectedPackageId, setSelectedPackageId] = useState("");
+  const [loadingPackages, setLoadingPackages] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchTransactions();
-  }, []);
+    const normalized = username.trim();
 
-  const handleSubmit = async (
-    data: { name: string; credit_core: number; amount: number },
-    id?: string
-  ) => {
-    try {
-      if (id) {
-        await axiosInstance.patch(`/masters/transaction/${id}`, data); // 🔥 PATCH
-      } else {
-        await axiosInstance.post("/masters/transaction", data);
+    if (!normalized) {
+      setPackages([]);
+      setSelectedPackageId("");
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setLoadingPackages(true);
+        const response = await axiosInstance.get("/masters/package", {
+          params: { username: normalized },
+        });
+
+        const items = Array.isArray(response.data) ? response.data : [];
+        setPackages(items);
+        setSelectedPackageId("");
+      } catch (error) {
+        console.log("Error fetching packages", error);
+        setPackages([]);
+        setSelectedPackageId("");
+      } finally {
+        setLoadingPackages(false);
       }
+    }, 400);
 
-      fetchTransactions();
-      setModalOpen(false);
-      setEditData(null);
+    return () => window.clearTimeout(timeoutId);
+  }, [username]);
+
+  const selectedPackage = useMemo(
+    () => packages.find((item) => `${item.id}` === selectedPackageId) ?? null,
+    [packages, selectedPackageId],
+  );
+
+  const amount = selectedPackage ? `${selectedPackage.price ?? ""}` : "";
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!username.trim()) {
+      alert("Please enter the client user name or email.");
+      return;
+    }
+
+    if (!selectedPackageId) {
+      alert("Please select credit type.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await axiosInstance.post("/masters/wallet/package", {
+        username: username.trim(),
+        package_id: Number(selectedPackageId),
+      });
+
+      alert(response?.data?.message || "Transaction Add Successfully");
+      setUsername("");
+      setPackages([]);
+      setSelectedPackageId("");
     } catch (error) {
       console.log("Error saving transaction", error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this transaction?")) return;
-
-    try {
-      await axiosInstance.delete(`/masters/transaction/${id}`);
-      fetchTransactions();
-    } catch (error) {
-      console.log("Error deleting transaction", error);
+      alert("Unable to add transaction.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
-
-      <TransactionModal
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditData(null);
-        }}
-        onSubmit={handleSubmit}
-        editData={editData}
-      />
-
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-dark dark:text-white">Transactions</h2>
-
-        <button
-          className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
-          onClick={() => {
-            setEditData(null);
-            setModalOpen(true);
-          }}
-        >
-          Add Transaction
-        </button>
+    <div className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+      <div className="mb-6">
+        <p className="text-sm text-dark-5">Overview</p>
+        <h2 className="text-xl font-semibold text-dark dark:text-white">
+          Master <span className="font-normal">/ Add Transactions</span>
+        </h2>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
-            <TableHead>#</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Credit Core</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+      <form onSubmit={handleSubmit} className="max-w-2xl space-y-5">
+        <InputGroup
+          label="User Name"
+          type="text"
+          placeholder="Enter client user name or email"
+          value={username}
+          handleChange={(e) => setUsername(e.target.value)}
+        />
 
-        <TableBody>
-          {transactions.map((item, index) => (
-            <TableRow key={item.id} className="border-[#eee] dark:border-dark-3">
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell>{item.credit_core}</TableCell>
-              <TableCell>₹ {item.amount}</TableCell>
+        <div>
+          <label className="text-body-sm font-medium text-dark dark:text-white">
+            Credit Score
+          </label>
+          <select
+            value={selectedPackageId}
+            onChange={(e) => setSelectedPackageId(e.target.value)}
+            className="mt-3 w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-5.5 py-3 text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
+            disabled={loadingPackages || !packages.length}
+          >
+            <option value="">
+              {loadingPackages ? "Loading credit types..." : "Select Credit Type"}
+            </option>
+            {packages.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.credit ?? item.title ?? item.duration ?? item.id}
+              </option>
+            ))}
+          </select>
+        </div>
 
-              <TableCell>
-                <div className="flex items-center justify-end gap-x-3.5">
+        <InputGroup
+          label="Amount"
+          type="text"
+          placeholder="Amount"
+          value={amount}
+          disabled
+        />
 
-                  {/* EDIT */}
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => {
-                      setEditData(item);
-                      setModalOpen(true);
-                    }}
-                  >
-                    <PencilSquareIcon />
-                  </button>
-
-                  {/* DELETE */}
-                  <button
-                    className="hover:text-primary"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    <TrashIcon />
-                  </button>
-
-                </div>
-              </TableCell>
-
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
+        <div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-md bg-primary px-5 py-2 text-white hover:bg-primary/90 disabled:opacity-60"
+          >
+            {submitting ? "Adding..." : "Add Transaction"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

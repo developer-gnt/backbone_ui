@@ -6,11 +6,8 @@ import InputGroup from "@/components/FormElements/InputGroup";
 interface FormModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (
-    data: { form: string; sequence_number: number },
-    id?: string
-  ) => void;
-  editData?: { id: string; form: string; sequence_number: number } | null;
+  onSubmit: (data: { form: string }, id?: number) => void;
+  editData?: { id: number; form: string } | null;
 }
 
 export default function FormModal({
@@ -20,15 +17,12 @@ export default function FormModal({
   editData,
 }: FormModalProps) {
   const [formName, setFormName] = useState("");
-  const [sequence, setSequence] = useState<number>(0);
 
   useEffect(() => {
     if (editData) {
-      setFormName(editData.form);
-      setSequence(editData.sequence_number);
+      setFormName(editData.form || "");
     } else {
       setFormName("");
-      setSequence(0);
     }
   }, [editData]);
 
@@ -37,13 +31,11 @@ export default function FormModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-xl border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2">
-
         <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">
           {editData ? "Edit Form" : "Add Form"}
         </h3>
 
         <div className="space-y-4">
-
           <InputGroup
             label="Form Name"
             type="text"
@@ -51,15 +43,6 @@ export default function FormModal({
             value={formName}
             handleChange={(e) => setFormName(e.target.value)}
           />
-
-          <InputGroup
-            label="Sequence Number"
-            type="number"
-            placeholder="Enter sequence number"
-            value={String(sequence)}
-            handleChange={(e) => setSequence(Number(e.target.value))}
-          />
-
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
@@ -71,15 +54,7 @@ export default function FormModal({
           </button>
 
           <button
-            onClick={() =>
-              onSubmit(
-                {
-                  form: formName,
-                  sequence_number: sequence,
-                },
-                editData?.id
-              )
-            }
+            onClick={() => onSubmit({ form: formName.trim() }, editData?.id)}
             className="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
           >
             {editData ? "Update" : "Add"}

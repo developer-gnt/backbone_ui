@@ -1,8 +1,8 @@
 import Signin from "@/components/Auth/Signin";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -15,7 +15,15 @@ export default function SignIn() {
         <div className="flex flex-wrap items-center">
           <div className="w-full xl:w-1/2">
             <div className="w-full p-4 sm:p-12.5 xl:p-15">
-              <Signin />
+              <Suspense
+                fallback={
+                  <div className="rounded-lg border border-stroke bg-gray-1 px-4 py-3 text-sm text-dark-5 dark:border-dark-3 dark:bg-dark-2 dark:text-dark-6">
+                    Loading sign-in form...
+                  </div>
+                }
+              >
+                <Signin />
+              </Suspense>
             </div>
           </div>
 
