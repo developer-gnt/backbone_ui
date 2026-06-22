@@ -1,5 +1,6 @@
 import React from "react";
 import { ToastContainer, ToastContainerProps } from "react-toastify";
+// @ts-ignore: side-effect CSS import without type declarations
 import "react-toastify/dist/ReactToastify.css";
 
 export function AppToaster(props: ToastContainerProps) {
