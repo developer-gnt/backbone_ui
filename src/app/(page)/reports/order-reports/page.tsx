@@ -468,11 +468,10 @@ export default function OrderReport() {
 
           {message && (
             <div
-              className={`mx-5 mt-4 rounded-lg border px-4 py-3 text-sm ${
-                message.type === "success"
+              className={`mx-5 mt-4 rounded-lg border px-4 py-3 text-sm ${message.type === "success"
                   ? "border-green-200 bg-green-50 text-green-700 dark:border-green-dark dark:bg-green-dark/20 dark:text-green-light-4"
                   : "border-red-200 bg-red-50 text-red-700 dark:border-red-dark dark:bg-red-dark/20 dark:text-red-light-4"
-              }`}
+                }`}
             >
               {message.text}
             </div>
@@ -705,11 +704,10 @@ export default function OrderReport() {
 
       {message && (
         <div
-          className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
-            message.type === "success"
+          className={`mb-4 rounded-lg border px-4 py-3 text-sm ${message.type === "success"
               ? "border-green-200 bg-green-50 text-green-700 dark:border-green-dark dark:bg-green-dark/20 dark:text-green-light-4"
               : "border-red-200 bg-red-50 text-red-700 dark:border-red-dark dark:bg-red-dark/20 dark:text-red-light-4"
-          }`}
+            }`}
         >
           {message.text}
         </div>
@@ -854,7 +852,7 @@ export default function OrderReport() {
 
       {detailsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-          <div className="max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-lg border border-stroke bg-white p-6 shadow-xl dark:border-dark-3 dark:bg-dark-2">
+          <div className="z-20 max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-lg border border-stroke bg-white p-6 shadow-xl dark:border-dark-3 dark:bg-dark-2">
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold text-dark dark:text-white">

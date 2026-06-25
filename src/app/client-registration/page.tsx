@@ -65,7 +65,11 @@ export default function ClientRegistrationPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.replace((user?.role ?? "").toLowerCase() === "client" ? "/client/new-order" : "/");
+      router.replace(
+        `${user?.role ?? ""}`.trim().toLowerCase() === "client"
+          ? "/client/new-order"
+          : "/",
+      );
     }
   }, [isAuthenticated, isLoading, router, user?.role]);
 

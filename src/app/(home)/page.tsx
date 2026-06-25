@@ -243,7 +243,7 @@ const getSupervisorStatusOptions = (status?: string) => {
 
 export default function Home() {
   const { user } = useAuth();
-  const role = (user?.role ?? "").toLowerCase();
+  const role = `${user?.role ?? ""}`.trim().toLowerCase();
   const isClientUser = role === "client";
   const isSupervisorUser = role === "supervisor";
   const isTeamMemberUser = role === "team member";
@@ -394,12 +394,12 @@ export default function Home() {
 
           const nextTeamCount = isSupervisorUser
             ? (Array.isArray((teamResponse as any)?.data) ? (teamResponse as any).data : []).filter(
-                (item: { emp_supervisor?: string }) =>
-                  identifiers
-                    .toLowerCase()
-                    .split(",")
-                    .includes(`${item.emp_supervisor ?? ""}`.trim().toLowerCase()),
-              ).length
+              (item: { emp_supervisor?: string }) =>
+                identifiers
+                  .toLowerCase()
+                  .split(",")
+                  .includes(`${item.emp_supervisor ?? ""}`.trim().toLowerCase()),
+            ).length
             : 0;
 
           setMemberOrders(nextOrders);
@@ -953,11 +953,10 @@ export default function Home() {
         )}
         {clientFeedback && (
           <div
-            className={`rounded-lg px-4 py-3 text-sm ${
-              clientFeedback.type === "success"
+            className={`rounded-lg px-4 py-3 text-sm ${clientFeedback.type === "success"
                 ? "border border-green-200 bg-green-50 text-green-700"
                 : "border border-red-200 bg-red-50 text-red-700"
-            }`}
+              }`}
           >
             {clientFeedback.text}
           </div>
@@ -1272,11 +1271,10 @@ export default function Home() {
                                     key={star}
                                     type="button"
                                     onClick={() => void handleClientRating(order.id, star)}
-                                    className={`text-lg leading-none transition hover:scale-105 hover:text-primary ${
-                                      star <= existingRating
+                                    className={`text-lg leading-none transition hover:scale-105 hover:text-primary ${star <= existingRating
                                         ? "text-primary"
                                         : "text-gray-300 dark:text-gray-600"
-                                    }`}
+                                      }`}
                                     title={`Rate ${star}`}
                                   >
                                     ★
@@ -1451,11 +1449,10 @@ export default function Home() {
 
         {supervisorFeedback && (
           <div
-            className={`rounded-lg px-4 py-3 text-sm ${
-              supervisorFeedback.type === "success"
+            className={`rounded-lg px-4 py-3 text-sm ${supervisorFeedback.type === "success"
                 ? "border border-green-200 bg-green-50 text-green-700"
                 : "border border-red-200 bg-red-50 text-red-700"
-            }`}
+              }`}
           >
             {supervisorFeedback.text}
           </div>
@@ -1476,164 +1473,164 @@ export default function Home() {
                 onSubmit={handleSupervisorSearch}
                 className="flex flex-wrap items-center gap-3"
               >
-              <input
-                type="text"
-                value={supervisorPendingFilters.fileNumber}
-                onChange={(event) =>
-                  setSupervisorPendingFilters((current) => ({
-                    ...current,
-                    fileNumber: event.target.value,
-                  }))
-                }
-                placeholder="File #"
-                className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white md:w-[150px]"
-              />
-              <input
-                type="text"
-                value={supervisorPendingFilters.subjectAddress}
-                onChange={(event) =>
-                  setSupervisorPendingFilters((current) => ({
-                    ...current,
-                    subjectAddress: event.target.value,
-                  }))
-                }
-                placeholder="Subject Address"
-                className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white md:w-[220px]"
-              />
-              <button
-                type="submit"
-                className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
-              >
-                Search
-              </button>
-              <button
-                type="button"
-                onClick={handleSupervisorExport}
-                className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
-              >
-                Get Data
-              </button>
-            </form>
+                <input
+                  type="text"
+                  value={supervisorPendingFilters.fileNumber}
+                  onChange={(event) =>
+                    setSupervisorPendingFilters((current) => ({
+                      ...current,
+                      fileNumber: event.target.value,
+                    }))
+                  }
+                  placeholder="File #"
+                  className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white md:w-[150px]"
+                />
+                <input
+                  type="text"
+                  value={supervisorPendingFilters.subjectAddress}
+                  onChange={(event) =>
+                    setSupervisorPendingFilters((current) => ({
+                      ...current,
+                      subjectAddress: event.target.value,
+                    }))
+                  }
+                  placeholder="Subject Address"
+                  className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white md:w-[220px]"
+                />
+                <button
+                  type="submit"
+                  className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
+                >
+                  Search
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSupervisorExport}
+                  className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
+                >
+                  Get Data
+                </button>
+              </form>
             </div>
           </div>
 
           <div className="overflow-x-auto px-1 pb-1">
             <div className="min-w-[1450px]">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
-                  <TableHead>Sr. No.</TableHead>
-                  <TableHead>File#</TableHead>
-                  <TableHead>TAT</TableHead>
-                  <TableHead>Order Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>User Name</TableHead>
-                  <TableHead>Client Name</TableHead>
-                  <TableHead>Property Address</TableHead>
-                  <TableHead>Change Status</TableHead>
-                  <TableHead>Client Rating</TableHead>
-                  <TableHead>Client Feedback</TableHead>
-                  <TableHead>Assigned</TableHead>
-                  <TableHead>Reply</TableHead>
-                  <TableHead>Remaining TAT</TableHead>
-                  <TableHead>Completed Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoadingSupervisorOrders ? (
-                  <TableRow>
-                    <TableCell colSpan={15} className="py-6 text-center text-dark-5">
-                      Loading dashboard orders...
-                    </TableCell>
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
+                    <TableHead>Sr. No.</TableHead>
+                    <TableHead>File#</TableHead>
+                    <TableHead>TAT</TableHead>
+                    <TableHead>Order Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>User Name</TableHead>
+                    <TableHead>Client Name</TableHead>
+                    <TableHead>Property Address</TableHead>
+                    <TableHead>Change Status</TableHead>
+                    <TableHead>Client Rating</TableHead>
+                    <TableHead>Client Feedback</TableHead>
+                    <TableHead>Assigned</TableHead>
+                    <TableHead>Reply</TableHead>
+                    <TableHead>Remaining TAT</TableHead>
+                    <TableHead>Completed Date</TableHead>
                   </TableRow>
-                ) : supervisorOrdersError ? (
-                  <TableRow>
-                    <TableCell colSpan={15} className="py-6 text-center text-red-600">
-                      {supervisorOrdersError}
-                    </TableCell>
-                  </TableRow>
-                ) : visibleSupervisorOrders.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={15} className="py-6 text-center text-dark-5">
-                      No Data Found !
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  visibleSupervisorOrders.map((order, index) => {
-                    const statusConfig = getSupervisorStatusOptions(order.status);
-                    const currentStatus = `${order.status ?? statusConfig.options[0] ?? ""}`;
+                </TableHeader>
+                <TableBody>
+                  {isLoadingSupervisorOrders ? (
+                    <TableRow>
+                      <TableCell colSpan={15} className="py-6 text-center text-dark-5">
+                        Loading dashboard orders...
+                      </TableCell>
+                    </TableRow>
+                  ) : supervisorOrdersError ? (
+                    <TableRow>
+                      <TableCell colSpan={15} className="py-6 text-center text-red-600">
+                        {supervisorOrdersError}
+                      </TableCell>
+                    </TableRow>
+                  ) : visibleSupervisorOrders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={15} className="py-6 text-center text-dark-5">
+                        No Data Found !
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    visibleSupervisorOrders.map((order, index) => {
+                      const statusConfig = getSupervisorStatusOptions(order.status);
+                      const currentStatus = `${order.status ?? statusConfig.options[0] ?? ""}`;
 
-                    return (
-                      <TableRow
-                        key={`${order.id}-${index}`}
-                        className={`${getTatRowClassName(order.package)} hover:bg-gray-1 dark:hover:bg-dark-2`}
-                      >
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>
-                          <Link href={`/orders/details/${order.id}`} className="underline">
-                            {order.id}
-                          </Link>
-                        </TableCell>
-                        <TableCell>{order.package || order.tat || "-"}</TableCell>
-                        <TableCell>{formatDateTime(order.created_date)}</TableCell>
-                        <TableCell>
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}>
-                            {order.status || "-"}
-                          </span>
-                        </TableCell>
-                        <TableCell>{order.createdby || "-"}</TableCell>
-                        <TableCell>{order.client_name || "-"}</TableCell>
-                        <TableCell>{order.subject_address || "-"}</TableCell>
-                        <TableCell>
-                          <select
-                            value={currentStatus}
-                            onChange={(event) =>
-                              void handleSupervisorStatusChange(order, event.target.value)
-                            }
-                            disabled={
-                              statusConfig.disabled ||
-                              isUpdatingSupervisorStatus === `${order.id}`
-                            }
-                            className="min-w-[120px] rounded-md border border-stroke bg-transparent px-2 py-2 text-sm outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-70 dark:border-dark-3 dark:text-white"
-                          >
-                            {statusConfig.options.map((option) => (
-                              <option key={option} value={option}>
-                                {option}
-                              </option>
-                            ))}
-                          </select>
-                        </TableCell>
-                        <TableCell>{order.feedback_rating ?? "-"}</TableCell>
-                        <TableCell>{order.feedback || "-"}</TableCell>
-                        <TableCell>{order.assigner_name || "-"}</TableCell>
-                        <TableCell>
-                          <Link
-                            href={`/chat-system?id=${order.id}`}
-                            title="Send Message"
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stroke hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-5 w-5"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                      return (
+                        <TableRow
+                          key={`${order.id}-${index}`}
+                          className={`${getTatRowClassName(order.package)} hover:bg-gray-1 dark:hover:bg-dark-2`}
+                        >
+                          <TableCell>{index + 1}</TableCell>
+                          <TableCell>
+                            <Link href={`/orders/details/${order.id}`} className="underline">
+                              {order.id}
+                            </Link>
+                          </TableCell>
+                          <TableCell>{order.package || order.tat || "-"}</TableCell>
+                          <TableCell>{formatDateTime(order.created_date)}</TableCell>
+                          <TableCell>
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}>
+                              {order.status || "-"}
+                            </span>
+                          </TableCell>
+                          <TableCell>{order.createdby || "-"}</TableCell>
+                          <TableCell>{order.client_name || "-"}</TableCell>
+                          <TableCell>{order.subject_address || "-"}</TableCell>
+                          <TableCell>
+                            <select
+                              value={currentStatus}
+                              onChange={(event) =>
+                                void handleSupervisorStatusChange(order, event.target.value)
+                              }
+                              disabled={
+                                statusConfig.disabled ||
+                                isUpdatingSupervisorStatus === `${order.id}`
+                              }
+                              className="min-w-[120px] rounded-md border border-stroke bg-transparent px-2 py-2 text-sm outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-70 dark:border-dark-3 dark:text-white"
                             >
-                              <path d="M21 15a2 2 0 0 1 -2 2h-4l-4 4v-4h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2z" />
-                            </svg>
-                          </Link>
-                        </TableCell>
-                        <TableCell>{order.remaining_tat || "-"}</TableCell>
-                        <TableCell>{formatDateTime(order.modify_date)}</TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
+                              {statusConfig.options.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          </TableCell>
+                          <TableCell>{order.feedback_rating ?? "-"}</TableCell>
+                          <TableCell>{order.feedback || "-"}</TableCell>
+                          <TableCell>{order.assigner_name || "-"}</TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/chat-system?id=${order.id}`}
+                              title="Send Message"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stroke hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M21 15a2 2 0 0 1 -2 2h-4l-4 4v-4h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2z" />
+                              </svg>
+                            </Link>
+                          </TableCell>
+                          <TableCell>{order.remaining_tat || "-"}</TableCell>
+                          <TableCell>{formatDateTime(order.modify_date)}</TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </div>
 
@@ -1893,100 +1890,100 @@ export default function Home() {
 
         <div className="overflow-x-auto px-1 pb-1">
           <div className="min-w-[1500px]">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
-                <TableHead>Sr. No.</TableHead>
-                <TableHead>File#</TableHead>
-                <TableHead>TAT</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Order Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>User Name</TableHead>
-                <TableHead>Message</TableHead>
-                <TableHead>Client Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Property Address</TableHead>
-                <TableHead>Assigned</TableHead>
-                <TableHead>Completed Date</TableHead>
-                <TableHead>Client Feedback</TableHead>
-                <TableHead>Client Rating</TableHead>
-                <TableHead>Remaining TAT</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoadingAdminOrders ? (
-                <TableRow>
-                  <TableCell colSpan={16} className="py-6 text-center text-dark-5">
-                    Loading dashboard orders...
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
+                  <TableHead>Sr. No.</TableHead>
+                  <TableHead>File#</TableHead>
+                  <TableHead>TAT</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Order Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>User Name</TableHead>
+                  <TableHead>Message</TableHead>
+                  <TableHead>Client Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Property Address</TableHead>
+                  <TableHead>Assigned</TableHead>
+                  <TableHead>Completed Date</TableHead>
+                  <TableHead>Client Feedback</TableHead>
+                  <TableHead>Client Rating</TableHead>
+                  <TableHead>Remaining TAT</TableHead>
                 </TableRow>
-              ) : adminOrdersError ? (
-                <TableRow>
-                  <TableCell colSpan={16} className="py-6 text-center text-red-600">
-                    {adminOrdersError}
-                  </TableCell>
-                </TableRow>
-              ) : visibleAdminOrders.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={16} className="py-6 text-center text-dark-5">
-                    No Data Found !
-                  </TableCell>
-                </TableRow>
-              ) : (
-                visibleAdminOrders.map((order, index) => (
-                  <TableRow key={`${order.id}-${index}`} className={getTatRowClassName(order.package)}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>
-                      <Link href={`/orders/details/${order.id}`} className="underline">
-                        {order.id}
-                      </Link>
+              </TableHeader>
+              <TableBody>
+                {isLoadingAdminOrders ? (
+                  <TableRow>
+                    <TableCell colSpan={16} className="py-6 text-center text-dark-5">
+                      Loading dashboard orders...
                     </TableCell>
-                    <TableCell>{order.package || order.tat || "-"}</TableCell>
-                    <TableCell>{formatCurrency(order.amount)}</TableCell>
-                    <TableCell>{formatDateTime(order.created_date)}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}>
-                        {order.status || "-"}
-                      </span>
-                    </TableCell>
-                    <TableCell>{order.createdby || "-"}</TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/chat-system?id=${order.id}`}
-                        title="Send Message"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stroke hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M3 20l1.3-3.9A9 8 0 1 1 7.7 19L3 20z" />
-                          <line x1="8" y1="12" x2="8.01" y2="12" />
-                          <line x1="12" y1="12" x2="12.01" y2="12" />
-                          <line x1="16" y1="12" x2="16.01" y2="12" />
-                        </svg>
-                      </Link>
-                    </TableCell>
-                    <TableCell>{order.client_name || "-"}</TableCell>
-                    <TableCell>{order.email || "-"}</TableCell>
-                    <TableCell>{order.subject_address || "-"}</TableCell>
-                    <TableCell>{order.assigner_name || "-"}</TableCell>
-                    <TableCell>{formatDateTime(order.modify_date)}</TableCell>
-                    <TableCell>{order.feedback || "-"}</TableCell>
-                    <TableCell>{order.feedback_rating ?? "-"}</TableCell>
-                    <TableCell>{order.remaining_tat || "-"}</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : adminOrdersError ? (
+                  <TableRow>
+                    <TableCell colSpan={16} className="py-6 text-center text-red-600">
+                      {adminOrdersError}
+                    </TableCell>
+                  </TableRow>
+                ) : visibleAdminOrders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={16} className="py-6 text-center text-dark-5">
+                      No Data Found !
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  visibleAdminOrders.map((order, index) => (
+                    <TableRow key={`${order.id}-${index}`} className={getTatRowClassName(order.package)}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <Link href={`/orders/details/${order.id}`} className="underline">
+                          {order.id}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{order.package || order.tat || "-"}</TableCell>
+                      <TableCell>{formatCurrency(order.amount)}</TableCell>
+                      <TableCell>{formatDateTime(order.created_date)}</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}>
+                          {order.status || "-"}
+                        </span>
+                      </TableCell>
+                      <TableCell>{order.createdby || "-"}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={`/chat-system?id=${order.id}`}
+                          title="Send Message"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stroke hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 20l1.3-3.9A9 8 0 1 1 7.7 19L3 20z" />
+                            <line x1="8" y1="12" x2="8.01" y2="12" />
+                            <line x1="12" y1="12" x2="12.01" y2="12" />
+                            <line x1="16" y1="12" x2="16.01" y2="12" />
+                          </svg>
+                        </Link>
+                      </TableCell>
+                      <TableCell>{order.client_name || "-"}</TableCell>
+                      <TableCell>{order.email || "-"}</TableCell>
+                      <TableCell>{order.subject_address || "-"}</TableCell>
+                      <TableCell>{order.assigner_name || "-"}</TableCell>
+                      <TableCell>{formatDateTime(order.modify_date)}</TableCell>
+                      <TableCell>{order.feedback || "-"}</TableCell>
+                      <TableCell>{order.feedback_rating ?? "-"}</TableCell>
+                      <TableCell>{order.remaining_tat || "-"}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </div>
 
@@ -2025,58 +2022,58 @@ export default function Home() {
 
         <div className="overflow-x-auto px-1 pb-1">
           <div className="min-w-[1050px]">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
-                <TableHead>Sr. No.</TableHead>
-                <TableHead>created by</TableHead>
-                <TableHead>Transaction Amount ($)</TableHead>
-                <TableHead>Client Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Transaction ID</TableHead>
-                <TableHead>Transaction Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoadingAdminTransactions ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-6 text-center text-dark-5">
-                    Loading last transactions...
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
+                  <TableHead>Sr. No.</TableHead>
+                  <TableHead>created by</TableHead>
+                  <TableHead>Transaction Amount ($)</TableHead>
+                  <TableHead>Client Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Transaction ID</TableHead>
+                  <TableHead>Transaction Date</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ) : adminTransactionsError ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-6 text-center text-red-600">
-                    {adminTransactionsError}
-                  </TableCell>
-                </TableRow>
-              ) : visibleAdminTransactions.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="py-6 text-center text-dark-5">
-                    No Data Found !
-                  </TableCell>
-                </TableRow>
-              ) : (
-                visibleAdminTransactions.map((transaction, index) => (
-                  <TableRow key={`${transaction.id}-${index}`}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>{transaction.createdby || "-"}</TableCell>
-                    <TableCell>{formatCurrency(transaction.amount)}</TableCell>
-                    <TableCell>{transaction.client_name || "-"}</TableCell>
-                    <TableCell>{transaction.email || "-"}</TableCell>
-                    <TableCell>{transaction.transaction_id || transaction.id}</TableCell>
-                    <TableCell>{formatDateTime(transaction.created_date)}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(transaction.status)}`}>
-                        {transaction.status || "-"}
-                      </span>
+              </TableHeader>
+              <TableBody>
+                {isLoadingAdminTransactions ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-6 text-center text-dark-5">
+                      Loading last transactions...
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : adminTransactionsError ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-6 text-center text-red-600">
+                      {adminTransactionsError}
+                    </TableCell>
+                  </TableRow>
+                ) : visibleAdminTransactions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-6 text-center text-dark-5">
+                      No Data Found !
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  visibleAdminTransactions.map((transaction, index) => (
+                    <TableRow key={`${transaction.id}-${index}`}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{transaction.createdby || "-"}</TableCell>
+                      <TableCell>{formatCurrency(transaction.amount)}</TableCell>
+                      <TableCell>{transaction.client_name || "-"}</TableCell>
+                      <TableCell>{transaction.email || "-"}</TableCell>
+                      <TableCell>{transaction.transaction_id || transaction.id}</TableCell>
+                      <TableCell>{formatDateTime(transaction.created_date)}</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(transaction.status)}`}>
+                          {transaction.status || "-"}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
         </div>
 

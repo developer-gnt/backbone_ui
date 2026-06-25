@@ -26,12 +26,12 @@ export default function Page() {
 
       <div className="overflow-hidden rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
         <div className="relative h-35 md:h-52">
-          <Image
+          {/* <Image
             src="/images/cover/cover-01.png"
             alt="profile cover"
             fill
             className="object-cover"
-          />
+          /> */}
         </div>
 
         <div className="px-4 pb-8 pt-0 sm:px-8">

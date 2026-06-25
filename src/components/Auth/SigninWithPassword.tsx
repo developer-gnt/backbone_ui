@@ -19,7 +19,9 @@ export default function SigninWithPassword() {
       return requestedNext;
     }
 
-    return (user?.role ?? "").toLowerCase() === "client" ? "/client/new-order" : "/";
+    return `${user?.role ?? ""}`.trim().toLowerCase() === "client"
+      ? "/client/new-order"
+      : "/";
   }, [searchParams, user?.role]);
 
   const [data, setData] = useState({

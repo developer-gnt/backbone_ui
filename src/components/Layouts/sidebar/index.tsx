@@ -13,12 +13,12 @@ import { useSidebarContext } from "./sidebar-context";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const navData = useMemo(() => {
-    const role = (user?.role ?? "").toLowerCase();
+    const role = `${user?.role ?? ""}`.trim().toLowerCase();
 
     if (role === "client") {
       return CLIENT_NAV_DATA;
@@ -34,6 +34,10 @@ export function Sidebar() {
 
     return NAV_DATA;
   }, [user?.role]);
+
+  if (isLoading) {
+    return null;
+  }
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) => (prev.includes(title) ? [] : [title]));
@@ -68,9 +72,9 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          "max-w-[290px] overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark",
+          "overflow-hidden border-r border-gray-200 bg-white transition-all duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark shrink-0",
           isMobile ? "fixed bottom-0 top-0 z-50" : "sticky top-0 h-screen",
-          isOpen ? "w-full" : "w-0",
+          isOpen ? "w-[290px]" : "w-0",
         )}
         aria-label="Main navigation"
         aria-hidden={!isOpen}
@@ -129,7 +133,7 @@ export function Sidebar() {
                                 className={cn(
                                   "ml-auto rotate-180 transition-transform duration-200",
                                   expandedItems.includes(item.title) &&
-                                    "rotate-0",
+                                  "rotate-0",
                                 )}
                                 aria-hidden="true"
                               />
@@ -160,7 +164,7 @@ export function Sidebar() {
                               "url" in item
                                 ? item.url + ""
                                 : "/" +
-                                  item.title.toLowerCase().split(" ").join("-");
+                                item.title.toLowerCase().split(" ").join("-");
 
                             return (
                               <MenuItem

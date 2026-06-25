@@ -7,7 +7,7 @@ export function Logo() {
     <div className="relative h-8 max-w-[10.847rem]">
       <Image
         src={logo}
-        width={180}
+        width={130}
         className="dark:hidden"
         alt="NextAdmin logo"
         role="presentation"
