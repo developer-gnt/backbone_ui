@@ -954,8 +954,8 @@ export default function Home() {
         {clientFeedback && (
           <div
             className={`rounded-lg px-4 py-3 text-sm ${clientFeedback.type === "success"
-                ? "border border-green-200 bg-green-50 text-green-700"
-                : "border border-red-200 bg-red-50 text-red-700"
+              ? "border border-green-200 bg-green-50 text-green-700"
+              : "border border-red-200 bg-red-50 text-red-700"
               }`}
           >
             {clientFeedback.text}
@@ -1272,8 +1272,8 @@ export default function Home() {
                                     type="button"
                                     onClick={() => void handleClientRating(order.id, star)}
                                     className={`text-lg leading-none transition hover:scale-105 hover:text-primary ${star <= existingRating
-                                        ? "text-primary"
-                                        : "text-gray-300 dark:text-gray-600"
+                                      ? "text-primary"
+                                      : "text-gray-300 dark:text-gray-600"
                                       }`}
                                     title={`Rate ${star}`}
                                   >
@@ -1450,8 +1450,8 @@ export default function Home() {
         {supervisorFeedback && (
           <div
             className={`rounded-lg px-4 py-3 text-sm ${supervisorFeedback.type === "success"
-                ? "border border-green-200 bg-green-50 text-green-700"
-                : "border border-red-200 bg-red-50 text-red-700"
+              ? "border border-green-200 bg-green-50 text-green-700"
+              : "border border-red-200 bg-red-50 text-red-700"
               }`}
           >
             {supervisorFeedback.text}
@@ -1532,6 +1532,8 @@ export default function Home() {
                     <TableHead>Client Feedback</TableHead>
                     <TableHead>Assigned</TableHead>
                     <TableHead>Reply</TableHead>
+                    <TableHead>Change In Order</TableHead>
+
                     <TableHead>Remaining TAT</TableHead>
                     <TableHead>Completed Date</TableHead>
                   </TableRow>
@@ -1622,6 +1624,38 @@ export default function Home() {
                                 <path d="M21 15a2 2 0 0 1 -2 2h-4l-4 4v-4h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2z" />
                               </svg>
                             </Link>
+                          </TableCell>
+                          <TableCell>
+                            {(() => {
+                              const normalizedStatus = `${order.status ?? ""}`.toLowerCase();
+                              const canEdit =
+                                normalizedStatus !== "completed" &&
+                                normalizedStatus !== "cancel";
+
+                              return canEdit ? (
+                                <Link
+                                  href={`/client/edit-order?oid=${order.id}`}
+                                  title="Change In Order"
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stroke hover:bg-gray-1 dark:border-dark-3 dark:hover:bg-dark-2"
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                  </svg>
+                                </Link>
+                              ) : (
+                                <span className="text-xs text-dark-5">—</span>
+                              );
+                            })()}
                           </TableCell>
                           <TableCell>{order.remaining_tat || "-"}</TableCell>
                           <TableCell>{formatDateTime(order.modify_date)}</TableCell>
