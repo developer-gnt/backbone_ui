@@ -130,9 +130,9 @@ const PackagesPage = () => {
         </TableHeader>
 
         <TableBody>
-          {packages.map((pkg) => (
+          {packages.map((pkg, index) => (
             <TableRow key={pkg.id} className="border-[#eee] dark:border-dark-3">
-              <TableCell>{pkg.id}</TableCell>
+              <TableCell>{index + 1}</TableCell>
               <TableCell>{pkg.title || "-"}</TableCell>
               <TableCell>{pkg.duration || "-"}</TableCell>
               <TableCell>₹ {pkg.price}</TableCell>

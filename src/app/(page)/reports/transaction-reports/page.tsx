@@ -89,7 +89,7 @@ const exportRows = (rows: TransactionRow[]) => {
 const CreditTransactionPage = () => {
   const [rows, setRows] = useState<TransactionRow[]>([]);
   const [draftUsername, setDraftUsername] = useState("");
-  const [filters, setFilters] = useState<Filters>({ username: "", type: "credit" });
+  const [filters, setFilters] = useState<Filters>({ username: "", type: "all" });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -267,11 +267,10 @@ const CreditTransactionPage = () => {
 
       {message && (
         <div
-          className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
-            message.type === "success"
+          className={`mb-4 rounded-lg border px-4 py-3 text-sm ${message.type === "success"
               ? "border-green-200 bg-green-50 text-green-700 dark:border-green-dark dark:bg-green-dark/20 dark:text-green-light-4"
               : "border-red-200 bg-red-50 text-red-700 dark:border-red-dark dark:bg-red-dark/20 dark:text-red-light-4"
-          }`}
+            }`}
         >
           {message.text}
         </div>

@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
+import { LocationIQResult, searchAddress } from "@/lib/locationiq";
 
 type TatPackageOption = {
   packageId: number | string;
@@ -161,6 +162,37 @@ export default function PlaceNewOrderPage() {
 
   const etaPackages = useMemo(() => getEtaPackages(packages), [packages]);
 
+  const [suggestions, setSuggestions] = useState<LocationIQResult[]>([]);
+  const [loadingAddress, setLoadingAddress] = useState(false);
+
+  useEffect(() => {
+    if (form.fullAddress.trim().length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        setLoadingAddress(true);
+
+        const results = await searchAddress(form.fullAddress);
+
+        setSuggestions(results);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingAddress(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [form.fullAddress]);
+
+
+
+
+
+
   const etaAvailabilityRows = useMemo(
     () =>
       ETA_ORDER.map((duration, index) => {
@@ -262,8 +294,8 @@ export default function PlaceNewOrderPage() {
         const response = await axiosInstance.get("/tat-packages", {
           params: pricingUsername
             ? {
-                username: pricingUsername,
-              }
+              username: pricingUsername,
+            }
             : undefined,
         });
         const nextPackages = Array.isArray(response.data) ? response.data : [];
@@ -321,6 +353,31 @@ export default function PlaceNewOrderPage() {
 
   const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSelectAddress = (item: LocationIQResult) => {
+    updateField("fullAddress", item.display_name);
+
+    updateField(
+      "subjectAddress",
+      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim()
+    );
+
+    updateField(
+      "city",
+      item.address.city ??
+      item.address.town ??
+      item.address.village ??
+      ""
+    );
+
+    updateField("state", item.address.state ?? "");
+
+    updateField("zipcode", item.address.postcode ?? "");
+
+    updateField("country", item.address.country ?? "");
+
+    setSuggestions([]);
   };
 
   const updateFiles = (label: string, fileList: FileList | null) => {
@@ -414,10 +471,10 @@ export default function PlaceNewOrderPage() {
       setClientInfo((prev) =>
         prev
           ? {
-              ...prev,
-              wallete_balance:
-                response.data?.wallete_balance ?? prev.wallete_balance ?? 0,
-            }
+            ...prev,
+            wallete_balance:
+              response.data?.wallete_balance ?? prev.wallete_balance ?? 0,
+          }
           : prev,
       );
       setForm((prev) => ({
@@ -456,11 +513,10 @@ export default function PlaceNewOrderPage() {
 
       {feedback && (
         <div
-          className={`mb-5 rounded-md px-4 py-3 text-sm ${
-            feedback.type === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
+          className={`mb-5 rounded-md px-4 py-3 text-sm ${feedback.type === "success"
+            ? "bg-green-100 text-green-700"
+            : "bg-red-100 text-red-700"
+            }`}
         >
           {feedback.text}
         </div>
@@ -588,12 +644,45 @@ export default function PlaceNewOrderPage() {
               <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
                 *Address
               </label>
-              <input
+
+              <div className="relative">
+                <input
+                  value={form.fullAddress}
+                  onChange={(e) =>
+                    updateField("fullAddress", e.target.value)
+                  }
+                  placeholder="e.g. 1234 Main St"
+                  className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm"
+                />
+
+                {loadingAddress && (
+                  <div className="mt-2 text-sm">
+                    Searching...
+                  </div>
+                )}
+
+                {suggestions.length > 0 && (
+                  <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
+                    {suggestions.map((item, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleSelectAddress(item)}
+                        className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100"
+                      >
+                        {item.display_name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* <input
                 value={form.fullAddress}
                 onChange={(event) => updateField("fullAddress", event.target.value)}
                 placeholder="e.g. 1234 Main St"
                 className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-              />
+              /> */}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
