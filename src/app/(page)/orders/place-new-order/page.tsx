@@ -261,7 +261,10 @@ export default function PlaceNewOrderPage() {
 
 
   useEffect(() => {
-    const username = form.clientUsername.trim();
+    const username =
+      user?.role === "Client"
+        ? user.username?.trim() || ""
+        : form.clientUsername.trim();
 
     if (!username) {
       setClientInfo(null);
@@ -273,8 +276,11 @@ export default function PlaceNewOrderPage() {
         const response = await axiosInstance.get(`/user/${encodeURIComponent(username)}`);
         const nextClient = response.data ?? null;
         setClientInfo(nextClient);
+
         setForm((prev) => ({
           ...prev,
+          clientUsername:
+            prev.clientUsername || user?.username || nextClient?.username || "",
           standardInstruction:
             prev.standardInstruction || `${nextClient?.std_instr ?? ""}`,
         }));
