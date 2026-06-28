@@ -45,18 +45,30 @@ export default function Page() {
                 <h2 className="text-2xl font-semibold text-dark dark:text-white">
                   {isLoading ? "Loading profile..." : displayName}
                 </h2>
+
                 <p className="text-sm text-dark-5">
                   {user?.role || "User"} • {user?.status || "Active"}
                 </p>
               </div>
             </div>
 
-            <Link
-              href="/pages/settings"
-              className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-            >
-              Edit Profile & Password
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              {user?.role !== "Admin" && user?.role !== "SubAdmin" && (
+                <Link
+                  href="/client/add-credit"
+                  className="inline-flex items-center rounded-lg bg-green-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-green-700 hover:shadow-md"
+                >
+                  Add Credits
+                </Link>
+              )}
+
+              <Link
+                href="/pages/settings"
+                className="inline-flex items-center rounded-lg bg-primary px-5 py-2 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+              >
+                Edit Profile & Password
+              </Link>
+            </div>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

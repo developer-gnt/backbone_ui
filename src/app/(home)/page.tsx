@@ -977,7 +977,7 @@ export default function Home() {
         {/* Summary Cards */}
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <Link
-            href="/reports/account-report"
+            href="/client/add-credit"
             className="rounded-xl border border-stroke bg-white p-5 shadow-1 transition duration-200 hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
           >
             <p className="text-sm font-medium text-dark-5 dark:text-dark-6">Wallet</p>
