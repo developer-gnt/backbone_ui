@@ -85,11 +85,10 @@ export default function ClientContactPage() {
 
           {feedback && (
             <div
-              className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
-                feedback.type === "success"
+              className={`mb-4 rounded-lg border px-4 py-3 text-sm ${feedback.type === "success"
                   ? "border-green-200 bg-green-50 text-green-700 dark:border-green-dark/40 dark:bg-green-dark/10 dark:text-green-light-4"
                   : "border-red-200 bg-red-50 text-red-700 dark:border-red-dark/40 dark:bg-red-dark/10 dark:text-red-light-4"
-              }`}
+                }`}
             >
               {feedback.text}
             </div>
@@ -148,7 +147,7 @@ export default function ClientContactPage() {
             </div>
             <div>
               <div className="font-medium text-dark dark:text-white">Email</div>
-              <p>backboneappraisal2021@gmail.com</p>
+              <p>orders@backbonedatasolutions.com</p>
             </div>
             <div>
               <div className="font-medium text-dark dark:text-white">Phone</div>
