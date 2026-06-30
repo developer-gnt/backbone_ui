@@ -315,8 +315,8 @@ export default function AssignedOrdersPage() {
       isTeamMember
         ? TABS.filter((tab) => tab.value === "Accept" || tab.value === "Completed")
         : isSupervisor
-        ? TABS.filter((tab) => tab.value !== "Work In Progress" && tab.value !== "Cancelled")
-        : TABS,
+          ? TABS.filter((tab) => tab.value !== "Work In Progress" && tab.value !== "Cancelled")
+          : TABS,
     [isSupervisor, isTeamMember],
   );
 
@@ -434,12 +434,12 @@ export default function AssignedOrdersPage() {
         prev.map((row) =>
           String(row.id) === String(assignOrder.id)
             ? {
-                ...row,
-                assigned_team_member: String(assignTeamMemberId),
-                assigner_name: getPersonLabel(selected),
-                status: "Work In Progress",
-                reply: assignNote.trim() || row.reply,
-              }
+              ...row,
+              assigned_team_member: String(assignTeamMemberId),
+              assigner_name: getPersonLabel(selected),
+              status: "Work In Progress",
+              reply: assignNote.trim() || row.reply,
+            }
             : row,
         ),
       );
@@ -470,10 +470,10 @@ export default function AssignedOrdersPage() {
         prev.map((row) =>
           String(row.id) === String(workOrder.id)
             ? {
-                ...row,
-                status: "Work In Progress",
-                reply: workMessage.trim() || row.reply,
-              }
+              ...row,
+              status: "Work In Progress",
+              reply: workMessage.trim() || row.reply,
+            }
             : row,
         ),
       );
@@ -576,10 +576,10 @@ export default function AssignedOrdersPage() {
         prev.map((row) =>
           String(row.id) === String(targetOrder.id)
             ? {
-                ...row,
-                status: "Completed",
-                reply: remark.trim() || row.reply,
-              }
+              ...row,
+              status: "Completed",
+              reply: remark.trim() || row.reply,
+            }
             : row,
         ),
       );
@@ -651,11 +651,10 @@ export default function AssignedOrdersPage() {
             key={tab.value}
             type="button"
             onClick={() => setActiveTab(tab.value)}
-            className={`rounded-md px-4 py-2 text-sm font-medium transition ${
-              activeTab === tab.value
-                ? "bg-primary text-white"
-                : "bg-gray-1 text-dark hover:bg-gray-2 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
-            }`}
+            className={`rounded-md px-4 py-2 text-sm font-medium transition ${activeTab === tab.value
+              ? "bg-primary text-white"
+              : "bg-gray-1 text-dark hover:bg-gray-2 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+              }`}
           >
             {tab.label}
           </button>
@@ -762,19 +761,22 @@ export default function AssignedOrdersPage() {
                   {showActionColumn && (
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
-                        {isSupervisor && activeTab === "Accept" && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAssignOrder(row);
-                              setAssignTeamMemberId("");
-                              setAssignNote(row.reply || "");
-                            }}
-                            className="rounded-md bg-green px-3 py-1 text-xs font-medium text-white hover:bg-green/90"
-                          >
-                            Assign Team Member
-                          </button>
-                        )}
+                        {isSupervisor &&
+                          (activeTab === "Accept" || activeTab === "Work In Progress") && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAssignOrder(row);
+                                setAssignTeamMemberId(String(row.assigned_team_member ?? ""));
+                                setAssignNote(row.reply || "");
+                              }}
+                              className="rounded-md bg-green px-3 py-1 text-xs font-medium text-white hover:bg-green/90"
+                            >
+                              {activeTab === "Accept"
+                                ? "Assign Team Member"
+                                : "Reassign Team Member"}
+                            </button>
+                          )}
 
                         {isTeamMember && (
                           <button
@@ -982,7 +984,10 @@ export default function AssignedOrdersPage() {
       )}
 
       {assignOrder && isSupervisor && (
-        <ModalShell title={`Assign Team Member - File #${assignOrder.id}`} onClose={() => setAssignOrder(null)}>
+        <ModalShell title={`${assignOrder.assigned_team_member
+          ? "Reassign Team Member"
+          : "Assign Team Member"
+          } - File #${assignOrder.id}`} onClose={() => setAssignOrder(null)}>
           <div className="space-y-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-dark dark:text-white">Select Team Member</label>

@@ -362,12 +362,12 @@ export default function PlaceNewOrderPage() {
   };
 
   const handleSelectAddress = (item: LocationIQResult) => {
-    updateField("fullAddress", item.display_name);
+    const streetAddress =
+      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim() ||
+      item.display_name;
 
-    updateField(
-      "subjectAddress",
-      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim()
-    );
+    updateField("fullAddress", streetAddress);
+    updateField("subjectAddress", streetAddress);
 
     updateField(
       "city",
@@ -378,9 +378,7 @@ export default function PlaceNewOrderPage() {
     );
 
     updateField("state", item.address.state ?? "");
-
     updateField("zipcode", item.address.postcode ?? "");
-
     updateField("country", item.address.country ?? "");
 
     setSuggestions([]);
@@ -398,6 +396,18 @@ export default function PlaceNewOrderPage() {
     setFeedback(null);
 
     const subjectAddress = form.subjectAddress.trim() || form.fullAddress.trim();
+
+    if (
+      !form.city.trim() ||
+      !form.state.trim() ||
+      !form.zipcode.trim()
+    ) {
+      setFeedback({
+        type: "error",
+        text: "Please select an address from the suggestions or manually enter a valid Address, City, State and Zip Code.",
+      });
+      return;
+    }
 
     if (!form.clientUsername.trim()) {
       setFeedback({ type: "error", text: "Client username is required." });
@@ -698,7 +708,10 @@ export default function PlaceNewOrderPage() {
                 </label>
                 <input
                   value={form.subjectAddress}
-                  onChange={(event) => updateField("subjectAddress", event.target.value)}
+                  onChange={(event) => {
+                    updateField("subjectAddress", event.target.value);
+                    updateField("fullAddress", event.target.value);
+                  }}
                   onBlur={() => {
                     if (!form.subjectAddress.trim() && form.fullAddress.trim()) {
                       updateField("subjectAddress", form.fullAddress.trim());
@@ -838,6 +851,12 @@ export default function PlaceNewOrderPage() {
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
+            <strong>Note:</strong> Large appraisal files and ZIP archives may take up to
+            2 minutes to upload depending on your internet connection. Please do not
+            refresh or close this page while the upload is in progress.
           </div>
         </div>
 

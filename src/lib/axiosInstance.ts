@@ -21,7 +21,7 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
   withCredentials: true,
-  timeout: 15000,
+  timeout: 300000,
 });
 
 // Global error handler
