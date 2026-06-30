@@ -361,25 +361,18 @@ export default function PlaceNewOrderPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSelectAddress = (item: LocationIQResult) => {
-    const streetAddress =
-      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim() ||
-      item.display_name;
-
-    updateField("fullAddress", streetAddress);
-    updateField("subjectAddress", streetAddress);
+  const handleSelectAddress = (item: any) => {
+    updateField("fullAddress", item.display_name);
 
     updateField(
-      "city",
-      item.address.city ??
-      item.address.town ??
-      item.address.village ??
-      ""
+      "subjectAddress",
+      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim()
     );
 
-    updateField("state", item.address.state ?? "");
-    updateField("zipcode", item.address.postcode ?? "");
-    updateField("country", item.address.country ?? "");
+    updateField("city", item.address.city || item.address.town || "");
+    updateField("state", item.address.state || "");
+    updateField("zipcode", item.address.postcode || "");
+    updateField("country", item.address.country || "");
 
     setSuggestions([]);
   };
@@ -710,11 +703,10 @@ export default function PlaceNewOrderPage() {
                   value={form.subjectAddress}
                   onChange={(event) => {
                     updateField("subjectAddress", event.target.value);
-                    updateField("fullAddress", event.target.value);
                   }}
                   onBlur={() => {
-                    if (!form.subjectAddress.trim() && form.fullAddress.trim()) {
-                      updateField("subjectAddress", form.fullAddress.trim());
+                    if (!form.subjectAddress.trim()) {
+                      updateField("subjectAddress", form.fullAddress);
                     }
                   }}
                   placeholder="e.g. 1234 Main St"
