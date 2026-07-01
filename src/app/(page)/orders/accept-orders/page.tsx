@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
@@ -144,11 +144,56 @@ function LegacyAcceptedOrdersPage() {
   const isSupervisorUser = normalizedRole === "supervisor";
   const currentAssigneeKeys = useMemo(
     () =>
-      [user?.username, user?.email, `${user?.id ?? ""}`]
+      [
+        user?.username,
+        user?.email,
+        `${user?.id ?? ""}`,
+        user?.firstname,
+        user?.lastname,
+        `${user?.firstname ?? ""} ${user?.lastname ?? ""}`.trim(),
+      ]
         .map((value) => `${value ?? ""}`.trim().toLowerCase())
         .filter(Boolean),
-    [user?.email, user?.id, user?.username],
+    [user?.email, user?.id, user?.username, user?.firstname, user?.lastname],
   );
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    isDraggingRef.current = true;
+    scrollRef.current.classList.add("cursor-grabbing", "select-none");
+    scrollRef.current.classList.remove("cursor-grab");
+    startXRef.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeftRef.current = scrollRef.current.scrollLeft;
+  };
+
+  const handleMouseLeave = () => {
+    isDraggingRef.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.classList.remove("cursor-grabbing", "select-none");
+      scrollRef.current.classList.add("cursor-grab");
+    }
+  };
+  
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.classList.remove("cursor-grabbing", "select-none");
+      scrollRef.current.classList.add("cursor-grab");
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 2;
+    scrollRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [supervisors, setSupervisors] = useState<SupervisorOption[]>([]);
@@ -183,7 +228,6 @@ function LegacyAcceptedOrdersPage() {
       const response = await axiosInstance.get("/masters/reports/orders", {
         params: {
           status: "Accept",
-          assignedSupervisor: isSupervisorUser ? currentAssigneeKeys.join(",") : undefined,
           pageSize: "500",
         },
       });
@@ -195,12 +239,7 @@ function LegacyAcceptedOrdersPage() {
           ? payload
           : [];
 
-      const nextRows = rawRows.filter(
-        (order: OrderRow) =>
-          `${order.assigned_supervisor ?? ""}`.trim() && !`${order.assigned_team_member ?? ""}`.trim(),
-      );
-
-      setOrders(nextRows);
+      setOrders(rawRows);
     } catch (error) {
       setOrders([]);
       setMessage({
@@ -218,21 +257,12 @@ function LegacyAcceptedOrdersPage() {
         params: { role: isSupervisorUser ? "Team Member" : "Supervisor" },
       });
 
-      const nextRows = (Array.isArray(response.data) ? response.data : []).filter(
-        (item: SupervisorOption) => {
-          if (!isSupervisorUser) {
-            return true;
-          }
-
-          return currentAssigneeKeys.includes(`${item.emp_supervisor ?? ""}`.trim().toLowerCase());
-        },
-      );
-
+      const nextRows = Array.isArray(response.data) ? response.data : [];
       setSupervisors(nextRows);
     } catch {
       setSupervisors([]);
     }
-  }, [currentAssigneeKeys, isSupervisorUser]);
+  }, [isSupervisorUser]);
 
   useEffect(() => {
     void loadOrders();
@@ -362,11 +392,10 @@ function LegacyAcceptedOrdersPage() {
 
       {message && (
         <div
-          className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
-            message.type === "error"
-              ? "border-red-200 bg-red-50 text-red-700 dark:border-red-dark/40 dark:bg-red-dark/10 dark:text-red-light-4"
-              : "border-green-200 bg-green-50 text-green-700 dark:border-green-dark/40 dark:bg-green-dark/10 dark:text-green-light-4"
-          }`}
+          className={`mb-4 rounded-lg border px-4 py-3 text-sm ${message.type === "error"
+            ? "border-red-200 bg-red-50 text-red-700 dark:border-red-dark/40 dark:bg-red-dark/10 dark:text-red-light-4"
+            : "border-green-200 bg-green-50 text-green-700 dark:border-green-dark/40 dark:bg-green-dark/10 dark:text-green-light-4"
+            }`}
         >
           {message.text}
         </div>
@@ -389,10 +418,17 @@ function LegacyAcceptedOrdersPage() {
         </Link>
       </div>
 
-      <div className="overflow-auto rounded-xl border border-stroke dark:border-dark-3">
+      <div
+        ref={scrollRef}
+        className="overflow-auto rounded-xl border border-stroke dark:border-dark-3 max-h-[calc(100vh-320px)] cursor-grab"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
         <Table className="min-w-[1600px]">
           <TableHeader>
-            <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-semibold [&>th]:text-dark [&>th]:dark:text-white">
+            <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-semibold [&>th]:text-dark [&>th]:dark:text-white sticky top-0 z-10">
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
               <TableHead>TAT</TableHead>
@@ -405,7 +441,7 @@ function LegacyAcceptedOrdersPage() {
               <TableHead>Assigned</TableHead>
               <TableHead>Property Address</TableHead>
               <TableHead>Working Docs</TableHead>
-              <TableHead>Accept</TableHead>
+              <TableHead>ReAssign</TableHead>
               <TableHead>Cancel</TableHead>
               <TableHead>Work Status</TableHead>
             </TableRow>
@@ -495,7 +531,7 @@ function LegacyAcceptedOrdersPage() {
                           setSelectedSupervisorId("");
                         }}
                       >
-                        Assign
+                        ReAssign
                       </button>
                     </TableCell>
                     <TableCell>

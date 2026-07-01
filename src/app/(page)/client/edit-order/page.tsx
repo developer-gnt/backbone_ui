@@ -5,18 +5,29 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
 
-type PackageOption = {
-  id: number | string;
-  title?: string;
-  duration?: string;
-  price?: number | string;
-  credit?: number | string;
-  basePrice?: number | string;
-  baseCredit?: number | string;
-  customPrice?: number | string | null;
-  customCredit?: number | string | null;
-  isCustomPricing?: boolean;
-  pricingNotes?: string | null;
+// type PackageOption = {
+//   id: number | string;
+//   title?: string;
+//   duration?: string;
+//   price?: number | string;
+//   credit?: number | string;
+//   basePrice?: number | string;
+//   baseCredit?: number | string;
+//   customPrice?: number | string | null;
+//   customCredit?: number | string | null;
+//   isCustomPricing?: boolean;
+//   pricingNotes?: string | null;
+// };
+
+type TatPackageOption = {
+  packageId: number | string;
+  packageCode?: string;
+  displayLabel?: string;
+  tatHours?: number | string;
+  defaultPrice?: number | string;
+  effectivePrice?: number | string;
+  isOverridden?: boolean;
+  overrideId?: number | null;
 };
 
 type OrderTypeOption = {
@@ -117,23 +128,40 @@ const UPLOAD_FIELDS = [
   },
 ] as const;
 
-const getDurationValue = (item?: PackageOption) => {
-  const raw = `${item?.duration ?? item?.title ?? ""}`;
+const AVAILABILITY_COLORS = [
+  "text-green-600",
+  "text-blue-600",
+  "text-red-600",
+] as const;
+
+const ETA_ORDER = ["12", "06", "04"] as const;
+
+const getDurationValue = (item?: TatPackageOption) => {
+  const raw = `${item?.tatHours ?? item?.packageCode ?? item?.displayLabel ?? ""}`;
   const match = raw.match(/\d+/);
-  return match ? match[0].padStart(2, "0") : `${item?.id ?? ""}`;
+
+  return match ? match[0].padStart(2, "0") : `${item?.packageId ?? ""}`;
 };
 
-const getPackageCost = (item?: PackageOption) =>
-  Number(item?.credit ?? item?.price ?? 0);
+const getPackageCost = (item?: TatPackageOption) =>
+  Number(item?.effectivePrice ?? item?.defaultPrice ?? 0);
 
-const getPackageTitle = (item?: PackageOption) =>
-  item?.title?.trim() || `${Number(getDurationValue(item))} hours TAT`;
+const getPackageTitle = (item?: TatPackageOption) =>
+  item?.displayLabel?.trim() || `${Number(getDurationValue(item))} hours TAT`;
 
-const getEtaPackages = (packages: PackageOption[]) => {
-  const ETA_ORDER = ["12", "06", "04"] as const;
+const getEtaLabel = (item?: TatPackageOption, index = 0) => {
+  const duration = getDurationValue(item);
+
+  const displayDuration =
+    ETA_ORDER.find((v) => v === duration) ?? ETA_ORDER[index] ?? duration;
+
+  return `${displayDuration} hours TAT`;
+};
+
+const getEtaPackages = (packages: TatPackageOption[]) => {
   const preferred = ETA_ORDER.map((duration) =>
-    packages.find((item) => getDurationValue(item) === duration)
-  ).filter((item): item is PackageOption => Boolean(item));
+    packages.find((item) => getDurationValue(item) === duration),
+  ).filter((item): item is TatPackageOption => Boolean(item));
 
   if (
     preferred.length >= ETA_ORDER.length ||
@@ -142,9 +170,10 @@ const getEtaPackages = (packages: PackageOption[]) => {
     return preferred.length ? preferred : packages.slice(0, ETA_ORDER.length);
   }
 
-  const selectedIds = new Set(preferred.map((item) => `${item.id}`));
+  const selectedIds = new Set(preferred.map((item) => `${item.packageId}`));
+
   const fallback = packages
-    .filter((item) => !selectedIds.has(`${item.id}`))
+    .filter((item) => !selectedIds.has(`${item.packageId}`))
     .slice(0, ETA_ORDER.length - preferred.length);
 
   return [...preferred, ...fallback];
@@ -174,14 +203,20 @@ export default function EditOrderPage() {
     packageId: "",
   });
 
-  const [packages, setPackages] = useState<PackageOption[]>([]);
+  const [packages, setPackages] = useState<TatPackageOption[]>([]);
   const [orderTypes, setOrderTypes] = useState<OrderTypeOption[]>([]);
   const [financingOptions, setFinancingOptions] = useState<FinancingOption[]>(
-    []
+    [],
   );
   const [states, setStates] = useState<StateOption[]>([]);
   const [files, setFiles] = useState<AttachmentRow[]>([]);
   const [filesByType, setFilesByType] = useState<Record<string, File[]>>({});
+  const [availabilityRows, setAvailabilityRows] = useState<
+    Array<{
+      package?: string;
+      msg?: string;
+    }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{
@@ -189,21 +224,35 @@ export default function EditOrderPage() {
     text: string;
   } | null>(null);
 
-  const etaPackages = useMemo(
-    () => getEtaPackages(packages),
-    [packages]
+  const etaPackages = useMemo(() => getEtaPackages(packages), [packages]);
+
+  const etaAvailabilityRows = useMemo(
+    () =>
+      ETA_ORDER.map((duration, index) => {
+        const matchedRow =
+          availabilityRows.find((row) =>
+            `${row.package ?? ""}`.includes(duration),
+          ) ?? availabilityRows[index];
+
+        return {
+          key: `${duration}-${index}`,
+          text: matchedRow?.msg?.trim() || "Available",
+          color: AVAILABILITY_COLORS[index] ?? "text-dark dark:text-white",
+        };
+      }),
+    [availabilityRows],
   );
 
   const selectedPackage = useMemo(
     () =>
-      etaPackages.find((item) => `${item.id}` === form.packageId) ||
+      etaPackages.find((item) => `${item.packageId}` === form.packageId) ||
       etaPackages[0],
-    [form.packageId, etaPackages]
+    [form.packageId, etaPackages],
   );
 
   const updateField = <K extends keyof FormState>(
     key: K,
-    value: FormState[K]
+    value: FormState[K],
   ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
@@ -231,13 +280,15 @@ export default function EditOrderPage() {
         setLoading(true);
 
         const [
+          availabilityRes,
           packageRes,
           orderTypeRes,
           formRes,
           stateRes,
           orderDetailsRes,
         ] = await Promise.all([
-          axiosInstance.get("/masters/package"),
+          axiosInstance.get("/masters/alert-availability"),
+          axiosInstance.get("/tat-packages"),
           axiosInstance.get("/masters/order-type"),
           axiosInstance.get("/masters/forms"),
           axiosInstance.get("/masters/state"),
@@ -258,6 +309,9 @@ export default function EditOrderPage() {
         setOrderTypes(nextOrderTypes);
         setFinancingOptions(nextForms);
         setStates(nextStates);
+        setAvailabilityRows(
+          Array.isArray(availabilityRes.data) ? availabilityRes.data : [],
+        );
         setFiles(orderDetails.downloads || []);
 
         const order = orderDetails.order;
@@ -267,10 +321,10 @@ export default function EditOrderPage() {
         if (order.tat) {
           const tatValue = order.tat.replace(/\D/g, "").padStart(2, "0");
           const matchedPackage = nextPackages.find(
-            (p) => getDurationValue(p) === tatValue
+            (p) => getDurationValue(p) === tatValue,
           );
           if (matchedPackage) {
-            packageId = `${matchedPackage.id}`;
+            packageId = `${matchedPackage.packageId}`;
           }
         }
 
@@ -296,7 +350,7 @@ export default function EditOrderPage() {
           type: "error",
           text: getApiErrorMessage(
             error,
-            "Failed to load order details. Please try again."
+            "Failed to load order details. Please try again.",
           ),
         });
       } finally {
@@ -341,10 +395,7 @@ export default function EditOrderPage() {
       payload.append("subject_city", form.city.trim());
       payload.append("subject_zipcode", form.zipcode.trim());
       payload.append("subject_country", form.country.trim());
-      payload.append(
-        "order_type_comment",
-        form.orderTypeComment.trim()
-      );
+      payload.append("order_type_comment", form.orderTypeComment.trim());
       payload.append("description", form.instructions.trim());
       payload.append("standard_instruction", form.standardInstruction.trim());
       payload.append("sketch", form.sketch);
@@ -378,7 +429,7 @@ export default function EditOrderPage() {
         type: "error",
         text: getApiErrorMessage(
           error,
-          "Failed to update the order. Please try again."
+          "Failed to update the order. Please try again.",
         ),
       });
     } finally {
@@ -502,9 +553,7 @@ export default function EditOrderPage() {
               <input
                 type="text"
                 value={form.subjectAddress}
-                onChange={(e) =>
-                  updateField("subjectAddress", e.target.value)
-                }
+                onChange={(e) => updateField("subjectAddress", e.target.value)}
                 placeholder="29 S. Pine St."
                 className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 required
@@ -732,14 +781,14 @@ export default function EditOrderPage() {
               <div className="flex flex-wrap gap-3 rounded-md border border-stroke px-3 py-2 dark:border-dark-3">
                 {etaPackages.map((item) => (
                   <label
-                    key={item.id}
+                    key={item.packageId}
                     className="flex items-center gap-2 text-sm text-dark dark:text-white"
                   >
                     <input
                       type="radio"
                       name="package"
-                      value={`${item.id}`}
-                      checked={`${form.packageId}` === `${item.id}`}
+                      value={`${item.packageId}`}
+                      checked={`${form.packageId}` === `${item.packageId}`}
                       onChange={(e) => updateField("packageId", e.target.value)}
                       className="h-4 w-4 cursor-pointer"
                     />
@@ -756,7 +805,7 @@ export default function EditOrderPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="ml-auto inline-flex items-center justify-center rounded-md bg-primary px-6 py-2.5 text-center font-medium text-white hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-auto inline-flex items-center justify-center rounded-md bg-primary px-6 py-2.5 text-center font-medium text-white hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Updating..." : "Submit Changes"}
           </button>

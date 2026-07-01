@@ -88,7 +88,11 @@ const UPLOAD_FIELDS = [
   },
 ] as const;
 
-const AVAILABILITY_COLORS = ["text-green-600", "text-blue-600", "text-red-600"] as const;
+const AVAILABILITY_COLORS = [
+  "text-green-600",
+  "text-blue-600",
+  "text-red-600",
+] as const;
 const ETA_ORDER = ["12", "06", "04"] as const;
 
 const getEtaPackages = (packages: TatPackageOption[]) => {
@@ -96,7 +100,10 @@ const getEtaPackages = (packages: TatPackageOption[]) => {
     packages.find((item) => getDurationValue(item) === duration),
   ).filter((item): item is TatPackageOption => Boolean(item));
 
-  if (preferred.length >= ETA_ORDER.length || packages.length <= ETA_ORDER.length) {
+  if (
+    preferred.length >= ETA_ORDER.length ||
+    packages.length <= ETA_ORDER.length
+  ) {
     return preferred.length ? preferred : packages.slice(0, ETA_ORDER.length);
   }
 
@@ -134,11 +141,16 @@ const getDurationValue = (item?: TatPackageOption) => {
   return match ? match[0].padStart(2, "0") : `${item?.packageId ?? ""}`;
 };
 
-const getPackageCost = (item?: TatPackageOption) => Number(item?.effectivePrice ?? item?.defaultPrice ?? 0);
-const getPackageTitle = (item?: TatPackageOption) => item?.displayLabel?.trim() || `${Number(getDurationValue(item))} hours TAT`;
+const getPackageCost = (item?: TatPackageOption) =>
+  Number(item?.effectivePrice ?? item?.defaultPrice ?? 0);
+const getPackageTitle = (item?: TatPackageOption) =>
+  item?.displayLabel?.trim() || `${Number(getDurationValue(item))} hours TAT`;
 const getEtaLabel = (item?: TatPackageOption, index = 0) => {
   const duration = getDurationValue(item);
-  const displayDuration = ETA_ORDER.find((value) => value === duration) ?? ETA_ORDER[index] ?? duration;
+  const displayDuration =
+    ETA_ORDER.find((value) => value === duration) ??
+    ETA_ORDER[index] ??
+    duration;
   return `${displayDuration} hours TAT`;
 };
 
@@ -147,10 +159,15 @@ export default function PlaceNewOrderPage() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [packages, setPackages] = useState<TatPackageOption[]>([]);
   const [orderTypes, setOrderTypes] = useState<OrderTypeOption[]>([]);
-  const [financingOptions, setFinancingOptions] = useState<FinancingOption[]>([]);
+  const [financingOptions, setFinancingOptions] = useState<FinancingOption[]>(
+    [],
+  );
   const [states, setStates] = useState<StateOption[]>([]);
   const [clientInfo, setClientInfo] = useState<ClientLookup | null>(null);
-  const [duplicateInfo, setDuplicateInfo] = useState<{ exists: boolean; count: number } | null>(null);
+  const [duplicateInfo, setDuplicateInfo] = useState<{
+    exists: boolean;
+    count: number;
+  } | null>(null);
   const [filesByType, setFilesByType] = useState<Record<string, File[]>>({});
   const [extraUploadSlots, setExtraUploadSlots] = useState<number[]>([0]);
   const [availabilityRows, setAvailabilityRows] = useState<
@@ -158,14 +175,21 @@ export default function PlaceNewOrderPage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const etaPackages = useMemo(() => getEtaPackages(packages), [packages]);
 
   const [suggestions, setSuggestions] = useState<LocationIQResult[]>([]);
   const [loadingAddress, setLoadingAddress] = useState(false);
+  const [addressSelected, setAddressSelected] = useState(false);
 
   useEffect(() => {
+    if (addressSelected) {
+      return;
+    }
     if (form.fullAddress.trim().length < 3) {
       setSuggestions([]);
       return;
@@ -188,17 +212,13 @@ export default function PlaceNewOrderPage() {
     return () => clearTimeout(timeout);
   }, [form.fullAddress]);
 
-
-
-
-
-
   const etaAvailabilityRows = useMemo(
     () =>
       ETA_ORDER.map((duration, index) => {
         const matchedRow =
-          availabilityRows.find((row) => `${row.package ?? ""}`.includes(duration)) ??
-          availabilityRows[index];
+          availabilityRows.find((row) =>
+            `${row.package ?? ""}`.includes(duration),
+          ) ?? availabilityRows[index];
 
         return {
           key: `${duration}-${index}`,
@@ -223,8 +243,12 @@ export default function PlaceNewOrderPage() {
             axiosInstance.get("/masters/alert-availability"),
           ]);
 
-        const nextPackages = Array.isArray(packageRes.data) ? packageRes.data : [];
-        const nextOrderTypes = Array.isArray(orderTypeRes.data) ? orderTypeRes.data : [];
+        const nextPackages = Array.isArray(packageRes.data)
+          ? packageRes.data
+          : [];
+        const nextOrderTypes = Array.isArray(orderTypeRes.data)
+          ? orderTypeRes.data
+          : [];
         const nextForms = Array.isArray(formRes.data) ? formRes.data : [];
         const nextStates = Array.isArray(stateRes.data) ? stateRes.data : [];
         const nextAvailability = Array.isArray(availabilityRes.data)
@@ -242,8 +266,10 @@ export default function PlaceNewOrderPage() {
         setForm((prev) => ({
           ...prev,
           packageId: prev.packageId || `${defaultEtaPackage?.packageId ?? ""}`,
-          orderType: prev.orderType || `${nextOrderTypes[0]?.order_type ?? "1004"}`,
-          financing: prev.financing || `${nextForms[0]?.form ?? "CONVENTIONAL"}`,
+          orderType:
+            prev.orderType || `${nextOrderTypes[0]?.order_type ?? "1004"}`,
+          financing:
+            prev.financing || `${nextForms[0]?.form ?? "CONVENTIONAL"}`,
           state: prev.state || `${nextStates[0]?.city ?? ""}`,
         }));
       } catch (error) {
@@ -259,7 +285,6 @@ export default function PlaceNewOrderPage() {
     void loadPageData();
   }, []);
 
-
   useEffect(() => {
     const username =
       user?.role === "Client"
@@ -273,7 +298,9 @@ export default function PlaceNewOrderPage() {
 
     const timeoutId = window.setTimeout(async () => {
       try {
-        const response = await axiosInstance.get(`/user/${encodeURIComponent(username)}`);
+        const response = await axiosInstance.get(
+          `/user/${encodeURIComponent(username)}`,
+        );
         const nextClient = response.data ?? null;
         setClientInfo(nextClient);
 
@@ -300,8 +327,8 @@ export default function PlaceNewOrderPage() {
         const response = await axiosInstance.get("/tat-packages", {
           params: pricingUsername
             ? {
-              username: pricingUsername,
-            }
+                username: pricingUsername,
+              }
             : undefined,
         });
         const nextPackages = Array.isArray(response.data) ? response.data : [];
@@ -315,7 +342,9 @@ export default function PlaceNewOrderPage() {
         setPackages(nextPackages);
         setForm((prev) => ({
           ...prev,
-          packageId: preferredEtaPackages.some((item) => `${item.packageId}` === prev.packageId)
+          packageId: preferredEtaPackages.some(
+            (item) => `${item.packageId}` === prev.packageId,
+          )
             ? prev.packageId
             : `${preferredEtaPackages[0]?.packageId ?? ""}`,
         }));
@@ -337,9 +366,12 @@ export default function PlaceNewOrderPage() {
 
     const timeoutId = window.setTimeout(async () => {
       try {
-        const response = await axiosInstance.get("/masters/orders/check-duplicate-address", {
-          params: { address },
-        });
+        const response = await axiosInstance.get(
+          "/masters/orders/check-duplicate-address",
+          {
+            params: { address },
+          },
+        );
         setDuplicateInfo(response.data ?? { exists: false, count: 0 });
       } catch {
         setDuplicateInfo(null);
@@ -350,14 +382,19 @@ export default function PlaceNewOrderPage() {
   }, [form.subjectAddress]);
 
   const selectedPackage = useMemo(
-    () => etaPackages.find((item) => `${item.packageId}` === form.packageId) ?? etaPackages[0],
+    () =>
+      etaPackages.find((item) => `${item.packageId}` === form.packageId) ??
+      etaPackages[0],
     [form.packageId, etaPackages],
   );
 
   const selectedPackageCost = getPackageCost(selectedPackage);
   const clientWallet = Number(clientInfo?.wallete_balance ?? 0);
 
-  const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+  const updateField = <K extends keyof FormState>(
+    key: K,
+    value: FormState[K],
+  ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -366,7 +403,7 @@ export default function PlaceNewOrderPage() {
 
     updateField(
       "subjectAddress",
-      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim()
+      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim(),
     );
 
     updateField("city", item.address.city || item.address.town || "");
@@ -375,6 +412,7 @@ export default function PlaceNewOrderPage() {
     updateField("country", item.address.country || "");
 
     setSuggestions([]);
+    setAddressSelected(true);
   };
 
   const updateFiles = (label: string, fileList: FileList | null) => {
@@ -388,13 +426,10 @@ export default function PlaceNewOrderPage() {
     event.preventDefault();
     setFeedback(null);
 
-    const subjectAddress = form.subjectAddress.trim() || form.fullAddress.trim();
+    const subjectAddress =
+      form.subjectAddress.trim() || form.fullAddress.trim();
 
-    if (
-      !form.city.trim() ||
-      !form.state.trim() ||
-      !form.zipcode.trim()
-    ) {
+    if (!form.city.trim() || !form.state.trim() || !form.zipcode.trim()) {
       setFeedback({
         type: "error",
         text: "Please select an address from the suggestions or manually enter a valid Address, City, State and Zip Code.",
@@ -438,10 +473,19 @@ export default function PlaceNewOrderPage() {
     try {
       const payload = new FormData();
       payload.append("createdby", form.clientUsername.trim());
-      payload.append("package", selectedPackage?.packageCode || getDurationValue(selectedPackage));
+      payload.append(
+        "package",
+        selectedPackage?.packageCode || getDurationValue(selectedPackage),
+      );
       payload.append("tat_package_id", `${selectedPackage?.packageId ?? ""}`);
-      payload.append("package_code", selectedPackage?.packageCode || getDurationValue(selectedPackage));
-      payload.append("tat_hours", `${selectedPackage?.tatHours ?? getDurationValue(selectedPackage)}`);
+      payload.append(
+        "package_code",
+        selectedPackage?.packageCode || getDurationValue(selectedPackage),
+      );
+      payload.append(
+        "tat_hours",
+        `${selectedPackage?.tatHours ?? getDurationValue(selectedPackage)}`,
+      );
       payload.append("charged_amount", `${selectedPackageCost}`);
       payload.append("amount", `${selectedPackageCost}`);
       payload.append("status", "New Order");
@@ -480,10 +524,10 @@ export default function PlaceNewOrderPage() {
       setClientInfo((prev) =>
         prev
           ? {
-            ...prev,
-            wallete_balance:
-              response.data?.wallete_balance ?? prev.wallete_balance ?? 0,
-          }
+              ...prev,
+              wallete_balance:
+                response.data?.wallete_balance ?? prev.wallete_balance ?? 0,
+            }
           : prev,
       );
       setForm((prev) => ({
@@ -522,10 +566,11 @@ export default function PlaceNewOrderPage() {
 
       {feedback && (
         <div
-          className={`mb-5 rounded-md px-4 py-3 text-sm ${feedback.type === "success"
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-700"
-            }`}
+          className={`mb-5 rounded-md px-4 py-3 text-sm ${
+            feedback.type === "success"
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
         >
           {feedback.text}
         </div>
@@ -544,7 +589,9 @@ export default function PlaceNewOrderPage() {
               </label>
               <input
                 value={form.clientUsername}
-                onChange={(event) => updateField("clientUsername", event.target.value)}
+                onChange={(event) =>
+                  updateField("clientUsername", event.target.value)
+                }
                 placeholder="Eg. ron1992"
                 className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 required
@@ -565,7 +612,9 @@ export default function PlaceNewOrderPage() {
                       type="radio"
                       name="orderType"
                       checked={form.orderType === (item.order_type || "")}
-                      onChange={() => updateField("orderType", item.order_type || "")}
+                      onChange={() =>
+                        updateField("orderType", item.order_type || "")
+                      }
                     />
                     {item.order_type || "Order Type"}
                   </label>
@@ -574,9 +623,13 @@ export default function PlaceNewOrderPage() {
 
               <input
                 value={form.orderTypeComment}
-                onChange={(event) => updateField("orderTypeComment", event.target.value)}
+                onChange={(event) =>
+                  updateField("orderTypeComment", event.target.value)
+                }
                 placeholder="Write Comment For Order Type"
-                style={{ display: form.orderType === "Other" ? "block" : "none" }}
+                style={{
+                  display: form.orderType === "Other" ? "block" : "none",
+                }}
                 className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
               />
             </div>
@@ -587,7 +640,9 @@ export default function PlaceNewOrderPage() {
                 <input
                   type="checkbox"
                   checked={form.reoform}
-                  onChange={(event) => updateField("reoform", event.target.checked)}
+                  onChange={(event) =>
+                    updateField("reoform", event.target.checked)
+                  }
                 />
               </div>
 
@@ -605,7 +660,9 @@ export default function PlaceNewOrderPage() {
                         type="radio"
                         name="financing"
                         checked={form.financing === (item.form || "")}
-                        onChange={() => updateField("financing", item.form || "")}
+                        onChange={() =>
+                          updateField("financing", item.form || "")
+                        }
                       />
                       {item.form || "Form"}
                     </label>
@@ -618,7 +675,9 @@ export default function PlaceNewOrderPage() {
                 <input
                   type="checkbox"
                   checked={form.nonUad}
-                  onChange={(event) => updateField("nonUad", event.target.checked)}
+                  onChange={(event) =>
+                    updateField("nonUad", event.target.checked)
+                  }
                 />
               </div>
             </div>
@@ -629,7 +688,9 @@ export default function PlaceNewOrderPage() {
               </label>
               <input
                 value={form.borrowerName}
-                onChange={(event) => updateField("borrowerName", event.target.value)}
+                onChange={(event) =>
+                  updateField("borrowerName", event.target.value)
+                }
                 placeholder="BORROWER NAME"
                 className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
               />
@@ -645,7 +706,8 @@ export default function PlaceNewOrderPage() {
           <div className="space-y-5 p-4">
             {duplicateInfo?.exists && (
               <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                This subject address is already exist in the portal.Please reconfirm before placing duplicate order.Thanks!!
+                This subject address is already exist in the portal.Please
+                reconfirm before placing duplicate order.Thanks!!
               </div>
             )}
 
@@ -657,17 +719,16 @@ export default function PlaceNewOrderPage() {
               <div className="relative">
                 <input
                   value={form.fullAddress}
-                  onChange={(e) =>
-                    updateField("fullAddress", e.target.value)
-                  }
+                  onChange={(e) => {
+                    setAddressSelected(false);
+                    updateField("fullAddress", e.target.value);
+                  }}
                   placeholder="e.g. 1234 Main St"
                   className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm"
                 />
 
                 {loadingAddress && (
-                  <div className="mt-2 text-sm">
-                    Searching...
-                  </div>
+                  <div className="mt-2 text-sm">Searching...</div>
                 )}
 
                 {suggestions.length > 0 && (
@@ -725,7 +786,10 @@ export default function PlaceNewOrderPage() {
                   className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 >
                   {states.map((item, index) => (
-                    <option key={`${item.id ?? item.city ?? index}`} value={item.city || ""}>
+                    <option
+                      key={`${item.id ?? item.city ?? index}`}
+                      value={item.city || ""}
+                    >
                       {item.city || "State"}
                     </option>
                   ))}
@@ -752,7 +816,9 @@ export default function PlaceNewOrderPage() {
                 </label>
                 <input
                   value={form.zipcode}
-                  onChange={(event) => updateField("zipcode", event.target.value)}
+                  onChange={(event) =>
+                    updateField("zipcode", event.target.value)
+                  }
                   placeholder="e.g. 04574"
                   className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 />
@@ -764,7 +830,9 @@ export default function PlaceNewOrderPage() {
                 </label>
                 <input
                   value={form.country}
-                  onChange={(event) => updateField("country", event.target.value)}
+                  onChange={(event) =>
+                    updateField("country", event.target.value)
+                  }
                   placeholder="e.g. United States"
                   className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 />
@@ -788,7 +856,9 @@ export default function PlaceNewOrderPage() {
                   <input
                     type="file"
                     multiple
-                    onChange={(event) => updateFiles(field.label, event.target.files)}
+                    onChange={(event) =>
+                      updateFiles(field.label, event.target.files)
+                    }
                     className="w-full rounded-md border border-stroke bg-transparent px-3 py-2 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                   />
                 </div>
@@ -801,7 +871,8 @@ export default function PlaceNewOrderPage() {
                   More Files or .zip
                 </label>
                 <p className="mt-1 text-xs text-dark-5">
-                  You can upload more files if needed or rather than uploading single file you can upload .zip file of all type of file.
+                  You can upload more files if needed or rather than uploading
+                  single file you can upload .zip file of all type of file.
                 </p>
               </div>
 
@@ -811,7 +882,10 @@ export default function PlaceNewOrderPage() {
                     <input
                       type="file"
                       onChange={(event) =>
-                        updateFiles(`More Files or .zip ${slot}`, event.target.files)
+                        updateFiles(
+                          `More Files or .zip ${slot}`,
+                          event.target.files,
+                        )
                       }
                       className="min-w-[220px] flex-1 rounded-md border border-stroke bg-transparent px-3 py-2 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                     />
@@ -820,7 +894,10 @@ export default function PlaceNewOrderPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setExtraUploadSlots((prev) => [...prev, (prev.at(-1) ?? 0) + 1])
+                          setExtraUploadSlots((prev) => [
+                            ...prev,
+                            (prev.at(-1) ?? 0) + 1,
+                          ])
                         }
                         className="rounded-md bg-primary px-3 py-2 text-sm text-white hover:bg-primary/90"
                       >
@@ -832,7 +909,9 @@ export default function PlaceNewOrderPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setExtraUploadSlots((prev) => prev.filter((item) => item !== slot))
+                          setExtraUploadSlots((prev) =>
+                            prev.filter((item) => item !== slot),
+                          )
                         }
                         className="rounded-md bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
                       >
@@ -846,9 +925,10 @@ export default function PlaceNewOrderPage() {
           </div>
 
           <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
-            <strong>Note:</strong> Large appraisal files and ZIP archives may take up to
-            2 minutes to upload depending on your internet connection. Please do not
-            refresh or close this page while the upload is in progress.
+            <strong>Note:</strong> Large appraisal files and ZIP archives may
+            take up to 2 minutes to upload depending on your internet
+            connection. Please do not refresh or close this page while the
+            upload is in progress.
           </div>
         </div>
 
@@ -888,12 +968,15 @@ export default function PlaceNewOrderPage() {
                   Instruction For This Order
                 </label>
                 <p className="mt-1 text-xs text-dark-5">
-                  e.g. your default font, MLS pages link, Client/Lender Name, Borrower Name, any comp or subject data missing.
+                  e.g. your default font, MLS pages link, Client/Lender Name,
+                  Borrower Name, any comp or subject data missing.
                 </p>
               </div>
               <textarea
                 value={form.instructions}
-                onChange={(event) => updateField("instructions", event.target.value)}
+                onChange={(event) =>
+                  updateField("instructions", event.target.value)
+                }
                 rows={4}
                 className="w-full rounded-md border border-stroke bg-transparent px-4 py-3 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
               />
@@ -905,12 +988,16 @@ export default function PlaceNewOrderPage() {
                   Standard Instruction For All Order
                 </label>
                 <p className="mt-1 text-xs text-dark-5">
-                  These instructions should not changed very often. These will be used every-time we do the data entry for all of your reports.
+                  These instructions should not changed very often. These will
+                  be used every-time we do the data entry for all of your
+                  reports.
                 </p>
               </div>
               <textarea
                 value={form.standardInstruction}
-                onChange={(event) => updateField("standardInstruction", event.target.value)}
+                onChange={(event) =>
+                  updateField("standardInstruction", event.target.value)
+                }
                 rows={4}
                 className="w-full rounded-md border border-stroke bg-transparent px-4 py-3 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
               />
@@ -930,7 +1017,9 @@ export default function PlaceNewOrderPage() {
                       src="https://secure.ieimpact.com/impact-assets/img/help.svg"
                     />
                   </span>
-                  <span className="text-xs font-normal text-dark-5">[ <small>Hours</small> ]</span>
+                  <span className="text-xs font-normal text-dark-5">
+                    [ <small>Hours</small> ]
+                  </span>
                 </label>
               </div>
 
@@ -945,7 +1034,9 @@ export default function PlaceNewOrderPage() {
                               type="radio"
                               name="packageId"
                               checked={`${item.packageId}` === form.packageId}
-                              onChange={() => updateField("packageId", `${item.packageId}`)}
+                              onChange={() =>
+                                updateField("packageId", `${item.packageId}`)
+                              }
                             />
                             <span>{getEtaLabel(item, index)}</span>
                           </label>

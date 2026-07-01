@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
@@ -172,13 +172,58 @@ function LegacyAdminNewOrdersPage() {
   const isSupervisorUser = normalizedRole === "supervisor";
   const currentAssigneeKeys = useMemo(
     () =>
-      [user?.username, user?.email, `${user?.id ?? ""}`]
+      [
+        user?.username,
+        user?.email,
+        `${user?.id ?? ""}`,
+        user?.firstname,
+        user?.lastname,
+        `${user?.firstname ?? ""} ${user?.lastname ?? ""}`.trim(),
+      ]
         .map((value) => `${value ?? ""}`.trim().toLowerCase())
         .filter(Boolean),
-    [user?.email, user?.id, user?.username],
+    [user?.email, user?.id, user?.username, user?.firstname, user?.lastname],
   );
   const showCreditAndFeedback = !isSupervisorUser;
   const tableColSpan = showCreditAndFeedback ? 18 : 15;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    isDraggingRef.current = true;
+    scrollRef.current.classList.add("cursor-grabbing", "select-none");
+    scrollRef.current.classList.remove("cursor-grab");
+    startXRef.current = e.pageX - scrollRef.current.offsetLeft;
+    scrollLeftRef.current = scrollRef.current.scrollLeft;
+  };
+
+  const handleMouseLeave = () => {
+    isDraggingRef.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.classList.remove("cursor-grabbing", "select-none");
+      scrollRef.current.classList.add("cursor-grab");
+    }
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+    if (scrollRef.current) {
+      scrollRef.current.classList.remove("cursor-grabbing", "select-none");
+      scrollRef.current.classList.add("cursor-grab");
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startXRef.current) * 2;
+    scrollRef.current.scrollLeft = scrollLeftRef.current - walk;
+  };
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [supervisors, setSupervisors] = useState<SupervisorOption[]>([]);
@@ -218,18 +263,20 @@ function LegacyAdminNewOrdersPage() {
 
     try {
       const response = await axiosInstance.get("/masters/reports/orders", {
-        params: {
-          status: "Pending,New Order,Reopen",
-          pageSize: "500",
-        },
+        params: { pageSize: "500", _t: Date.now() },
       });
 
       const payload = response.data;
-      const nextRows = Array.isArray(payload?.data)
+      const rawRows = Array.isArray(payload?.data)
         ? payload.data
         : Array.isArray(payload)
           ? payload
           : [];
+
+      const nextRows = rawRows.filter((order: OrderRow) => {
+        const status = `${order.status ?? ""}`.trim().toLowerCase();
+        return status !== "accept" && status !== "accepted";
+      });
 
       setOrders(nextRows);
     } catch (error) {
@@ -249,21 +296,12 @@ function LegacyAdminNewOrdersPage() {
         params: { role: isSupervisorUser ? "Team Member" : "Supervisor" },
       });
 
-      const nextRows = (Array.isArray(response.data) ? response.data : []).filter(
-        (item: SupervisorOption) => {
-          if (!isSupervisorUser) {
-            return true;
-          }
-
-          return currentAssigneeKeys.includes(`${item.emp_supervisor ?? ""}`.trim().toLowerCase());
-        },
-      );
-
+      const nextRows = Array.isArray(response.data) ? response.data : [];
       setSupervisors(nextRows);
     } catch {
       setSupervisors([]);
     }
-  }, [currentAssigneeKeys, isSupervisorUser]);
+  }, [isSupervisorUser]);
 
   useEffect(() => {
     void loadOrders();
@@ -410,6 +448,7 @@ function LegacyAdminNewOrdersPage() {
         });
       }
 
+      setOrders((prev) => prev.filter((o) => o.id !== assignOrder.id));
       setAssignOrder(null);
       setAcceptOrder(null);
       setAcceptDocs([]);
@@ -469,9 +508,8 @@ function LegacyAdminNewOrdersPage() {
             Orders summary,order assigning to Backbone Data Solutions employees
           </p>
           <p
-            className={`mt-3 text-base ${
-              message?.type === "error" ? "text-red-500" : "text-green-600"
-            }`}
+            className={`mt-3 text-base ${message?.type === "error" ? "text-red-500" : "text-green-600"
+              }`}
           >
             {message?.text || ""}
           </p>
@@ -488,10 +526,17 @@ function LegacyAdminNewOrdersPage() {
         </div>
       </div>
 
-      <div className="overflow-auto">
+      <div
+        ref={scrollRef}
+        className="overflow-auto max-h-[calc(100vh-320px)] cursor-grab"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
         <Table className="min-w-[1700px]">
           <TableHeader>
-            <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-medium [&>th]:text-dark [&>th]:dark:text-white">
+            <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-medium [&>th]:text-dark [&>th]:dark:text-white sticky top-0 z-10">
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
               <TableHead>TAT</TableHead>
@@ -1095,8 +1140,8 @@ function LegacyTeamMemberNewOrdersPage() {
                 const pkg = `${order.package ?? ""}`.trim();
                 const rowClassName =
                   pkg === "04" ? "text-red-600 font-semibold" :
-                  pkg === "06" ? "text-blue-600 font-semibold" :
-                  pkg === "12" ? "text-green-600 font-semibold" : "";
+                    pkg === "06" ? "text-blue-600 font-semibold" :
+                      pkg === "12" ? "text-green-600 font-semibold" : "";
                 return (
                   <TableRow key={order.id} className={`border-[#eee] dark:border-dark-3 ${rowClassName}`}>
                     <TableCell>{index + 1}</TableCell>
