@@ -540,7 +540,7 @@ const ClientManagement = () => {
                           <span className="inline-block h-5 w-5" />
                         )}
                       </div>
-                    </TableCell>
+                    </TableCell> 
 
                     <TableCell>
                       <button

@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import TablePagination from "@/components/ui/table-pagination";
 import OrderWorkflowPage from "../_components/order-workflow-page";
 
 type OrderRow = {
@@ -226,6 +227,8 @@ function LegacyAdminNewOrdersPage() {
   };
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   const [supervisors, setSupervisors] = useState<SupervisorOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -279,6 +282,7 @@ function LegacyAdminNewOrdersPage() {
       });
 
       setOrders(nextRows);
+      setCurrentPage(1);
     } catch (error) {
       setOrders([]);
       setMessage({
@@ -496,6 +500,9 @@ function LegacyAdminNewOrdersPage() {
     }
   };
 
+  const totalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = useMemo(() => orders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [orders, currentPage]);
+
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-5 shadow-1 dark:border-dark-3 dark:bg-gray-dark sm:p-7.5">
       <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -572,7 +579,7 @@ function LegacyAdminNewOrdersPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              orders.map((order, index) => {
+              paginatedOrders.map((order, index) => {
                 const packageValue = `${order.package ?? ""}`.trim();
                 const rowClassName =
                   packageValue === "04"
@@ -585,7 +592,7 @@ function LegacyAdminNewOrdersPage() {
 
                 return (
                   <TableRow key={order.id} className={`border-[#eee] dark:border-dark-3 ${rowClassName}`}>
-                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                     <TableCell>
                       <Link
                         href={`/orders/details/${order.id}`}
@@ -677,6 +684,15 @@ function LegacyAdminNewOrdersPage() {
           </TableBody>
         </Table>
       </div>
+
+      <TablePagination
+        page={currentPage}
+        totalPages={totalPages}
+        totalItems={orders.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+        onPageChange={setCurrentPage}
+        label="orders"
+      />
 
       <ModalShell
         title={`Send Message${replyOrder?.id ? ` - File #${replyOrder.id}` : ""}`}
@@ -943,6 +959,8 @@ function LegacyTeamMemberNewOrdersPage() {
   const { user } = useAuth();
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -974,6 +992,7 @@ function LegacyTeamMemberNewOrdersPage() {
           ? payload
           : [];
       setOrders(nextRows);
+      setCurrentPage(1);
     } catch (error) {
       setOrders([]);
       setMessage({ type: "error", text: getApiErrorMessage(error, "Unable to load new orders.") });
@@ -1085,6 +1104,9 @@ function LegacyTeamMemberNewOrdersPage() {
     }
   };
 
+  const totalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = useMemo(() => orders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [orders, currentPage]);
+
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-5 shadow-1 dark:border-dark-3 dark:bg-gray-dark sm:p-7.5">
       <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -1136,7 +1158,7 @@ function LegacyTeamMemberNewOrdersPage() {
                 <TableCell colSpan={13} className="py-8 text-center text-dark-5">No Data Found !</TableCell>
               </TableRow>
             ) : (
-              orders.map((order, index) => {
+              paginatedOrders.map((order, index) => {
                 const pkg = `${order.package ?? ""}`.trim();
                 const rowClassName =
                   pkg === "04" ? "text-red-600 font-semibold" :
@@ -1144,7 +1166,7 @@ function LegacyTeamMemberNewOrdersPage() {
                       pkg === "12" ? "text-green-600 font-semibold" : "";
                 return (
                   <TableRow key={order.id} className={`border-[#eee] dark:border-dark-3 ${rowClassName}`}>
-                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                     <TableCell>
                       <Link href={`/orders/details/${order.id}`} className="text-primary underline decoration-primary">
                         {order.id}

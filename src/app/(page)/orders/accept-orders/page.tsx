@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import TablePagination from "@/components/ui/table-pagination";
 import OrderWorkflowPage from "../_components/order-workflow-page";
 
 type OrderRow = {
@@ -196,6 +197,8 @@ function LegacyAcceptedOrdersPage() {
   };
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   const [supervisors, setSupervisors] = useState<SupervisorOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -240,6 +243,7 @@ function LegacyAcceptedOrdersPage() {
           : [];
 
       setOrders(rawRows);
+      setCurrentPage(1);
     } catch (error) {
       setOrders([]);
       setMessage({
@@ -365,6 +369,9 @@ function LegacyAcceptedOrdersPage() {
     }
   };
 
+  const totalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = useMemo(() => orders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE), [orders, currentPage]);
+
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-5 shadow-1 dark:border-dark-3 dark:bg-gray-dark sm:p-7.5">
       <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
@@ -441,7 +448,7 @@ function LegacyAcceptedOrdersPage() {
               <TableHead>Assigned</TableHead>
               <TableHead>Property Address</TableHead>
               <TableHead>Working Docs</TableHead>
-              <TableHead>ReAssign</TableHead>
+              <TableHead>Assign</TableHead>
               <TableHead>Cancel</TableHead>
               <TableHead>Work Status</TableHead>
             </TableRow>
@@ -461,7 +468,7 @@ function LegacyAcceptedOrdersPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              orders.map((order, index) => {
+              paginatedOrders.map((order, index) => {
                 const packageValue = `${order.package ?? ""}`.trim();
                 const rowClassName =
                   packageValue === "04"
@@ -477,7 +484,7 @@ function LegacyAcceptedOrdersPage() {
                     key={order.id}
                     className={`border-[#eee] align-top dark:border-dark-3 ${rowClassName}`}
                   >
-                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</TableCell>
                     <TableCell>
                       <Link
                         href={`/orders/details/${order.id}`}
@@ -531,7 +538,7 @@ function LegacyAcceptedOrdersPage() {
                           setSelectedSupervisorId("");
                         }}
                       >
-                        ReAssign
+                        Assign
                       </button>
                     </TableCell>
                     <TableCell>
@@ -562,6 +569,15 @@ function LegacyAcceptedOrdersPage() {
           </TableBody>
         </Table>
       </div>
+
+      <TablePagination
+        page={currentPage}
+        totalPages={totalPages}
+        totalItems={orders.length}
+        itemsPerPage={ITEMS_PER_PAGE}
+        onPageChange={setCurrentPage}
+        label="orders"
+      />
 
       <ModalShell
         title={`Assign Order${assignOrder?.id ? ` - File #${assignOrder.id}` : ""}`}
