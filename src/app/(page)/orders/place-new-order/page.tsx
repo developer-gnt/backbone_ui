@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
 import { LocationIQResult, searchAddress } from "@/lib/locationiq";
+import { notifyError, notifySuccess } from "@/lib/notify";
 
 type TatPackageOption = {
   packageId: number | string;
@@ -175,10 +176,10 @@ export default function PlaceNewOrderPage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+  // const [feedback, setFeedback] = useState<{
+  //   type: "success" | "error";
+  //   text: string;
+  // } | null>(null);
 
   const etaPackages = useMemo(() => getEtaPackages(packages), [packages]);
 
@@ -273,10 +274,15 @@ export default function PlaceNewOrderPage() {
           state: prev.state || `${nextStates[0]?.city ?? ""}`,
         }));
       } catch (error) {
-        setFeedback({
-          type: "error",
-          text: getApiErrorMessage(error, "Unable to load the new order page."),
-        });
+        //  catch (error) {
+        //   setFeedback({
+        //     type: "error",
+        //     text: getApiErrorMessage(error, "Unable to load the new order page."),
+        //   });
+        // }
+        notifyError(
+          getApiErrorMessage(error, "Unable to load the new order page."),
+        );
       } finally {
         setLoading(false);
       }
@@ -424,47 +430,58 @@ export default function PlaceNewOrderPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFeedback(null);
+    // setFeedback(null);
 
     const subjectAddress =
       form.subjectAddress.trim() || form.fullAddress.trim();
 
     if (!form.city.trim() || !form.state.trim() || !form.zipcode.trim()) {
-      setFeedback({
-        type: "error",
-        text: "Please select an address from the suggestions or manually enter a valid Address, City, State and Zip Code.",
-      });
+      // setFeedback({
+      //   type: "error",
+      //   text: "Please select an address from the suggestions or manually enter a valid Address, City, State and Zip Code.",
+      // });
+      notifyError(
+        "Please select an address from the suggestions or manually enter a valid Address, City, State and Zip Code.",
+      );
       return;
     }
 
     if (!form.clientUsername.trim()) {
-      setFeedback({ type: "error", text: "Client username is required." });
+      // setFeedback({ type: "error", text: "Client username is required." });
+      notifyError("Client username is required.");
       return;
     }
 
     if (!clientInfo) {
-      setFeedback({
-        type: "error",
-        text: "Please enter a valid client username before submitting.",
-      });
+      // setFeedback({
+      //   type: "error",
+      //   text: "Please enter a valid client username before submitting.",
+      // });
+      notifyError("Please enter a valid client username before submitting.");
       return;
     }
 
     if (!selectedPackage) {
-      setFeedback({ type: "error", text: "Estimated ETA is required." });
+      // setFeedback({ type: "error", text: "Estimated ETA is required." });
+      notifyError("Estimated ETA is required.");
       return;
     }
 
     if (!subjectAddress) {
-      setFeedback({ type: "error", text: "Street address is required." });
+      // setFeedback({ type: "error", text: "Street address is required." });
+      notifyError("Street address is required.");
       return;
     }
 
     if (selectedPackageCost > clientWallet) {
-      setFeedback({
-        type: "error",
-        text: "The selected client does not have enough wallet balance to proceed with this order.",
-      });
+      // setFeedback({
+      // type: "error",
+      // text: "The selected client does not have enough wallet balance to proceed with this order.",
+
+      // });
+      notifyError(
+        "Your wallet balance is insufficient. Please add credit to continue creating new orders.",
+      );
       return;
     }
 
@@ -540,16 +557,18 @@ export default function PlaceNewOrderPage() {
         standardInstruction: prev.standardInstruction,
       }));
 
-      window.alert("Your Order has been successfully placed!");
-      setFeedback({
-        type: "success",
-        text: "Your Order has been successfully placed!",
-      });
+      // window.alert("Your Order has been successfully placed!");
+      // setFeedback({
+      //   type: "success",
+      //   text: "Your Order has been successfully placed!",
+      // });
+      notifySuccess("Your Order has been successfully placed!");
     } catch (error) {
-      setFeedback({
-        type: "error",
-        text: getApiErrorMessage(error, "Failed to place the new order."),
-      });
+      // setFeedback({
+      //   type: "error",
+      //   text: getApiErrorMessage(error, "Failed to place the new order."),
+      // });
+      notifyError(getApiErrorMessage(error, "Failed to place the new order."));
     } finally {
       setSubmitting(false);
     }
@@ -564,7 +583,7 @@ export default function PlaceNewOrderPage() {
         </h2>
       </div>
 
-      {feedback && (
+      {/* {feedback && (
         <div
           className={`mb-5 rounded-md px-4 py-3 text-sm ${
             feedback.type === "success"
@@ -574,7 +593,7 @@ export default function PlaceNewOrderPage() {
         >
           {feedback.text}
         </div>
-      )}
+      )} */}
 
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div className="overflow-hidden rounded-md border border-stroke dark:border-dark-3">

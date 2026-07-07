@@ -211,7 +211,9 @@ const getStatusBadgeClassName = (status?: string) => {
     return "bg-red-100 text-red-700 dark:bg-red-dark/30 dark:text-red-300";
   }
 
-  if (["work in progress", "accept", "accepted", "reopen"].includes(normalized)) {
+  if (
+    ["work in progress", "accept", "accepted", "reopen"].includes(normalized)
+  ) {
     return "bg-blue-100 text-blue-700 dark:bg-blue-dark/30 dark:text-blue-300";
   }
 
@@ -251,28 +253,37 @@ export default function Home() {
   const isAdminUser = !isClientUser && !isMemberUser;
   const [summary, setSummary] = useState<DashboardSummary>(emptySummary);
   const [clientOrders, setClientOrders] = useState<ClientDashboardOrder[]>([]);
-  const [clientTransactions, setClientTransactions] = useState<ClientDashboardTransaction[]>([]);
+  const [clientTransactions, setClientTransactions] = useState<
+    ClientDashboardTransaction[]
+  >([]);
   const [memberOrders, setMemberOrders] = useState<ClientDashboardOrder[]>([]);
-  const [supervisorOrders, setSupervisorOrders] = useState<AdminDashboardOrder[]>([]);
+  const [supervisorOrders, setSupervisorOrders] = useState<
+    AdminDashboardOrder[]
+  >([]);
   const [adminOrders, setAdminOrders] = useState<AdminDashboardOrder[]>([]);
-  const [adminTransactions, setAdminTransactions] = useState<AdminDashboardTransaction[]>([]);
+  const [adminTransactions, setAdminTransactions] = useState<
+    AdminDashboardTransaction[]
+  >([]);
   const [memberTeamCount, setMemberTeamCount] = useState(0);
   const [employeeCount, setEmployeeCount] = useState(0);
-  const [supervisorPendingFilters, setSupervisorPendingFilters] = useState<OrderSearchFilters>({
-    clientName: "",
-    fileNumber: "",
-    subjectAddress: "",
-  });
-  const [supervisorFilters, setSupervisorFilters] = useState<OrderSearchFilters>({
-    clientName: "",
-    fileNumber: "",
-    subjectAddress: "",
-  });
-  const [pendingOrderFilters, setPendingOrderFilters] = useState<OrderSearchFilters>({
-    clientName: "",
-    fileNumber: "",
-    subjectAddress: "",
-  });
+  const [supervisorPendingFilters, setSupervisorPendingFilters] =
+    useState<OrderSearchFilters>({
+      clientName: "",
+      fileNumber: "",
+      subjectAddress: "",
+    });
+  const [supervisorFilters, setSupervisorFilters] =
+    useState<OrderSearchFilters>({
+      clientName: "",
+      fileNumber: "",
+      subjectAddress: "",
+    });
+  const [pendingOrderFilters, setPendingOrderFilters] =
+    useState<OrderSearchFilters>({
+      clientName: "",
+      fileNumber: "",
+      subjectAddress: "",
+    });
   const [orderFilters, setOrderFilters] = useState<OrderSearchFilters>({
     clientName: "",
     fileNumber: "",
@@ -285,36 +296,52 @@ export default function Home() {
   const [adminCurrentPage, setAdminCurrentPage] = useState(1);
   const [transactionCurrentPage, setTransactionCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingSupervisorOrders, setIsLoadingSupervisorOrders] = useState(false);
+  const [isLoadingSupervisorOrders, setIsLoadingSupervisorOrders] =
+    useState(false);
   const [isLoadingAdminOrders, setIsLoadingAdminOrders] = useState(false);
-  const [isLoadingAdminTransactions, setIsLoadingAdminTransactions] = useState(false);
+  const [isLoadingAdminTransactions, setIsLoadingAdminTransactions] =
+    useState(false);
   const [error, setError] = useState<string | null>(null);
   const [supervisorFeedback, setSupervisorFeedback] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
-  const [supervisorOrdersError, setSupervisorOrdersError] = useState<string | null>(null);
+  const [supervisorOrdersError, setSupervisorOrdersError] = useState<
+    string | null
+  >(null);
   const [adminOrdersError, setAdminOrdersError] = useState<string | null>(null);
-  const [adminTransactionsError, setAdminTransactionsError] = useState<string | null>(null);
-  const [isUpdatingSupervisorStatus, setIsUpdatingSupervisorStatus] = useState<string | null>(null);
+  const [adminTransactionsError, setAdminTransactionsError] = useState<
+    string | null
+  >(null);
+  const [isUpdatingSupervisorStatus, setIsUpdatingSupervisorStatus] = useState<
+    string | null
+  >(null);
   const [clientPageSize, setClientPageSize] = useState(20);
   const [clientCurrentPage, setClientCurrentPage] = useState(1);
   const [clientPendingFileFilter, setClientPendingFileFilter] = useState("");
-  const [clientPendingAddressFilter, setClientPendingAddressFilter] = useState("");
+  const [clientPendingAddressFilter, setClientPendingAddressFilter] =
+    useState("");
   const [clientFileFilter, setClientFileFilter] = useState("");
   const [clientAddressFilter, setClientAddressFilter] = useState("");
   const [clientFeedback, setClientFeedback] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
-  const [clientUpdatingStatus, setClientUpdatingStatus] = useState<string | null>(null);
+  const [clientUpdatingStatus, setClientUpdatingStatus] = useState<
+    string | null
+  >(null);
   const [clientCancelModal, setClientCancelModal] = useState<{
     id: string | number;
   } | null>(null);
   const [clientCancelRemark, setClientCancelRemark] = useState("");
   const [clientDownloadsModal, setClientDownloadsModal] = useState<{
     orderId: string | number;
-    items: { id: string | number; type?: string; filename?: string; filepath?: string }[];
+    items: {
+      id: string | number;
+      type?: string;
+      filename?: string;
+      filepath?: string;
+    }[];
     loading: boolean;
   } | null>(null);
   const [clientCommentsModal, setClientCommentsModal] = useState<{
@@ -393,13 +420,17 @@ export default function Home() {
               : [];
 
           const nextTeamCount = isSupervisorUser
-            ? (Array.isArray((teamResponse as any)?.data) ? (teamResponse as any).data : []).filter(
-              (item: { emp_supervisor?: string }) =>
+            ? (Array.isArray((teamResponse as any)?.data)
+                ? (teamResponse as any).data
+                : []
+              ).filter((item: { emp_supervisor?: string }) =>
                 identifiers
                   .toLowerCase()
                   .split(",")
-                  .includes(`${item.emp_supervisor ?? ""}`.trim().toLowerCase()),
-            ).length
+                  .includes(
+                    `${item.emp_supervisor ?? ""}`.trim().toLowerCase(),
+                  ),
+              ).length
             : 0;
 
           setMemberOrders(nextOrders);
@@ -410,7 +441,9 @@ export default function Home() {
           return;
         }
 
-        const response = await axiosInstance.get("/masters/reports/dashboard-summary");
+        const response = await axiosInstance.get(
+          "/masters/reports/dashboard-summary",
+        );
         setSummary(response.data ?? emptySummary);
       } catch (err) {
         setError(getApiErrorMessage(err, "Unable to load dashboard data."));
@@ -447,7 +480,9 @@ export default function Home() {
         },
       });
 
-      setSupervisorOrders(Array.isArray(response.data?.data) ? response.data.data : []);
+      setSupervisorOrders(
+        Array.isArray(response.data?.data) ? response.data.data : [],
+      );
     } catch (err) {
       setSupervisorOrders([]);
       setSupervisorOrdersError(
@@ -494,17 +529,26 @@ export default function Home() {
           },
         });
 
-        setAdminOrders(Array.isArray(response.data?.data) ? response.data.data : []);
+        setAdminOrders(
+          Array.isArray(response.data?.data) ? response.data.data : [],
+        );
       } catch (err) {
         setAdminOrders([]);
-        setAdminOrdersError(getApiErrorMessage(err, "Unable to load dashboard orders."));
+        setAdminOrdersError(
+          getApiErrorMessage(err, "Unable to load dashboard orders."),
+        );
       } finally {
         setIsLoadingAdminOrders(false);
       }
     };
 
     void loadAdminOrders();
-  }, [isAdminUser, orderFilters.clientName, orderFilters.fileNumber, orderFilters.subjectAddress]);
+  }, [
+    isAdminUser,
+    orderFilters.clientName,
+    orderFilters.fileNumber,
+    orderFilters.subjectAddress,
+  ]);
 
   useEffect(() => {
     if (!isAdminUser) {
@@ -609,7 +653,9 @@ export default function Home() {
         .join(","),
     );
 
-    const csvContent = [headers.map(escapeCsvValue).join(","), ...csvRows].join("\n");
+    const csvContent = [headers.map(escapeCsvValue).join(","), ...csvRows].join(
+      "\n",
+    );
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -670,7 +716,9 @@ export default function Home() {
         .join(","),
     );
 
-    const csvContent = [headers.map(escapeCsvValue).join(","), ...csvRows].join("\n");
+    const csvContent = [headers.map(escapeCsvValue).join(","), ...csvRows].join(
+      "\n",
+    );
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -745,7 +793,11 @@ export default function Home() {
 
   useEffect(() => {
     setSupervisorCurrentPage(1);
-  }, [supervisorFilters.fileNumber, supervisorFilters.subjectAddress, supervisorPageSize]);
+  }, [
+    supervisorFilters.fileNumber,
+    supervisorFilters.subjectAddress,
+    supervisorPageSize,
+  ]);
 
   const reloadClientOrders = async () => {
     const username = user?.username || user?.email || undefined;
@@ -772,13 +824,17 @@ export default function Home() {
       return;
     }
     if (nextStatus === "Reopen") {
-      const confirmed = window.confirm("Are you sure? You want to Reopen this order.");
+      const confirmed = window.confirm(
+        "Are you sure? You want to Reopen this order.",
+      );
       if (!confirmed) return;
     }
     setClientUpdatingStatus(`${orderId}`);
     setClientFeedback(null);
     try {
-      await axiosInstance.patch(`/masters/orders/${orderId}/status`, { status: nextStatus });
+      await axiosInstance.patch(`/masters/orders/${orderId}/status`, {
+        status: nextStatus,
+      });
       setClientFeedback({
         type: "success",
         text: "Order status changed successfully. Now you can edit the order.",
@@ -799,13 +855,19 @@ export default function Home() {
     setClientUpdatingStatus(`${clientCancelModal.id}`);
     setClientFeedback(null);
     try {
-      await axiosInstance.patch(`/masters/orders/${clientCancelModal.id}/status`, {
-        status: "Cancel",
-        remark: clientCancelRemark.trim(),
-      });
+      await axiosInstance.patch(
+        `/masters/orders/${clientCancelModal.id}/status`,
+        {
+          status: "Cancel",
+          remark: clientCancelRemark.trim(),
+        },
+      );
       setClientCancelModal(null);
       setClientCancelRemark("");
-      setClientFeedback({ type: "success", text: "Order has been canceled successfully." });
+      setClientFeedback({
+        type: "success",
+        text: "Order has been canceled successfully.",
+      });
       await reloadClientOrders();
     } catch (err) {
       setClientFeedback({
@@ -817,7 +879,10 @@ export default function Home() {
     }
   };
 
-  const handleClientRating = async (orderId: string | number, rating: number) => {
+  const handleClientRating = async (
+    orderId: string | number,
+    rating: number,
+  ) => {
     const order = clientOrders.find((o) => `${o.id}` === `${orderId}`);
     if (Number(order?.feedback_rating ?? 0) > 0) {
       window.alert("Feedback for this order is already done.");
@@ -839,7 +904,9 @@ export default function Home() {
   const openClientDownloads = async (orderId: string | number) => {
     setClientDownloadsModal({ orderId, items: [], loading: true });
     try {
-      const response = await axiosInstance.get(`/masters/reports/orders/${orderId}/details`);
+      const response = await axiosInstance.get(
+        `/masters/reports/orders/${orderId}/details`,
+      );
       const items = Array.isArray(response.data?.completedDownloads)
         ? response.data.completedDownloads
         : [];
@@ -860,7 +927,12 @@ export default function Home() {
 
   useEffect(() => {
     setAdminCurrentPage(1);
-  }, [orderFilters.clientName, orderFilters.fileNumber, orderFilters.subjectAddress, orderPageSize]);
+  }, [
+    orderFilters.clientName,
+    orderFilters.fileNumber,
+    orderFilters.subjectAddress,
+    orderPageSize,
+  ]);
 
   useEffect(() => {
     setTransactionCurrentPage(1);
@@ -874,15 +946,24 @@ export default function Home() {
     1,
     Math.ceil(supervisorOrders.length / supervisorItemsPerPage),
   );
-  const adminTotalPages = Math.max(1, Math.ceil(adminOrders.length / adminItemsPerPage));
+  const adminTotalPages = Math.max(
+    1,
+    Math.ceil(adminOrders.length / adminItemsPerPage),
+  );
   const transactionTotalPages = Math.max(
     1,
     Math.ceil(adminTransactions.length / transactionItemsPerPage),
   );
 
-  const safeSupervisorPage = Math.min(supervisorCurrentPage, supervisorTotalPages);
+  const safeSupervisorPage = Math.min(
+    supervisorCurrentPage,
+    supervisorTotalPages,
+  );
   const safeAdminPage = Math.min(adminCurrentPage, adminTotalPages);
-  const safeTransactionPage = Math.min(transactionCurrentPage, transactionTotalPages);
+  const safeTransactionPage = Math.min(
+    transactionCurrentPage,
+    transactionTotalPages,
+  );
 
   const visibleSupervisorOrders = supervisorOrders.slice(
     (safeSupervisorPage - 1) * supervisorItemsPerPage,
@@ -924,20 +1005,32 @@ export default function Home() {
   ];
 
   if (isClientUser) {
-    const newOrdersCount = clientOrders.filter((o) => o.status === "New Order").length;
-    const inProgressCount = clientOrders.filter((o) => o.status === "Accept").length;
-    const completedCount = clientOrders.filter((o) => o.status === "Completed").length;
+    const newOrdersCount = clientOrders.filter(
+      (o) => o.status === "New Order",
+    ).length;
+    const inProgressCount = clientOrders.filter(
+      (o) => o.status === "Accept",
+    ).length;
+    const completedCount = clientOrders.filter(
+      (o) => o.status === "Completed",
+    ).length;
     const walletBalance = Number(user?.wallete_balance ?? 0);
     const filteredClientOrders = clientOrders.filter((o) => {
-      if (clientFileFilter && !`${o.id}`.includes(clientFileFilter)) return false;
+      if (clientFileFilter && !`${o.id}`.includes(clientFileFilter))
+        return false;
       if (
         clientAddressFilter &&
-        !(o.subject_address ?? "").toLowerCase().includes(clientAddressFilter.toLowerCase())
+        !(o.subject_address ?? "")
+          .toLowerCase()
+          .includes(clientAddressFilter.toLowerCase())
       )
         return false;
       return true;
     });
-    const totalClientPages = Math.max(1, Math.ceil(filteredClientOrders.length / clientPageSize));
+    const totalClientPages = Math.max(
+      1,
+      Math.ceil(filteredClientOrders.length / clientPageSize),
+    );
     const safeClientPage = Math.min(clientCurrentPage, totalClientPages);
     const visibleClientOrders = filteredClientOrders.slice(
       (safeClientPage - 1) * clientPageSize,
@@ -953,24 +1046,65 @@ export default function Home() {
         )}
         {clientFeedback && (
           <div
-            className={`rounded-lg px-4 py-3 text-sm ${clientFeedback.type === "success"
-              ? "border border-green-200 bg-green-50 text-green-700"
-              : "border border-red-200 bg-red-50 text-red-700"
-              }`}
+            className={`rounded-lg px-4 py-3 text-sm ${
+              clientFeedback.type === "success"
+                ? "border border-green-200 bg-green-50 text-green-700"
+                : "border border-red-200 bg-red-50 text-red-700"
+            }`}
           >
             {clientFeedback.text}
           </div>
         )}
 
         <div className="overflow-hidden rounded-2xl border border-stroke bg-white px-6 py-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+          {walletBalance < 12 && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 shadow-1 dark:border-red-800 dark:bg-red-900/20">
+              <div className="flex items-start gap-3">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mt-0.5 h-6 w-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01M10.29 3.86l-7.5 13A1 1 0 003.67 18h16.66a1 1 0 00.88-1.5l-7.5-13a1 1 0 00-1.74 0z"
+                  />
+                </svg>
+
+                <div className="flex-1">
+                  <h4 className="font-semibold text-red-700 dark:text-red-300">
+                    Low Wallet Balance
+                  </h4>
+
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-200">
+                    Your wallet balance is insufficient. Please add credit to
+                    continue creating new orders.
+                  </p>
+
+                  <Link
+                    href="/client/add-credit"
+                    className="mt-3 inline-flex rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                  >
+                    Add Credit
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs p-3 font-semibold uppercase tracking-[0.18em] text-primary">
             Client Workspace
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-dark dark:text-white">
             Dashboard Overview
           </h2>
           <p className="mt-1 text-sm text-dark-5">
-            Track order progress, manage updates, and review completed files in one place.
+            Track order progress, manage updates, and review completed files in
+            one place.
           </p>
         </div>
 
@@ -980,7 +1114,9 @@ export default function Home() {
             href="/client/add-credit"
             className="rounded-xl border border-stroke bg-white p-5 shadow-1 transition duration-200 hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
           >
-            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">Wallet</p>
+            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">
+              Wallet
+            </p>
             <p className="mt-1 text-xl font-bold text-primary">
               ({walletBalance} Credits)
             </p>
@@ -989,7 +1125,9 @@ export default function Home() {
             href="/client/new-order"
             className="rounded-xl border border-stroke bg-white p-5 shadow-1 transition duration-200 hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
           >
-            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">New Orders</p>
+            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">
+              New Orders
+            </p>
             <p className="mt-1 text-xl font-bold text-primary">
               ({newOrdersCount})
             </p>
@@ -998,7 +1136,9 @@ export default function Home() {
             href="/reports/order-reports"
             className="rounded-xl border border-stroke bg-white p-5 shadow-1 transition duration-200 hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
           >
-            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">In Progress Orders</p>
+            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">
+              In Progress Orders
+            </p>
             <p className="mt-1 text-xl font-bold text-primary">
               ({inProgressCount})
             </p>
@@ -1007,22 +1147,26 @@ export default function Home() {
             href="/reports/order-reports"
             className="rounded-xl border border-stroke bg-white p-5 shadow-1 transition duration-200 hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
           >
-            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">Completed Orders</p>
+            <p className="text-sm font-medium text-dark-5 dark:text-dark-6">
+              Completed Orders
+            </p>
             <p className="mt-1 text-xl font-bold text-primary">
               ({completedCount})
             </p>
           </Link>
           <div className="rounded-xl border border-stroke bg-white p-5 shadow-1 dark:border-dark-3 dark:bg-gray-dark sm:col-span-2 xl:col-span-1">
-            <p className="mb-2 font-semibold text-dark dark:text-white">Notes</p>
+            <p className="mb-2 font-semibold text-dark dark:text-white">
+              Notes
+            </p>
             <ol className="space-y-1 text-sm text-dark-5 dark:text-dark-6">
               <li>1. On each completed report 1 bonus point will be added.</li>
               <li>
-                2. On each star review rating for any order 1 point will be added. E.g. 1 Star = 1
-                Point, 5 Stars = 5 Points and so on.
+                2. On each star review rating for any order 1 point will be
+                added. E.g. 1 Star = 1 Point, 5 Stars = 5 Points and so on.
               </li>
               <li>
-                3. Earn 60 credit points on each reference of your friend, partner with sign up +
-                activation.
+                3. Earn 60 credit points on each reference of your friend,
+                partner with sign up + activation.
               </li>
             </ol>
           </div>
@@ -1032,7 +1176,9 @@ export default function Home() {
         <div className="overflow-hidden rounded-2xl border border-stroke bg-white shadow-1 dark:border-dark-3 dark:bg-gray-dark">
           <div className="border-b border-stroke bg-gray-1 px-5 py-4 dark:border-dark-3 dark:bg-dark-2">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <h4 className="text-lg font-semibold text-dark dark:text-white">Latest Orders</h4>
+              <h4 className="text-lg font-semibold text-dark dark:text-white">
+                Latest Orders
+              </h4>
               <div className="flex flex-wrap items-center gap-3">
                 <input
                   type="text"
@@ -1044,7 +1190,9 @@ export default function Home() {
                 <input
                   type="text"
                   value={clientPendingAddressFilter}
-                  onChange={(e) => setClientPendingAddressFilter(e.target.value)}
+                  onChange={(e) =>
+                    setClientPendingAddressFilter(e.target.value)
+                  }
                   placeholder="Subject Address"
                   className="w-[200px] rounded-lg border border-stroke bg-white px-3 py-2 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 />
@@ -1096,10 +1244,14 @@ export default function Home() {
                     ]);
                     const csv = [headers, ...csvRows]
                       .map((r) =>
-                        r.map((c) => `"${`${c}`.replace(/"/g, '""')}"`).join(","),
+                        r
+                          .map((c) => `"${`${c}`.replace(/"/g, '""')}"`)
+                          .join(","),
                       )
                       .join("\n");
-                    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                    const blob = new Blob([csv], {
+                      type: "text/csv;charset=utf-8;",
+                    });
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
@@ -1119,7 +1271,7 @@ export default function Home() {
             <div className="min-w-[1200px]">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
+                  <TableRow className="bg-gray-2 dark:bg-dark-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:[&>th]:text-white">
                     <TableHead>File#</TableHead>
                     <TableHead>Property Address</TableHead>
                     <TableHead>TAT</TableHead>
@@ -1134,24 +1286,33 @@ export default function Home() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="py-8 text-center text-dark-5">
+                      <TableCell
+                        colSpan={9}
+                        className="py-8 text-center text-dark-5"
+                      >
                         Loading orders...
                       </TableCell>
                     </TableRow>
                   ) : visibleClientOrders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="py-8 text-center text-dark-5">
+                      <TableCell
+                        colSpan={9}
+                        className="py-8 text-center text-dark-5"
+                      >
                         No Data Found !
                       </TableCell>
                     </TableRow>
                   ) : (
                     visibleClientOrders.map((order) => {
-                      const statusCfg = getSupervisorStatusOptions(order.status);
+                      const statusCfg = getSupervisorStatusOptions(
+                        order.status,
+                      );
                       const currentStatus = `${order.status ?? statusCfg.options[0] ?? ""}`;
                       const isUpdating = clientUpdatingStatus === `${order.id}`;
                       const normalizedStatus = currentStatus.toLowerCase();
                       const canEdit =
-                        normalizedStatus !== "completed" && normalizedStatus !== "cancel";
+                        normalizedStatus !== "completed" &&
+                        normalizedStatus !== "cancel";
                       const existingRating = Number(order.feedback_rating ?? 0);
                       const isCompleted = normalizedStatus === "completed";
 
@@ -1172,7 +1333,9 @@ export default function Home() {
                             {order.subject_address || "—"}
                           </TableCell>
                           <TableCell>{order.package || "—"}</TableCell>
-                          <TableCell>{formatDateTime(order.created_date)}</TableCell>
+                          <TableCell>
+                            {formatDateTime(order.created_date)}
+                          </TableCell>
                           <TableCell>
                             <select
                               value={currentStatus}
@@ -1270,11 +1433,14 @@ export default function Home() {
                                   <button
                                     key={star}
                                     type="button"
-                                    onClick={() => void handleClientRating(order.id, star)}
-                                    className={`text-lg leading-none transition hover:scale-105 hover:text-primary ${star <= existingRating
-                                      ? "text-primary"
-                                      : "text-gray-300 dark:text-gray-600"
-                                      }`}
+                                    onClick={() =>
+                                      void handleClientRating(order.id, star)
+                                    }
+                                    className={`text-lg leading-none transition hover:scale-105 hover:text-primary ${
+                                      star <= existingRating
+                                        ? "text-primary"
+                                        : "text-gray-300 dark:text-gray-600"
+                                    }`}
                                     title={`Rate ${star}`}
                                   >
                                     ★
@@ -1311,7 +1477,8 @@ export default function Home() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
             <div className="w-full max-w-md rounded-2xl border border-stroke bg-white p-6 shadow-xl dark:border-dark-3 dark:bg-dark-2">
               <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">
-                Enter Comment For Cancellation <span className="text-red-500">*</span>
+                Enter Comment For Cancellation{" "}
+                <span className="text-red-500">*</span>
               </h3>
               <textarea
                 value={clientCancelRemark}
@@ -1334,7 +1501,9 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => void handleClientCancelConfirm()}
-                  disabled={!clientCancelRemark.trim() || clientUpdatingStatus !== null}
+                  disabled={
+                    !clientCancelRemark.trim() || clientUpdatingStatus !== null
+                  }
                   className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   Cancel Order
@@ -1350,7 +1519,8 @@ export default function Home() {
             <div className="w-full max-w-lg rounded-2xl border border-stroke bg-white p-6 shadow-xl dark:border-dark-3 dark:bg-dark-2">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-dark dark:text-white">
-                  Completed Work Attachments — File #{clientDownloadsModal.orderId}
+                  Completed Work Attachments — File #
+                  {clientDownloadsModal.orderId}
                 </h3>
                 <button
                   type="button"
@@ -1363,7 +1533,9 @@ export default function Home() {
               {clientDownloadsModal.loading ? (
                 <p className="py-4 text-center text-dark-5">Loading...</p>
               ) : clientDownloadsModal.items.length === 0 ? (
-                <p className="py-4 text-center text-dark-5">No Files Found Here!</p>
+                <p className="py-4 text-center text-dark-5">
+                  No Files Found Here!
+                </p>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
@@ -1383,8 +1555,13 @@ export default function Home() {
                     {clientDownloadsModal.items.map((item) => {
                       const href = getAttachmentUrl(item.filepath);
                       return (
-                        <tr key={item.id} className="border-b border-stroke dark:border-dark-3">
-                          <td className="py-2 text-dark-5">{item.type || "—"}</td>
+                        <tr
+                          key={item.id}
+                          className="border-b border-stroke dark:border-dark-3"
+                        >
+                          <td className="py-2 text-dark-5">
+                            {item.type || "—"}
+                          </td>
                           <td className="py-2 text-dark dark:text-white">
                             {item.filename || "—"}
                           </td>
@@ -1449,10 +1626,11 @@ export default function Home() {
 
         {supervisorFeedback && (
           <div
-            className={`rounded-lg px-4 py-3 text-sm ${supervisorFeedback.type === "success"
-              ? "border border-green-200 bg-green-50 text-green-700"
-              : "border border-red-200 bg-red-50 text-red-700"
-              }`}
+            className={`rounded-lg px-4 py-3 text-sm ${
+              supervisorFeedback.type === "success"
+                ? "border border-green-200 bg-green-50 text-green-700"
+                : "border border-red-200 bg-red-50 text-red-700"
+            }`}
           >
             {supervisorFeedback.text}
           </div>
@@ -1462,10 +1640,15 @@ export default function Home() {
           <div className="border-b border-stroke bg-gradient-to-r from-primary/[0.08] via-transparent to-transparent px-5 py-4 dark:border-dark-3">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div>
-                <p className="text-sm font-medium text-primary">Supervisor Dashboard</p>
-                <h3 className="text-xl font-semibold text-dark dark:text-white">Order Queue</h3>
+                <p className="text-sm font-medium text-primary">
+                  Supervisor Dashboard
+                </p>
+                <h3 className="text-xl font-semibold text-dark dark:text-white">
+                  Order Queue
+                </h3>
                 <p className="mt-1 text-sm text-dark-5">
-                  Use search and horizontal scroll to review every column cleanly.
+                  Use search and horizontal scroll to review every column
+                  cleanly.
                 </p>
               </div>
 
@@ -1518,7 +1701,7 @@ export default function Home() {
             <div className="min-w-[1450px]">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
+                  <TableRow className="bg-gray-2 dark:bg-dark-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:[&>th]:text-white">
                     <TableHead>Sr. No.</TableHead>
                     <TableHead>File#</TableHead>
                     <TableHead>TAT</TableHead>
@@ -1541,25 +1724,36 @@ export default function Home() {
                 <TableBody>
                   {isLoadingSupervisorOrders ? (
                     <TableRow>
-                      <TableCell colSpan={15} className="py-6 text-center text-dark-5">
+                      <TableCell
+                        colSpan={15}
+                        className="py-6 text-center text-dark-5"
+                      >
                         Loading dashboard orders...
                       </TableCell>
                     </TableRow>
                   ) : supervisorOrdersError ? (
                     <TableRow>
-                      <TableCell colSpan={15} className="py-6 text-center text-red-600">
+                      <TableCell
+                        colSpan={15}
+                        className="py-6 text-center text-red-600"
+                      >
                         {supervisorOrdersError}
                       </TableCell>
                     </TableRow>
                   ) : visibleSupervisorOrders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={15} className="py-6 text-center text-dark-5">
+                      <TableCell
+                        colSpan={15}
+                        className="py-6 text-center text-dark-5"
+                      >
                         No Data Found !
                       </TableCell>
                     </TableRow>
                   ) : (
                     visibleSupervisorOrders.map((order, index) => {
-                      const statusConfig = getSupervisorStatusOptions(order.status);
+                      const statusConfig = getSupervisorStatusOptions(
+                        order.status,
+                      );
                       const currentStatus = `${order.status ?? statusConfig.options[0] ?? ""}`;
 
                       return (
@@ -1569,14 +1763,23 @@ export default function Home() {
                         >
                           <TableCell>{index + 1}</TableCell>
                           <TableCell>
-                            <Link href={`/orders/details/${order.id}`} className="underline">
+                            <Link
+                              href={`/orders/details/${order.id}`}
+                              className="underline"
+                            >
                               {order.id}
                             </Link>
                           </TableCell>
-                          <TableCell>{order.package || order.tat || "-"}</TableCell>
-                          <TableCell>{formatDateTime(order.created_date)}</TableCell>
                           <TableCell>
-                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}>
+                            {order.package || order.tat || "-"}
+                          </TableCell>
+                          <TableCell>
+                            {formatDateTime(order.created_date)}
+                          </TableCell>
+                          <TableCell>
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}
+                            >
                               {order.status || "-"}
                             </span>
                           </TableCell>
@@ -1587,7 +1790,10 @@ export default function Home() {
                             <select
                               value={currentStatus}
                               onChange={(event) =>
-                                void handleSupervisorStatusChange(order, event.target.value)
+                                void handleSupervisorStatusChange(
+                                  order,
+                                  event.target.value,
+                                )
                               }
                               disabled={
                                 statusConfig.disabled ||
@@ -1627,7 +1833,8 @@ export default function Home() {
                           </TableCell>
                           <TableCell>
                             {(() => {
-                              const normalizedStatus = `${order.status ?? ""}`.toLowerCase();
+                              const normalizedStatus =
+                                `${order.status ?? ""}`.toLowerCase();
                               const canEdit =
                                 normalizedStatus !== "completed" &&
                                 normalizedStatus !== "cancel";
@@ -1658,7 +1865,9 @@ export default function Home() {
                             })()}
                           </TableCell>
                           <TableCell>{order.remaining_tat || "-"}</TableCell>
-                          <TableCell>{formatDateTime(order.modify_date)}</TableCell>
+                          <TableCell>
+                            {formatDateTime(order.modify_date)}
+                          </TableCell>
                         </TableRow>
                       );
                     })
@@ -1674,7 +1883,9 @@ export default function Home() {
                 <span>Rows per page</span>
                 <select
                   value={supervisorPageSize}
-                  onChange={(event) => setSupervisorPageSize(event.target.value)}
+                  onChange={(event) =>
+                    setSupervisorPageSize(event.target.value)
+                  }
                   className="w-[100px] rounded-md border border-stroke bg-transparent px-3 py-2 text-sm outline-none focus:border-primary dark:border-dark-3 dark:text-white"
                 >
                   <option value="5">5</option>
@@ -1752,13 +1963,22 @@ export default function Home() {
             </p>
 
             <div className="mt-5 grid gap-3">
-              <Link href="/orders/new-order" className="rounded-lg border border-stroke px-4 py-3 text-sm font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white">
+              <Link
+                href="/orders/new-order"
+                className="rounded-lg border border-stroke px-4 py-3 text-sm font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
+              >
                 Open New Orders
               </Link>
-              <Link href="/orders/assigned-orders" className="rounded-lg border border-stroke px-4 py-3 text-sm font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white">
+              <Link
+                href="/orders/assigned-orders"
+                className="rounded-lg border border-stroke px-4 py-3 text-sm font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
+              >
                 Orders Assigned
               </Link>
-              <Link href="/reports/order-reports" className="rounded-lg border border-stroke px-4 py-3 text-sm font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white">
+              <Link
+                href="/reports/order-reports"
+                className="rounded-lg border border-stroke px-4 py-3 text-sm font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
+              >
                 Open Order Report
               </Link>
             </div>
@@ -1766,8 +1986,13 @@ export default function Home() {
 
           <div className="col-span-12 rounded-[10px] bg-white px-7.5 pb-4 pt-7.5 shadow-1 dark:bg-gray-dark dark:shadow-card xl:col-span-8">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-body-2xlg font-bold text-dark dark:text-white">Recent Assigned Orders</h2>
-              <Link href="/orders/assigned-orders" className="text-sm font-medium text-primary">
+              <h2 className="text-body-2xlg font-bold text-dark dark:text-white">
+                Recent Assigned Orders
+              </h2>
+              <Link
+                href="/orders/assigned-orders"
+                className="text-sm font-medium text-primary"
+              >
                 View All
               </Link>
             </div>
@@ -1785,8 +2010,13 @@ export default function Home() {
               <TableBody>
                 {memberOrders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-6 text-center text-dark-5">
-                      {isLoading ? "Loading assigned orders..." : "No assigned orders found yet."}
+                    <TableCell
+                      colSpan={5}
+                      className="py-6 text-center text-dark-5"
+                    >
+                      {isLoading
+                        ? "Loading assigned orders..."
+                        : "No assigned orders found yet."}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -1796,7 +2026,9 @@ export default function Home() {
                       <TableCell>{order.subject_address || "-"}</TableCell>
                       <TableCell>{order.package || "-"}</TableCell>
                       <TableCell>{order.status || "-"}</TableCell>
-                      <TableCell>{formatDateTime(order.created_date)}</TableCell>
+                      <TableCell>
+                        {formatDateTime(order.created_date)}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -1841,7 +2073,9 @@ export default function Home() {
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
-            <span className="text-sm font-bold sm:text-[22px]">PLACE NEW ORDER</span>
+            <span className="text-sm font-bold sm:text-[22px]">
+              PLACE NEW ORDER
+            </span>
           </Link>
         </div>
       </div>
@@ -1854,11 +2088,15 @@ export default function Home() {
             className="overflow-hidden rounded-[10px] border border-stroke bg-white shadow-1 transition hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
           >
             <div className="flex items-center justify-between border-b border-stroke px-4 py-3 dark:border-dark-3">
-              <span className="text-sm font-semibold text-dark dark:text-white">{item.title}</span>
+              <span className="text-sm font-semibold text-dark dark:text-white">
+                {item.title}
+              </span>
               <span className="text-xl">{item.icon}</span>
             </div>
             <div className="px-4 py-5">
-              <p className="text-3xl font-bold text-dark dark:text-white">{item.value}</p>
+              <p className="text-3xl font-bold text-dark dark:text-white">
+                {item.value}
+              </p>
             </div>
           </Link>
         ))}
@@ -1926,7 +2164,7 @@ export default function Home() {
           <div className="min-w-[1500px]">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
+                <TableRow className="bg-gray-2 dark:bg-dark-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:[&>th]:text-white">
                   <TableHead>Sr. No.</TableHead>
                   <TableHead>File#</TableHead>
                   <TableHead>TAT</TableHead>
@@ -1948,36 +2186,55 @@ export default function Home() {
               <TableBody>
                 {isLoadingAdminOrders ? (
                   <TableRow>
-                    <TableCell colSpan={16} className="py-6 text-center text-dark-5">
+                    <TableCell
+                      colSpan={16}
+                      className="py-6 text-center text-dark-5"
+                    >
                       Loading dashboard orders...
                     </TableCell>
                   </TableRow>
                 ) : adminOrdersError ? (
                   <TableRow>
-                    <TableCell colSpan={16} className="py-6 text-center text-red-600">
+                    <TableCell
+                      colSpan={16}
+                      className="py-6 text-center text-red-600"
+                    >
                       {adminOrdersError}
                     </TableCell>
                   </TableRow>
                 ) : visibleAdminOrders.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={16} className="py-6 text-center text-dark-5">
+                    <TableCell
+                      colSpan={16}
+                      className="py-6 text-center text-dark-5"
+                    >
                       No Data Found !
                     </TableCell>
                   </TableRow>
                 ) : (
                   visibleAdminOrders.map((order, index) => (
-                    <TableRow key={`${order.id}-${index}`} className={getTatRowClassName(order.package)}>
+                    <TableRow
+                      key={`${order.id}-${index}`}
+                      className={getTatRowClassName(order.package)}
+                    >
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
-                        <Link href={`/orders/details/${order.id}`} className="underline">
+                        <Link
+                          href={`/orders/details/${order.id}`}
+                          className="underline"
+                        >
                           {order.id}
                         </Link>
                       </TableCell>
                       <TableCell>{order.package || order.tat || "-"}</TableCell>
                       <TableCell>{formatCurrency(order.amount)}</TableCell>
-                      <TableCell>{formatDateTime(order.created_date)}</TableCell>
                       <TableCell>
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}>
+                        {formatDateTime(order.created_date)}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(order.status)}`}
+                        >
                           {order.status || "-"}
                         </span>
                       </TableCell>
@@ -2051,14 +2308,16 @@ export default function Home() {
 
       <div className="rounded-[10px] border border-stroke bg-white shadow-1 dark:border-dark-3 dark:bg-gray-dark">
         <div className="border-b border-stroke px-5 py-4 dark:border-dark-3">
-          <h4 className="text-lg font-semibold text-dark dark:text-white">Last Transactions</h4>
+          <h4 className="text-lg font-semibold text-dark dark:text-white">
+            Last Transactions
+          </h4>
         </div>
 
         <div className="overflow-x-auto px-1 pb-1">
           <div className="min-w-[1050px]">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:bg-dark-2 dark:[&>th]:text-white">
+                <TableRow className="bg-gray-2 dark:bg-dark-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:[&>th]:text-white">
                   <TableHead>Sr. No.</TableHead>
                   <TableHead>created by</TableHead>
                   <TableHead>Transaction Amount ($)</TableHead>
@@ -2072,19 +2331,28 @@ export default function Home() {
               <TableBody>
                 {isLoadingAdminTransactions ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-6 text-center text-dark-5">
+                    <TableCell
+                      colSpan={8}
+                      className="py-6 text-center text-dark-5"
+                    >
                       Loading last transactions...
                     </TableCell>
                   </TableRow>
                 ) : adminTransactionsError ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-6 text-center text-red-600">
+                    <TableCell
+                      colSpan={8}
+                      className="py-6 text-center text-red-600"
+                    >
                       {adminTransactionsError}
                     </TableCell>
                   </TableRow>
                 ) : visibleAdminTransactions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-6 text-center text-dark-5">
+                    <TableCell
+                      colSpan={8}
+                      className="py-6 text-center text-dark-5"
+                    >
                       No Data Found !
                     </TableCell>
                   </TableRow>
@@ -2093,13 +2361,21 @@ export default function Home() {
                     <TableRow key={`${transaction.id}-${index}`}>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{transaction.createdby || "-"}</TableCell>
-                      <TableCell>{formatCurrency(transaction.amount)}</TableCell>
+                      <TableCell>
+                        {formatCurrency(transaction.amount)}
+                      </TableCell>
                       <TableCell>{transaction.client_name || "-"}</TableCell>
                       <TableCell>{transaction.email || "-"}</TableCell>
-                      <TableCell>{transaction.transaction_id || transaction.id}</TableCell>
-                      <TableCell>{formatDateTime(transaction.created_date)}</TableCell>
                       <TableCell>
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(transaction.status)}`}>
+                        {transaction.transaction_id || transaction.id}
+                      </TableCell>
+                      <TableCell>
+                        {formatDateTime(transaction.created_date)}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusBadgeClassName(transaction.status)}`}
+                        >
                           {transaction.status || "-"}
                         </span>
                       </TableCell>
