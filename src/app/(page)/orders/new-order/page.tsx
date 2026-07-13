@@ -640,12 +640,21 @@ function LegacyAdminNewOrdersPage() {
                     <TableCell>
                       <button
                         type="button"
-                        className="rounded bg-green px-3 py-1 text-xs text-white hover:bg-green/90"
                         onClick={() => {
+                          if (order.status === "Cancel") {
+                            setMessage({ type: "error", text: "Action denied: This order has been cancelled by the client." });
+                            return;
+                          }
                           setAcceptOrder(order);
                           setAcceptDocs([]);
                           setAcceptMessage(order.reply || "");
                         }}
+                        disabled={order.status === "Cancel"}
+                        className={`rounded px-3 py-1 text-xs text-white ${
+                          order.status === "Cancel"
+                            ? "bg-gray-400 cursor-not-allowed opacity-75"
+                            : "bg-green hover:bg-green/90"
+                        }`}
                       >
                         Accept
                       </button>
@@ -653,11 +662,20 @@ function LegacyAdminNewOrdersPage() {
                     <TableCell>
                       <button
                         type="button"
-                        className="rounded bg-red px-3 py-1 text-xs text-white hover:bg-red/90"
                         onClick={() => {
+                          if (order.status === "Cancel") {
+                            setMessage({ type: "error", text: "Action denied: This order is already cancelled." });
+                            return;
+                          }
                           setCancelOrder(order);
                           setCancelRemark(order.remark || "");
                         }}
+                        disabled={order.status === "Cancel"}
+                        className={`rounded px-3 py-1 text-xs text-white ${
+                          order.status === "Cancel"
+                            ? "bg-gray-400 cursor-not-allowed opacity-75"
+                            : "bg-red hover:bg-red/90"
+                        }`}
                       >
                         Cancel
                       </button>
@@ -1199,8 +1217,21 @@ function LegacyTeamMemberNewOrdersPage() {
                     <TableCell>
                       <button
                         type="button"
-                        onClick={() => { setAcceptOrder(order); setAcceptDocs([]); setAcceptMessage(order.reply || ""); }}
-                        className="rounded-md bg-green px-2.5 py-1 text-[11px] font-medium text-white hover:bg-green/90"
+                        onClick={() => {
+                          if (order.status === "Cancel") {
+                            setMessage({ type: "error", text: "Action denied: This order has been cancelled by the client." });
+                            return;
+                          }
+                          setAcceptOrder(order); 
+                          setAcceptDocs([]); 
+                          setAcceptMessage(order.reply || ""); 
+                        }}
+                        disabled={order.status === "Cancel"}
+                        className={`rounded-md px-2.5 py-1 text-[11px] font-medium text-white ${
+                          order.status === "Cancel" 
+                            ? "bg-gray-400 cursor-not-allowed opacity-75" 
+                            : "bg-green hover:bg-green/90"
+                        }`}
                       >
                         Accept
                       </button>
@@ -1208,8 +1239,20 @@ function LegacyTeamMemberNewOrdersPage() {
                     <TableCell>
                       <button
                         type="button"
-                        onClick={() => { setCancelOrder(order); setCancelRemark(order.remark || ""); }}
-                        className="rounded-md bg-red px-2.5 py-1 text-[11px] font-medium text-white hover:bg-red/90"
+                        onClick={() => {
+                          if (order.status === "Cancel") {
+                            setMessage({ type: "error", text: "Action denied: This order is already cancelled." });
+                            return;
+                          }
+                          setCancelOrder(order); 
+                          setCancelRemark(order.remark || ""); 
+                        }}
+                        disabled={order.status === "Cancel"}
+                        className={`rounded-md px-2.5 py-1 text-[11px] font-medium text-white ${
+                          order.status === "Cancel" 
+                            ? "bg-gray-400 cursor-not-allowed opacity-75" 
+                            : "bg-red hover:bg-red/90"
+                        }`}
                       >
                         Cancel
                       </button>
