@@ -28,6 +28,10 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     let message = "An unexpected error occurred.";
     if (error.response?.data?.message) {
       message = Array.isArray(error.response.data.message)
