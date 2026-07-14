@@ -54,6 +54,7 @@ type OrderDetailResponse = {
     standard_instruction?: string;
     reply?: string;
     remark?: string;
+    message?: string;
   };
   downloads: AttachmentRow[];
   completedDownloads: AttachmentRow[];
@@ -732,6 +733,12 @@ function LegacyAcceptedOrdersPage() {
                 details?.order?.remark ||
                 "No special instructions available."}
             </div>
+            {details?.order?.message && (
+              <div className="mt-4 rounded bg-gray-1 p-4 text-sm dark:bg-dark-2">
+                <div className="mb-2 font-semibold text-dark dark:text-white">Client Message</div>
+                <div className="whitespace-pre-wrap text-dark-5">{details.order.message}</div>
+              </div>
+            )}
           </div>
         )}
       </ModalShell>

@@ -39,6 +39,7 @@ type ClientDashboardOrder = {
   emp_remark?: string;
   remark?: string;
   reply?: string;
+  message?: string;
 };
 
 type ClientDashboardTransaction = {
@@ -346,8 +347,14 @@ export default function Home() {
   } | null>(null);
   const [clientCommentsModal, setClientCommentsModal] = useState<{
     orderId: string | number;
-    text: string;
+    emp_remark?: string;
+    remark?: string;
+    reply?: string;
+    message?: string;
   } | null>(null);
+  const [clientReplyOrder, setClientReplyOrder] = useState<ClientDashboardOrder | null>(null);
+  const [clientReplyMessage, setClientReplyMessage] = useState("");
+  const [clientReplySubmitting, setClientReplySubmitting] = useState(false);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -421,16 +428,16 @@ export default function Home() {
 
           const nextTeamCount = isSupervisorUser
             ? (Array.isArray((teamResponse as any)?.data)
-                ? (teamResponse as any).data
-                : []
-              ).filter((item: { emp_supervisor?: string }) =>
-                identifiers
-                  .toLowerCase()
-                  .split(",")
-                  .includes(
-                    `${item.emp_supervisor ?? ""}`.trim().toLowerCase(),
-                  ),
-              ).length
+              ? (teamResponse as any).data
+              : []
+            ).filter((item: { emp_supervisor?: string }) =>
+              identifiers
+                .toLowerCase()
+                .split(",")
+                .includes(
+                  `${item.emp_supervisor ?? ""}`.trim().toLowerCase(),
+                ),
+            ).length
             : 0;
 
           setMemberOrders(nextOrders);
@@ -564,20 +571,20 @@ export default function Home() {
 
       try {
         const [transactionsResponse, employeesResponse] = await Promise.all([
-          axiosInstance.get("/masters/reports/transactions", {
-            params: { type: "all" },
-          }),
+          axiosInstance.get("/masters/reports/transactions"),
           axiosInstance.get("/user/employees"),
         ]);
 
         const transactions = Array.isArray(transactionsResponse.data)
           ? transactionsResponse.data
           : [];
+
         const employees = Array.isArray(employeesResponse.data)
           ? employeesResponse.data
           : [];
 
         setAdminTransactions(transactions);
+
         setEmployeeCount(
           employees.filter(
             (item: { status?: string }) =>
@@ -917,12 +924,31 @@ export default function Home() {
   };
 
   const openClientComments = (order: ClientDashboardOrder) => {
-    const text =
-      order.emp_remark?.trim() ||
-      order.remark?.trim() ||
-      order.reply?.trim() ||
-      "No Comments Found!!";
-    setClientCommentsModal({ orderId: order.id, text });
+    setClientCommentsModal({
+      orderId: order.id,
+      emp_remark: order.emp_remark?.trim(),
+      remark: order.remark?.trim(),
+      reply: order.reply?.trim(),
+      message: order.message?.trim()
+    });
+  };
+
+  const handleClientReplySend = async () => {
+    if (!clientReplyOrder || !clientReplyMessage.trim()) return;
+
+    setClientReplySubmitting(true);
+    try {
+      await axiosInstance.post(`/masters/orders/${clientReplyOrder.id}/messages`, {
+        message: clientReplyMessage.trim(),
+      });
+      setClientReplyOrder(null);
+      setClientReplyMessage("");
+      alert("Message sent successfully!");
+    } catch (error) {
+      alert(getApiErrorMessage(error, "Failed to send message."));
+    } finally {
+      setClientReplySubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -1046,11 +1072,10 @@ export default function Home() {
         )}
         {clientFeedback && (
           <div
-            className={`rounded-lg px-4 py-3 text-sm ${
-              clientFeedback.type === "success"
-                ? "border border-green-200 bg-green-50 text-green-700"
-                : "border border-red-200 bg-red-50 text-red-700"
-            }`}
+            className={`rounded-lg px-4 py-3 text-sm ${clientFeedback.type === "success"
+              ? "border border-green-200 bg-green-50 text-green-700"
+              : "border border-red-200 bg-red-50 text-red-700"
+              }`}
           >
             {clientFeedback.text}
           </div>
@@ -1279,6 +1304,7 @@ export default function Home() {
                     <TableHead>Update Status</TableHead>
                     <TableHead>Completed Report Files</TableHead>
                     <TableHead>BDS Comments</TableHead>
+                    <TableHead>Message</TableHead>
                     <TableHead>Change In Order</TableHead>
                     <TableHead>Rate Us</TableHead>
                   </TableRow>
@@ -1287,7 +1313,7 @@ export default function Home() {
                   {isLoading ? (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="py-8 text-center text-dark-5"
                       >
                         Loading orders...
@@ -1296,7 +1322,7 @@ export default function Home() {
                   ) : visibleClientOrders.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={10}
                         className="py-8 text-center text-dark-5"
                       >
                         No Data Found !
@@ -1402,6 +1428,15 @@ export default function Home() {
                             </button>
                           </TableCell>
                           <TableCell>
+                            <button
+                              type="button"
+                              className="rounded bg-yellow-500 px-3 py-1 text-xs text-white hover:bg-yellow-600"
+                              onClick={() => setClientReplyOrder(order)}
+                            >
+                              Reply
+                            </button>
+                          </TableCell>
+                          <TableCell>
                             {canEdit ? (
                               <Link
                                 href={`/client/edit-order?oid=${order.id}`}
@@ -1436,11 +1471,10 @@ export default function Home() {
                                     onClick={() =>
                                       void handleClientRating(order.id, star)
                                     }
-                                    className={`text-lg leading-none transition hover:scale-105 hover:text-primary ${
-                                      star <= existingRating
-                                        ? "text-primary"
-                                        : "text-gray-300 dark:text-gray-600"
-                                    }`}
+                                    className={`text-lg leading-none transition hover:scale-105 hover:text-primary ${star <= existingRating
+                                      ? "text-primary"
+                                      : "text-gray-300 dark:text-gray-600"
+                                      }`}
                                     title={`Rate ${star}`}
                                   >
                                     ★
@@ -1605,8 +1639,93 @@ export default function Home() {
                   Close
                 </button>
               </div>
-              <div className="rounded-lg bg-gray-1 px-4 py-4 text-sm text-dark dark:bg-dark-3 dark:text-white">
-                {clientCommentsModal.text}
+              <div className="flex flex-col gap-3 text-sm text-dark dark:text-white">
+                {clientCommentsModal.emp_remark && (
+                  <div className="rounded-lg bg-gray-1 px-4 py-3 dark:bg-dark-3">
+                    <span className="mb-1 block font-semibold text-primary">Team Member Note:</span>
+                    {clientCommentsModal.emp_remark}
+                  </div>
+                )}
+                {clientCommentsModal.remark && (
+                  <div className="rounded-lg bg-gray-1 px-4 py-3 dark:bg-dark-3">
+                    <span className="mb-1 block font-semibold text-primary">System / Status Note:</span>
+                    {clientCommentsModal.remark}
+                  </div>
+                )}
+                {clientCommentsModal.reply && (
+                  <div className="rounded-lg bg-gray-1 px-4 py-3 dark:bg-dark-3">
+                    <span className="mb-1 block font-semibold text-primary">Admin Reply:</span>
+                    {clientCommentsModal.reply}
+                  </div>
+                )}
+                {clientCommentsModal.message && (
+                  <div className="rounded-lg bg-gray-1 px-4 py-3 dark:bg-dark-3">
+                    <span className="mb-1 block font-semibold text-primary">Your Message:</span>
+                    {clientCommentsModal.message}
+                  </div>
+                )}
+                {!clientCommentsModal.emp_remark && !clientCommentsModal.remark && !clientCommentsModal.reply && !clientCommentsModal.message && (
+                  <div className="rounded-lg bg-gray-1 px-4 py-4 dark:bg-dark-3">
+                    No Comments Found!!
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Client Reply Modal */}
+        {clientReplyOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-md rounded-2xl border border-stroke bg-white p-6 shadow-xl dark:border-dark-3 dark:bg-dark-2">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-dark dark:text-white">
+                  Send Message - File #{clientReplyOrder.id}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setClientReplyOrder(null);
+                    setClientReplyMessage("");
+                  }}
+                  className="text-dark-5 hover:text-dark dark:text-gray-4 dark:hover:text-white"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+                    Message
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={clientReplyMessage}
+                    onChange={(e) => setClientReplyMessage(e.target.value)}
+                    placeholder="Type your message here..."
+                    className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+                  />
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setClientReplyOrder(null);
+                      setClientReplyMessage("");
+                    }}
+                    className="rounded-lg border border-stroke px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-1 dark:border-dark-3 dark:text-white dark:hover:bg-dark-3"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleClientReplySend()}
+                    disabled={clientReplySubmitting || !clientReplyMessage.trim()}
+                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-60"
+                  >
+                    {clientReplySubmitting ? "Sending..." : "Send"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1626,11 +1745,10 @@ export default function Home() {
 
         {supervisorFeedback && (
           <div
-            className={`rounded-lg px-4 py-3 text-sm ${
-              supervisorFeedback.type === "success"
-                ? "border border-green-200 bg-green-50 text-green-700"
-                : "border border-red-200 bg-red-50 text-red-700"
-            }`}
+            className={`rounded-lg px-4 py-3 text-sm ${supervisorFeedback.type === "success"
+              ? "border border-green-200 bg-green-50 text-green-700"
+              : "border border-red-200 bg-red-50 text-red-700"
+              }`}
           >
             {supervisorFeedback.text}
           </div>

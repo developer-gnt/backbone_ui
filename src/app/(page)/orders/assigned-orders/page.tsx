@@ -58,6 +58,7 @@ type OrderDetailResponse = {
     reply?: string;
     remark?: string;
     emp_remark?: string;
+    message?: string;
     modify_date?: string;
   };
   downloads: AttachmentRow[];
@@ -954,6 +955,10 @@ export default function AssignedOrdersPage() {
               <div className="rounded-lg bg-gray-1 p-4 text-sm dark:bg-dark-2">
                 <div className="mb-2 font-semibold text-dark dark:text-white">Work Status / Remark</div>
                 <div className="whitespace-pre-wrap text-dark-5">{details.order.reply || details.order.remark || "No work status available yet."}</div>
+              </div>
+              <div className="rounded-lg bg-gray-1 p-4 text-sm dark:bg-dark-2">
+                <div className="mb-2 font-semibold text-dark dark:text-white">Client Message</div>
+                <div className="whitespace-pre-wrap text-dark-5">{details.order.message || "No client message."}</div>
               </div>
             </div>
           ) : (

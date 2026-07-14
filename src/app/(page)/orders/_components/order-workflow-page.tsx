@@ -63,6 +63,7 @@ type OrderDetailResponse = {
     description?: string;
     reply?: string;
     remark?: string;
+    message?: string;
   };
   downloads: AttachmentRow[];
   completedDownloads: AttachmentRow[];
@@ -898,6 +899,10 @@ export default function OrderWorkflowPage({ mode }: Props) {
               <div className="rounded-lg bg-gray-1 p-4 text-sm dark:bg-dark-2">
                 <div className="mb-2 font-semibold text-dark dark:text-white">Reply / Work Status</div>
                 <div className="whitespace-pre-wrap text-dark-5">{details.order.reply || details.order.remark || "No work status available yet."}</div>
+              </div>
+              <div className="rounded-lg bg-gray-1 p-4 text-sm dark:bg-dark-2">
+                <div className="mb-2 font-semibold text-dark dark:text-white">Client Message</div>
+                <div className="whitespace-pre-wrap text-dark-5">{details.order.message || "No client message."}</div>
               </div>
             </div>
           ) : (
