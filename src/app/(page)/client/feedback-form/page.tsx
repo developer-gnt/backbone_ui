@@ -17,8 +17,13 @@ export default function ClientFeedbackFormPage() {
 
   useEffect(() => {
     const id = searchParams.get("id") || searchParams.get("order") || "";
+    const urlRating = searchParams.get("rating");
+
     if (id) {
       setOrderId(id);
+    }
+    if (urlRating) {
+      setRating(urlRating);
     }
   }, [searchParams]);
 

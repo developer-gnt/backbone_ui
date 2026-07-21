@@ -895,17 +895,9 @@ export default function Home() {
       window.alert("Feedback for this order is already done.");
       return;
     }
-    try {
-      await axiosInstance.patch(`/masters/orders/${orderId}/feedback`, {
-        feedback_rating: rating,
-      });
-      window.location.href = `/client/feedback-form?id=${orderId}`;
-    } catch (err) {
-      setClientFeedback({
-        type: "error",
-        text: getApiErrorMessage(err, "Unable to submit rating."),
-      });
-    }
+    
+    // Redirect to the feedback form and pass the rating in the URL
+    window.location.href = `/client/feedback-form?id=${orderId}&rating=${rating}`;
   };
 
   const openClientDownloads = async (orderId: string | number) => {
