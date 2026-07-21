@@ -30,8 +30,11 @@ export default function ClientFeedbackFormPage() {
       return;
     }
 
-    if (!feedback.trim()) {
-      setMessage({ type: "error", text: "Feedback is required." });
+    if (!feedback.trim() && !rating) {
+      setMessage({
+        type: "error",
+        text: "Please provide feedback or a rating.",
+      });
       return;
     }
 
@@ -50,6 +53,11 @@ export default function ClientFeedbackFormPage() {
         text:
           response.data?.message || "Thanx for providing your valuable feedback",
       });
+      
+      // Redirect to dashboard with a hard refresh to get latest data
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1500);
     } catch (error) {
       setMessage({
         type: "error",
@@ -99,7 +107,7 @@ export default function ClientFeedbackFormPage() {
             onChange={(event) => setFeedback(event.target.value)}
             rows={6}
             className="w-full rounded-lg border border-stroke bg-transparent px-4 py-3 outline-none focus:border-primary dark:border-dark-3 dark:text-white"
-            required
+            
           />
         </div>
 

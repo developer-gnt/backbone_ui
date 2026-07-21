@@ -642,17 +642,17 @@ function LegacyAdminNewOrdersPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (order.status === "Cancel") {
-                            setMessage({ type: "error", text: "Action denied: This order has been cancelled by the client." });
+                          if (order.status === "Cancel" || order.status === "Completed") {
+                            setMessage({ type: "error", text: "Action denied: This order is already cancelled or completed." });
                             return;
                           }
                           setAcceptOrder(order);
                           setAcceptDocs([]);
                           setAcceptMessage(order.reply || "");
                         }}
-                        disabled={order.status === "Cancel"}
+                        disabled={order.status === "Cancel" || order.status === "Completed"}
                         className={`rounded px-3 py-1 text-xs text-white ${
-                          order.status === "Cancel"
+                          order.status === "Cancel" || order.status === "Completed"
                             ? "bg-gray-400 cursor-not-allowed opacity-75"
                             : "bg-green hover:bg-green/90"
                         }`}
@@ -664,16 +664,16 @@ function LegacyAdminNewOrdersPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (order.status === "Cancel") {
-                            setMessage({ type: "error", text: "Action denied: This order is already cancelled." });
+                          if (order.status === "Cancel" || order.status === "Completed") {
+                            setMessage({ type: "error", text: "Action denied: This order is already cancelled or completed." });
                             return;
                           }
                           setCancelOrder(order);
                           setCancelRemark(order.remark || "");
                         }}
-                        disabled={order.status === "Cancel"}
+                        disabled={order.status === "Cancel" || order.status === "Completed"}
                         className={`rounded px-3 py-1 text-xs text-white ${
-                          order.status === "Cancel"
+                          order.status === "Cancel" || order.status === "Completed"
                             ? "bg-gray-400 cursor-not-allowed opacity-75"
                             : "bg-red hover:bg-red/90"
                         }`}
@@ -1219,17 +1219,17 @@ function LegacyTeamMemberNewOrdersPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (order.status === "Cancel") {
-                            setMessage({ type: "error", text: "Action denied: This order has been cancelled by the client." });
+                          if (order.status === "Cancel" || order.status === "Completed") {
+                            setMessage({ type: "error", text: "Action denied: This order is already cancelled or completed." });
                             return;
                           }
                           setAcceptOrder(order); 
                           setAcceptDocs([]); 
                           setAcceptMessage(order.reply || ""); 
                         }}
-                        disabled={order.status === "Cancel"}
+                        disabled={order.status === "Cancel" || order.status === "Completed"}
                         className={`rounded-md px-2.5 py-1 text-[11px] font-medium text-white ${
-                          order.status === "Cancel" 
+                          order.status === "Cancel" || order.status === "Completed"
                             ? "bg-gray-400 cursor-not-allowed opacity-75" 
                             : "bg-green hover:bg-green/90"
                         }`}
@@ -1241,16 +1241,16 @@ function LegacyTeamMemberNewOrdersPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (order.status === "Cancel") {
-                            setMessage({ type: "error", text: "Action denied: This order is already cancelled." });
+                          if (order.status === "Cancel" || order.status === "Completed") {
+                            setMessage({ type: "error", text: "Action denied: This order is already cancelled or completed." });
                             return;
                           }
                           setCancelOrder(order); 
                           setCancelRemark(order.remark || ""); 
                         }}
-                        disabled={order.status === "Cancel"}
+                        disabled={order.status === "Cancel" || order.status === "Completed"}
                         className={`rounded-md px-2.5 py-1 text-[11px] font-medium text-white ${
-                          order.status === "Cancel" 
+                          order.status === "Cancel" || order.status === "Completed"
                             ? "bg-gray-400 cursor-not-allowed opacity-75" 
                             : "bg-red hover:bg-red/90"
                         }`}
