@@ -27,6 +27,15 @@ export const NAV_DATA = [
         ],
       },
       {
+        title: "Inspections",
+        icon: Icons.Alphabet,
+        items: [
+          { title: "UAD 3.6", url: "/master/inspection36" },
+          { title: "UAD 2.6", url: "/master/inspection26" },
+          { title: "Records", url: "/master/inspections/records" }
+        ],
+      },
+      {
         title: "New Order",
         icon: Icons.OrderReport,
         items: [
@@ -112,6 +121,15 @@ export const CLIENT_NAV_DATA = [
         ],
       },
       {
+        title: "Inspections",
+        icon: Icons.Alphabet,
+        items: [
+          { title: "Inspection 2.6", url: "/master/inspection26" },
+          { title: "Inspection 3.6", url: "/master/inspection36" },
+          { title: "Records", url: "/master/inspections/records" }
+        ],
+      },
+      {
         title: "New Order",
         icon: Icons.OrderReport,
         url: "/client/new-order",
@@ -158,6 +176,15 @@ export const SUPERVISOR_NAV_DATA = [
         ],
       },
       {
+        title: "Inspections",
+        icon: Icons.Alphabet,
+        items: [
+          { title: "Inspection 2.6", url: "/master/inspection26" },
+          { title: "Inspection 3.6", url: "/master/inspection36" },
+          { title: "Records", url: "/master/inspections/records" }
+        ],
+      },
+      {
         title: "Place New Order",
         icon: Icons.OrderReport,
         url: "/orders/place-new-order",
@@ -183,6 +210,15 @@ export const TEAM_MEMBER_NAV_DATA = [
         url: "/orders/new-order",
         items: [],
       },
+      // {
+      //   title: "Inspections",
+      //   icon: Icons.Alphabet,
+      //   items: [
+      //     { title: "Inspection 2.6", url: "/master/inspection26" },
+      //     { title: "Inspection 3.6", url: "/master/inspection36" },
+      //     { title: "Records", url: "/master/inspections/records" }
+      //   ],
+      // },
       {
         title: "Orders Assigned",
         icon: Icons.OrderReport,

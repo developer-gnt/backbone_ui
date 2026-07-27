@@ -72,7 +72,7 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          "overflow-hidden border-r border-gray-200 bg-white transition-all duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark shrink-0",
+          "overflow-hidden border-r border-gray-200 bg-white transition-all duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark shrink-0 print:hidden",
           isMobile ? "fixed bottom-0 top-0 z-50" : "sticky top-0 h-screen",
           isOpen ? "w-[290px]" : "w-0",
         )}
