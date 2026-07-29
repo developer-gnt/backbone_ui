@@ -3,14 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import axiosInstance from "@/lib/axiosInstance";
-import { 
-  CheckCircle2, 
-  ChevronRight, 
-  ChevronLeft, 
-  Save, 
-  Download, 
-  Printer, 
-  Mail, 
+import {
+  CheckCircle2,
+  ChevronRight,
+  ChevronLeft,
+  Save,
+  Download,
+  Printer,
+  Mail,
   FileText,
   FileDown,
   LayoutTemplate,
@@ -182,29 +182,31 @@ const STEPS = [
       { type: "textarea", id: "sketchnotes", label: "Sketch dimensions / measurement notes" },
       { type: "textarea", id: "comments", label: "General comments" },
       { type: "sub", label: "Before you leave — check each item" },
-      { type: "checklist", id: "departure", items: [
-        "All rooms counted (total, BR, BA)",
-        "Kitchen appliances noted",
-        "Heating + cooling type + fuel",
-        "Foundation type noted",
-        "Exterior wall material (front + sides)",
-        "Roof material + condition",
-        "Quality rating (Q1-Q6)",
-        "Condition rating (C1-C6)",
-        "Garage type + # cars",
-        "All defects documented",
-        "Flooring types noted",
-        "Bath floor + wainscot",
-        "Attic access + features",
-        "Basement type + % finished",
-        "Sump pump noted",
-        "Pool / deck / patio / porch",
-        "Fence type",
-        "Lot size + shape + drainage",
-        "All levels measured + SF matches sketch",
-        "All required photos taken"
-      ]},
-      { type: "textarea", id: "team_notes", label: "Notes for ieIMPACT desktop team" },
+      {
+        type: "checklist", id: "departure", items: [
+          "All rooms counted (total, BR, BA)",
+          "Kitchen appliances noted",
+          "Heating + cooling type + fuel",
+          "Foundation type noted",
+          "Exterior wall material (front + sides)",
+          "Roof material + condition",
+          "Quality rating (Q1-Q6)",
+          "Condition rating (C1-C6)",
+          "Garage type + # cars",
+          "All defects documented",
+          "Flooring types noted",
+          "Bath floor + wainscot",
+          "Attic access + features",
+          "Basement type + % finished",
+          "Sump pump noted",
+          "Pool / deck / patio / porch",
+          "Fence type",
+          "Lot size + shape + drainage",
+          "All levels measured + SF matches sketch",
+          "All required photos taken"
+        ]
+      },
+      { type: "textarea", id: "team_notes", label: "Notes for Backbone desktop team" },
     ]
   },
 ];
@@ -217,7 +219,7 @@ STEPS.forEach((step, index) => {
       if (f.fields) extractIds(f.fields);
       if (f.type === 'photos' || f.type === 'checklist') {
         f.items.forEach((item: string) => {
-          const suffix = f.type === 'photos' ? item.replace(/\s+/g,'_') : item.replace(/[^\w]/g,'_');
+          const suffix = f.type === 'photos' ? item.replace(/\s+/g, '_') : item.replace(/[^\w]/g, '_');
           FIELD_MAP[`${f.id}_${suffix}`] = index;
         });
       }
@@ -237,9 +239,28 @@ const Inspection26Form = () => {
   const [hasTemplate, setHasTemplate] = useState(false);
   const [isViewMode, setIsViewMode] = useState(false);
   const [confirmModal, setConfirmModal] = useState<any>(null);
-  
-  // Custom toast state
-  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [isEmailing, setIsEmailing] = useState(false);
+
+  const handleEmailJson = async () => {
+    try {
+      setIsEmailing(true);
+      setToast({ message: "Sending form data to BackBone Data Solution...", type: 'success' });
+
+      await axiosInstance.post('/inspection26/email-json', formData);
+
+      setToast({ message: "Form data sent to BackBone Data Solution successfully!", type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      setShowExportModal(false);
+    } catch (error) {
+      console.error(error);
+      setToast({ message: "Failed to send form data.", type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setIsEmailing(false);
+    }
+  };
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -255,6 +276,11 @@ const Inspection26Form = () => {
           delete flatData[key];
         }
       });
+      if (res.data.measurements?.departure) {
+        if (typeof res.data.measurements.departure === 'object') {
+          Object.assign(flatData, res.data.measurements.departure);
+        }
+      }
       setFormData(flatData);
       setOriginalData(flatData);
     }).catch(err => console.error("Error fetching record", err));
@@ -270,7 +296,7 @@ const Inspection26Form = () => {
       if (savedData) {
         try {
           setFormData(JSON.parse(savedData));
-        } catch (e) {}
+        } catch (e) { }
       }
       if (savedStep) setCurrentStep(parseInt(savedStep) || 0);
     }
@@ -282,7 +308,7 @@ const Inspection26Form = () => {
 
   useEffect(() => {
     if (Object.keys(formData).length === 0 && currentStep === 0) return;
-    
+
     setSaveStatus("Saving...");
     const timeout = setTimeout(() => {
       localStorage.setItem("ieimpact_uad26_inspect", JSON.stringify(formData));
@@ -317,42 +343,49 @@ const Inspection26Form = () => {
     });
   };
 
+
   const submitToBackend = async () => {
     const payload: Record<string, any> = { site: {}, exterior: {}, interior: {}, basement: {}, measurements: {} };
-    
+
+    const departureObj: Record<string, boolean> = {};
+
     Object.keys(formData).forEach(key => {
-      const stepIndex = FIELD_MAP[key];
-      if (stepIndex === 0) payload[key] = formData[key];
-      else if (stepIndex === 1) payload.site[key] = formData[key];
-      else if (stepIndex === 2) payload.exterior[key] = formData[key];
-      else if (stepIndex === 3) payload.interior[key] = formData[key];
-      else if (stepIndex === 4) payload.basement[key] = formData[key];
-      else if (stepIndex === 5) payload.measurements[key] = formData[key];
-      else payload[key] = formData[key];
+      if (key.startsWith('departure_')) {
+        if (formData[key]) departureObj[key] = true;
+      } else {
+        const stepIndex = FIELD_MAP[key];
+        if (stepIndex === 0) payload[key] = formData[key];
+        else if (stepIndex === 1) payload.site[key] = formData[key];
+        else if (stepIndex === 2) payload.exterior[key] = formData[key];
+        else if (stepIndex === 3) payload.interior[key] = formData[key];
+        else if (stepIndex === 4) payload.basement[key] = formData[key];
+        else if (stepIndex === 5) payload.measurements[key] = formData[key];
+        else payload[key] = formData[key];
+      }
     });
+
+    payload.measurements.departure = departureObj;
 
     try {
       setSubmitting(true);
-      let response;
       if (editId) {
-        response = await axiosInstance.patch(`/inspection26/${editId}`, payload);
+        await axiosInstance.patch(`/inspection26/${editId}`, payload);
       } else {
-        response = await axiosInstance.post("/inspection26", payload);
+        await axiosInstance.post("/inspection26", payload);
       }
-      setToast({ message: response?.data?.message || (editId ? "Inspection updated successfully!" : "Inspection saved successfully!"), type: 'success' });
-      
-      // Auto-hide toast after 4s
+
+      // Generate PDF server-side from formData and email it
+      await axiosInstance.post('/inspection26/email-form-as-pdf', formData);
+
+      setToast({ message: "Inspection submitted & PDF report emailed successfully!", type: 'success' });
       setTimeout(() => setToast(null), 4000);
-      
+
       setFormData({});
       setCurrentStep(0);
       localStorage.removeItem("ieimpact_uad26_inspect");
       localStorage.removeItem("ieimpact_uad26_step");
-      
-      // If editing, navigate back to records
-      if (editId) {
-        router.push('/master/inspection26/records');
-      }
+
+      router.push('/master/inspections/records');
     } catch (error) {
       console.log("Error saving inspection form", error);
       setToast({ message: "Unable to save form. Please try again.", type: 'error' });
@@ -381,13 +414,11 @@ const Inspection26Form = () => {
                         f.multi ? handleToggleMulti(f.id, opt) : handleChange(f.id, opt);
                       }
                     }}
-                    className={`rounded-full border-[1.5px] px-4 py-2 text-sm font-medium transition ${
-                      isViewMode ? "cursor-default opacity-70" : "cursor-pointer hover:border-primary hover:bg-gray-2"
-                    } ${
-                      isSelected
+                    className={`rounded-full border-[1.5px] px-4 py-2 text-sm font-medium transition ${isViewMode ? "cursor-default opacity-70" : "cursor-pointer hover:border-primary hover:bg-gray-2"
+                      } ${isSelected
                         ? "border-primary bg-primary text-white"
                         : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                    }`}
+                      }`}
                   >
                     {opt}
                   </div>
@@ -410,13 +441,11 @@ const Inspection26Form = () => {
                     onClick={() => {
                       if (!isViewMode) handleChange(f.id, isSelected ? "" : opt);
                     }}
-                    className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-bold transition ${
-                      isViewMode ? "cursor-default opacity-70" : "cursor-pointer hover:border-primary"
-                    } ${
-                      isSelected
+                    className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-bold transition ${isViewMode ? "cursor-default opacity-70" : "cursor-pointer hover:border-primary"
+                      } ${isSelected
                         ? (isYes ? "border-green bg-green text-white" : "border-red bg-red text-white")
                         : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                    }`}
+                      }`}
                   >
                     {opt}
                   </div>
@@ -492,11 +521,10 @@ const Inspection26Form = () => {
                   <div
                     key={item}
                     onClick={() => handleChange(key, !isSelected)}
-                    className={`flex cursor-pointer items-center gap-2 rounded-lg border-[1.5px] px-3 py-2 text-xs font-medium transition ${
-                      isSelected
+                    className={`flex cursor-pointer items-center gap-2 rounded-lg border-[1.5px] px-3 py-2 text-xs font-medium transition ${isSelected
                         ? "border-green bg-green/10 text-green"
                         : "border-stroke bg-white text-dark hover:border-green dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                    }`}
+                      }`}
                   >
                     <div className={`flex h-4 w-4 items-center justify-center rounded-sm border ${isSelected ? "border-green bg-green text-white" : "border-stroke dark:border-dark-3"}`}>
                       {isSelected && "✓"}
@@ -519,11 +547,10 @@ const Inspection26Form = () => {
                   <div
                     key={item}
                     onClick={() => handleChange(key, !isSelected)}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border-[1.5px] px-4 py-2 text-sm transition ${
-                      isSelected
+                    className={`flex cursor-pointer items-center gap-3 rounded-lg border-[1.5px] px-4 py-2 text-sm transition ${isSelected
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-stroke bg-white text-dark hover:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                    }`}
+                      }`}
                   >
                     <div className={`flex h-4 w-4 items-center justify-center rounded-sm border ${isSelected ? "border-primary bg-primary text-white" : "border-stroke dark:border-dark-3"}`}>
                       {isSelected && "✓"}
@@ -542,7 +569,7 @@ const Inspection26Form = () => {
 
   return (
     <div className="relative rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5 print:border-none print:p-0 print:shadow-none">
-      
+
       {/* Nice Toast Notification */}
       {toast && (
         <div className={`fixed top-4 right-4 z-[999] flex items-center gap-3 rounded-lg px-6 py-4 shadow-xl transition-all animate-in slide-in-from-top-5 ${toast.type === 'success' ? 'bg-green text-white shadow-green/20' : 'bg-red text-white shadow-red/20'}`}>
@@ -565,7 +592,7 @@ const Inspection26Form = () => {
               {saveStatus}
             </span>
           )}
-          
+
           {isViewMode ? (
             <>
               <button
@@ -585,21 +612,21 @@ const Inspection26Form = () => {
             <>
               {editId && (
                 <button
-                  onClick={() => { 
+                  onClick={() => {
                     const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
                     if (hasChanges) {
                       setConfirmModal({
                         title: "Discard Changes?",
                         message: "You have unsaved changes. Are you sure you want to discard them?",
                         onConfirm: () => {
-                          setIsViewMode(true); 
+                          setIsViewMode(true);
                           fetchInspection();
-                          router.push(`/master/inspection26?id=${editId}&mode=view`); 
+                          router.push(`/master/inspection26?id=${editId}&mode=view`);
                         }
                       });
                     } else {
-                      setIsViewMode(true); 
-                      router.push(`/master/inspection26?id=${editId}&mode=view`); 
+                      setIsViewMode(true);
+                      router.push(`/master/inspection26?id=${editId}&mode=view`);
                     }
                   }}
                   className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50 transition-all dark:border-dark-3 dark:bg-dark-2 dark:text-white"
@@ -617,16 +644,16 @@ const Inspection26Form = () => {
               <button
                 onClick={() => {
                   setConfirmModal({
-      title: 'Clear Data',
-      message: 'Clear all data? This cannot be undone.',
-      onConfirm: () => {
-                    setFormData({});
-                    setCurrentStep(0);
-                    localStorage.removeItem("ieimpact_uad26_inspect");
-                    localStorage.removeItem("ieimpact_uad26_step");
-                  }
-                });
-              }}
+                    title: 'Clear Data',
+                    message: 'Clear all data? This cannot be undone.',
+                    onConfirm: () => {
+                      setFormData({});
+                      setCurrentStep(0);
+                      localStorage.removeItem("ieimpact_uad26_inspect");
+                      localStorage.removeItem("ieimpact_uad26_step");
+                    }
+                  });
+                }}
                 className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-red hover:bg-red/5 hover:border-red/20 transition-all dark:border-dark-3 dark:bg-dark-2"
               >
                 <Eraser className="w-4 h-4" />
@@ -650,7 +677,7 @@ const Inspection26Form = () => {
           {STEPS.map((s, index) => {
             const started = isStepStarted(index);
             const active = currentStep === index;
-            
+
             let btnClass = "border-stroke bg-white text-dark hover:shadow-md dark:border-dark-3 dark:bg-dark-2 dark:text-white transition-all duration-200 ease-in-out";
             if (active) {
               btnClass = "border-primary bg-primary text-white shadow-lg shadow-primary/30 transform scale-105";
@@ -702,7 +729,7 @@ const Inspection26Form = () => {
             <ChevronLeft className="w-4 h-4" />
             Previous Step
           </button>
-          
+
           {currentStep === STEPS.length - 1 ? (
             <div className="print:hidden">
               {!isViewMode && (
@@ -734,8 +761,8 @@ const Inspection26Form = () => {
       </div>
 
       {/* PRINT VIEW (All Steps Linearly) */}
-      <div className="hidden print:block text-black">
-        <div className="mb-6 text-center text-2xl font-bold">ieIMPACT UAD 2.6 Field Inspection</div>
+      <div id="inspection-form-pdf" className="hidden print:block text-black bg-white">
+        <div className="mb-6 text-center text-2xl font-bold">UAD 2.6 Field Inspection</div>
         {STEPS.map((step, sIdx) => (
           <div key={sIdx} className="mb-10">
             {step.title && (
@@ -761,7 +788,7 @@ const Inspection26Form = () => {
             <p className="mb-6 text-center text-xs text-dark-5">
               Templates are saved on this device only.
             </p>
-            
+
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => {
@@ -780,20 +807,20 @@ const Inspection26Form = () => {
                   <button
                     onClick={() => {
                       setConfirmModal({
-      title: 'Load Template',
-      message: 'This will overwrite your current form data. Proceed?',
-      onConfirm: () => {
-                        const tpl = localStorage.getItem("ieimpact_uad26_template");
-                        if (tpl) {
-                          try {
-                            setFormData(JSON.parse(tpl));
+                        title: 'Load Template',
+                        message: 'This will overwrite your current form data. Proceed?',
+                        onConfirm: () => {
+                          const tpl = localStorage.getItem("ieimpact_uad26_template");
+                          if (tpl) {
+                            try {
+                              setFormData(JSON.parse(tpl));
+                            }
+                            catch (e) { }
                           }
-                          catch(e) {}
+                          setShowTemplateModal(false);
                         }
-                        setShowTemplateModal(false);
-                      }
-                    });
-                  }}
+                      });
+                    }}
                     className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
                   >
                     <Download className="w-5 h-5 text-primary" />
@@ -802,14 +829,14 @@ const Inspection26Form = () => {
                   <button
                     onClick={() => {
                       setConfirmModal({
-      title: 'Delete Template',
-      message: 'Delete saved template?',
-      onConfirm: () => {
-                        localStorage.removeItem("ieimpact_uad26_template");
-                        setHasTemplate(false);
-                      }
-                    });
-                  }}
+                        title: 'Delete Template',
+                        message: 'Delete saved template?',
+                        onConfirm: () => {
+                          localStorage.removeItem("ieimpact_uad26_template");
+                          setHasTemplate(false);
+                        }
+                      });
+                    }}
                     className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-red shadow-sm transition hover:bg-red/5 hover:border-red/20 dark:border-dark-3 dark:bg-gray-dark dark:hover:bg-dark-3"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -818,7 +845,7 @@ const Inspection26Form = () => {
                 </>
               )}
             </div>
-            
+
             <p className="my-4 text-center text-sm text-dark-5">
               {hasTemplate ? "You have a saved template." : "No template saved yet."}
             </p>
@@ -841,7 +868,7 @@ const Inspection26Form = () => {
             <p className="mb-6 text-sm text-dark-5">
               Your data is saved locally on this device. Choose how to export:
             </p>
-            
+
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => {
@@ -853,16 +880,14 @@ const Inspection26Form = () => {
                 <Printer className="w-5 h-5" />
                 Print / Save as PDF
               </button>
-              
+
               <button
-                onClick={() => {
-                  window.location.href = `mailto:orders@backbonedatasolutions.com?subject=UAD 2.6%20Data&body=${encodeURIComponent(JSON.stringify(formData, null, 2))}`;
-                  setShowExportModal(false);
-                }}
-                className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                onClick={handleEmailJson}
+                disabled={isEmailing}
+                className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
               >
                 <Mail className="w-5 h-5 text-blue-500" />
-                Email to BackBone Data Solution
+                {isEmailing ? "Sending Data..." : "Email to BackBone Data Solution"}
               </button>
 
               <button

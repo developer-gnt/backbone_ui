@@ -124,8 +124,8 @@ export const CLIENT_NAV_DATA = [
         title: "Inspections",
         icon: Icons.Alphabet,
         items: [
-          { title: "Inspection 2.6", url: "/master/inspection26" },
-          { title: "Inspection 3.6", url: "/master/inspection36" },
+          { title: "UAD 3.6", url: "/master/inspection36" },
+          { title: "UAD 2.6", url: "/master/inspection26" },
           { title: "Records", url: "/master/inspections/records" }
         ],
       },
@@ -179,8 +179,8 @@ export const SUPERVISOR_NAV_DATA = [
         title: "Inspections",
         icon: Icons.Alphabet,
         items: [
-          { title: "Inspection 2.6", url: "/master/inspection26" },
-          { title: "Inspection 3.6", url: "/master/inspection36" },
+          { title: "UAD 3.6", url: "/master/inspection36" },
+          { title: "UAD 2.6", url: "/master/inspection26" },
           { title: "Records", url: "/master/inspections/records" }
         ],
       },

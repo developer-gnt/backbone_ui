@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { 
-  CheckCircle2, 
-  ChevronRight, 
-  ChevronLeft, 
-  Save, 
-  Download, 
-  Printer, 
-  Mail, 
+import {
+  CheckCircle2,
+  ChevronRight,
+  ChevronLeft,
+  Save,
+  Download,
+  Printer,
+  Mail,
   FileText,
   FileDown,
   LayoutTemplate,
@@ -34,16 +34,19 @@ const STEPS = [
 ];
 
 const FIELD_MAP: Record<string, string[]> = {
-  arrive: ["access", "streettype", "streetsurface", "pvtmaint", "typaccess", "p1_Street_Scene"],
-  curb: ["primview", "viewrange", "viewimpact", "otherview", "influences", "frontdoor", "p2_Front_of_Property"],
-  exterior: ["extwalls", "fndtype", "fndmat", "roofmat", "cond_walls", "cond_fnd", "cond_roof", "cond_win", "fndaccess", "roofage", "roofobs", "converted", "convfinish", "noncontig", "attic", "atticdet", "mitigation", "renewable", "renewtype", "renewown", "extdefects", "extdef1", "extdef2", "p3_Rear", "p3_Left_Side", "p3_Right_Side", "p3_Foundation", "p3_Roof", "p3_Solar_Energy", "p3_Mitigation", "p3_Ext_Defects"],
-  yard: ["topo", "drainage", "util_elec", "util_gas", "util_water", "util_sewer", "broadband", "primres", "respct", "nonres", "nonresmod", "restrict", "easement", "encroach", "amen_out", "amen_living", "amen_water", "amen1_name", "amen1_ct", "amen1_sf", "amen1_mat", "amen2_name", "amen2_ct", "amen2_sf", "amen2_mat", "sitedefects", "sitedef1", "p4_Yard", "p4_Pool_Spa", "p4_Deck_Patio", "p4_Waterfront", "p4_Non_Res_Use", "p4_Site_Defects"],
-  outbuildings: ["veh_type", "veh_attach", "veh_spaces", "veh_sf", "veh_surface", "ob1_type", "ob1_gba", "ob1_fin", "ob1_unfin", "ob1_rooms", "ob1_utils", "ob1_heat", "ob2_type", "ob2_gba", "ob2_fin", "ob2_heat", "p5_Garage_Carport", "p5_Outbuilding_Ext", "p5_Outbuilding_Int", "p5_Defects"],
-  mainlevel: ["occupancy", "levels", "br", "fullba", "halfba", "intqual", "intcond", "k1_level", "k1_update", "k1_time", "k1_cond", "k2_level", "k2_update", "floor_types", "floor_update", "floor_cond", "ceil_ht", "ceil_style", "wallceil_cond", "wholehome", "accessibility", "p6_Kitchen_s_", "p6_Living_Family", "p6_Dining", "p6_Main_Level_Rooms"],
-  upperlevel: ["bath1_loc", "bath1_type", "bath1_update", "bath1_cond", "bath2_loc", "bath2_type", "bath2_update", "bath2_cond", "bath3_loc", "bath3_type", "bath3_update", "bath3_cond", "bath4_loc", "bath4_type", "bath4_update", "bath4_cond", "br1_level", "br2_level", "br3_level", "br4_level", "br5_level", "br6_level", "up1_ceilht", "up1_floor", "up1_finsf", "up1_unfinsf", "up1_rooms", "p7_All_Bedrooms", "p7_All_Baths", "p7_Upper_Rooms", "p7_Updates_Renovations"],
-  belowgrade: ["bg_finsf", "bg_finnonstd", "bg_unfinsf", "bg_finish", "bg_grade", "bg_access", "bg_extaccess", "bg_ceilht", "bg_rooms", "heat_sys", "heat_fuel", "cooling", "furnace_bg", "other_mech", "bg_defects", "bgdef1", "p8_BG_Finished", "p8_BG_Unfinished", "p8_Mechanicals", "p8_BG_Defects"],
-  adu: ["adu_present", "adu_loc", "adu_access", "adu_rentable", "adu_typical", "adu_address", "adu_br", "adu_fullba", "adu_halfba", "adu_finsf", "adu_unfinsf", "adu_kitchen", "adu_bath", "p9_ADU_Exterior", "p9_ADU_Interior", "p9_ADU_Kitchen", "p9_ADU_Bath"],
-  final: ["ext_qual", "ext_cond", "ovr_qual", "ovr_cond", "fin_ag_std", "fin_ag_nonstd", "unfin_ag", "gba_total", "measstd", "funcissues", "notes", "departure", "team_notes"],
+  arrive: ["access", "streettype", "streetsurface", "pvtmaint", "typaccess", "p_Street_Scene"],
+  curb: ["primview", "viewrange", "viewimpact", "otherview", "influences", "frontdoor", "p_Front_of_Property"],
+  exterior: ["extwalls", "fndtype", "fndmat", "roofmat", "cond_walls", "cond_fnd", "cond_roof", "cond_win", "fndaccess", "roofage", "roofobs", "converted", "convfinish", "noncontig", "attic", "atticdet", "mitigation", "renewable", "renewtype", "renewown", "extdefects", "extdef1", "extdef2", "p_Rear", "p_Left_Side", "p_Right_Side", "p_Foundation", "p_Roof", "p_Solar_Energy", "p_Mitigation", "p_Ext_Defects"],
+  yard: ["topo", "drainage", "util_elec", "util_gas", "util_water", "util_sewer", "broadband", "primres", "respct", "nonres", "nonresmod", "restrict", "easement", "encroach", "amen_out", "amen_living", "amen_water", "amen1_name", "amen1_ct", "amen1_sf", "amen1_mat", "amen2_name", "amen2_ct", "amen2_sf", "amen2_mat", "sitedefects", "sitedef1", "p_Yard", "p_Pool_Spa", "p_Deck_Patio", "p_Waterfront", "p_Non_Res_Use", "p_Site_Defects"],
+  outbuildings: ["veh_type", "veh_attach", "veh_spaces", "veh_sf", "veh_surface", "ob1_type", "ob1_gba", "ob1_fin", "ob1_unfin", "ob1_rooms", "ob1_utils", "ob1_heat", "ob2_type", "ob2_gba", "ob2_fin", "ob2_heat", "p_Garage_Carport", "p_Outbuilding_Ext", "p_Outbuilding_Int", "p_Defects"],
+  mainlevel: ["occupancy", "levels", "br", "fullba", "halfba", "intqual", "intcond", "k1_level", "k1_update", "k1_time", "k1_cond", "k2_level", "k2_update", "floor_types", "floor_update", "floor_cond", "ceil_ht", "ceil_style", "wallceil_cond", "wholehome", "accessibility", "p_Kitchen_s_", "p_Living_Family", "p_Dining", "p_Main_Level_Rooms"],
+  upperlevel: ["bath1_loc", "bath1_type", "bath1_update", "bath1_cond", "bath2_loc", "bath2_type", "bath2_update", "bath2_cond", "bath3_loc", "bath3_type", "bath3_update", "bath3_cond", "bath4_loc", "bath4_type", "bath4_update", "bath4_cond", "br1_level", "br2_level", "br3_level", "br4_level", "br5_level", "br6_level", "up1_ceilht", "up1_floor", "up1_finsf", "up1_unfinsf", "up1_rooms", "p_All_Bedrooms", "p_All_Baths", "p_Upper_Rooms", "p_Updates_Renovations"],
+  belowgrade: ["bg_finsf", "bg_finnonstd", "bg_unfinsf", "bg_finish", "bg_grade", "bg_access", "bg_extaccess", "bg_ceilht", "bg_rooms", "heat_sys", "heat_fuel", "cooling", "furnace_bg", "other_mech", "bg_defects", "bgdef1", "p_BG_Finished", "p_BG_Unfinished", "p_Mechanicals", "p_BG_Defects"],
+  adu: ["adu_present", "adu_loc", "adu_access", "adu_rentable", "adu_typical", "adu_address", "adu_br", "adu_fullba", "adu_halfba", "adu_finsf", "adu_unfinsf", "adu_kitchen", "adu_bath", "p_ADU_Exterior", "p_ADU_Interior", "p_ADU_Kitchen", "p_ADU_Bath"],
+  final: [
+    "ext_qual", "ext_cond", "ovr_qual", "ovr_cond", "fin_ag_std", "fin_ag_nonstd", "unfin_ag", "gba_total", "measstd", "func_issues", "sketch_notes", "team_notes",
+    "c___Front_door_height_above_grade", "c___Roof_age_estimate", "c___Converted_areas", "c___Kitchen_update_timeframe_condition__EACH_", "c___Each_bathroom__type___update___condition", "c___Each_bedroom__level___ceiling_ht___flooring", "c___Flooring_types___update", "c___Ceiling_height_per_level", "c___Per_component_condition", "c___View___range___impact", "c___Non_residential_use", "c___Amenity_counts___areas", "c___Disaster_mitigation", "c___Renewable_energy", "c___Broadband_internet", "c___ADU_details__if_present_", "c___Outbuilding_GBA___utilities", "c___Furnace_location__BG__", "c_All_levels_measured", "c_All_photos_taken", "c_All_defects_documented", "c_BR_BA_counts_confirmed"
+  ],
 };
 
 export default function Inspection36Form() {
@@ -60,10 +63,31 @@ export default function Inspection36Form() {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [hasTemplate, setHasTemplate] = useState(false);
-  const [toast, setToast] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [isEmailing, setIsEmailing] = useState(false);
+
+  const handleEmailJson = async () => {
+    try {
+      setIsEmailing(true);
+      setToast({ message: "Sending form data to BackBone Data Solution...", type: 'success' });
+
+      await axiosInstance.post('/inspection36/email-json', formData);
+
+      setToast({ message: "Form data sent to BackBone Data Solution successfully!", type: 'success' });
+      setTimeout(() => setToast(null), 4000);
+      setShowExportModal(false);
+    } catch (error) {
+      console.error(error);
+      setToast({ message: "Failed to send form data.", type: 'error' });
+      setTimeout(() => setToast(null), 3000);
+    } finally {
+      setIsEmailing(false);
+    }
+  };
+
   const [isViewMode, setIsViewMode] = useState(inspectionId ? mode !== 'edit' : false);
   const [confirmModal, setConfirmModal] = useState<any>(null);
-  
+
   useEffect(() => {
     if (inspectionId) {
       fetchInspection();
@@ -73,7 +97,7 @@ export default function Inspection36Form() {
       if (savedData) {
         try {
           setFormData(JSON.parse(savedData));
-        } catch (e) {}
+        } catch (e) { }
       }
       if (savedStep) setCurrentStep(parseInt(savedStep) || 0);
     }
@@ -84,7 +108,7 @@ export default function Inspection36Form() {
 
   useEffect(() => {
     if (Object.keys(formData).length === 0 && currentStep === 0) return;
-    
+
     setSaveStatus("Saving...");
     const timeout = setTimeout(() => {
       localStorage.setItem("ieimpact_uad36_inspect", JSON.stringify(formData));
@@ -102,11 +126,11 @@ export default function Inspection36Form() {
       const { data } = await axiosInstance.get(`/inspection36/${inspectionId}`);
       // Flatten the data for the form state
       let flatData: any = { ...data };
-      
+
       Object.keys(FIELD_MAP).forEach((section) => {
         if (data[section]) {
           Object.keys(data[section]).forEach((key) => {
-             flatData[key] = data[section][key];
+            flatData[key] = data[section][key];
           });
         }
       });
@@ -134,10 +158,10 @@ export default function Inspection36Form() {
 
   const restructureDataForSave = () => {
     const payload: any = { ...formData };
-    
+
     // Group fields into their respective nested objects
     Object.keys(FIELD_MAP).forEach((section) => {
-      payload[section] = {};
+      payload[section] = payload[section] || {};
       FIELD_MAP[section].forEach((field) => {
         if (payload[field] !== undefined) {
           payload[section][field] = payload[field];
@@ -145,25 +169,135 @@ export default function Inspection36Form() {
         }
       });
     });
-    
+
+    // Sweep any remaining checklist checkboxes (c_...) into final
+    Object.keys(payload).forEach((key) => {
+      if (key.startsWith('c_')) {
+        payload.final = payload.final || {};
+        payload.final[key] = payload[key];
+        delete payload[key];
+      }
+    });
+
     // Clean up IDs of nested objects which might mess up typeorm
     Object.keys(FIELD_MAP).forEach((section) => {
-       if (payload[section] && payload[section].id) {
-           delete payload[section].id;
-       }
-       if (payload[section] && payload[section].inspection_id) {
-           delete payload[section].inspection_id;
-       }
+      if (payload[section] && payload[section].id) {
+        delete payload[section].id;
+      }
+      if (payload[section] && payload[section].inspection_id) {
+        delete payload[section].inspection_id;
+      }
     });
 
     return payload;
+  };
+
+  const sendPdfEmail = async (endpoint: string) => {
+    let overlay: HTMLElement | null = null;
+    let clone: HTMLElement | null = null;
+    const currentScrollY = window.scrollY;
+
+    try {
+      overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.backgroundColor = '#ffffff';
+      overlay.style.zIndex = '999999';
+      overlay.style.display = 'flex';
+      overlay.style.flexDirection = 'column';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+      overlay.style.fontFamily = 'sans-serif';
+      overlay.innerHTML = `
+        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;"></div>
+        <h2 style="margin-top: 20px; font-size: 20px; font-weight: bold; color: #111827;">Compiling & Sending PDF Email...</h2>
+        <p style="margin-top: 8px; color: #6b7280; font-size: 14px;">Please wait while the PDF report is emailed.</p>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+      `;
+      document.body.appendChild(overlay);
+
+      const originalElement = document.getElementById('inspection-form-pdf');
+      if (!originalElement) return;
+
+      clone = originalElement.cloneNode(true) as HTMLElement;
+      clone.id = 'pdf-clone-temp';
+
+      const origSelects = originalElement.querySelectorAll('select');
+      const cloneSelects = clone.querySelectorAll('select');
+      origSelects.forEach((sel, i) => {
+        if (cloneSelects[i]) {
+          cloneSelects[i].value = sel.value;
+          Array.from(cloneSelects[i].options).forEach((opt: any) => {
+            if (opt.value === sel.value) opt.setAttribute('selected', 'selected');
+            else opt.removeAttribute('selected');
+          });
+        }
+      });
+
+      const origInputs = originalElement.querySelectorAll('input, textarea');
+      const cloneInputs = clone.querySelectorAll('input, textarea');
+      origInputs.forEach((inp: any, i) => {
+        if (!cloneInputs[i]) return;
+        if (inp.type === 'checkbox' || inp.type === 'radio') {
+          (cloneInputs[i] as any).checked = inp.checked;
+          if (inp.checked) cloneInputs[i].setAttribute('checked', 'checked');
+          else cloneInputs[i].removeAttribute('checked');
+        } else {
+          (cloneInputs[i] as any).value = inp.value;
+          cloneInputs[i].setAttribute('value', inp.value);
+        }
+      });
+
+      clone.classList.remove('hidden');
+      clone.style.display = 'block';
+      clone.style.position = 'absolute';
+      clone.style.top = '0';
+      clone.style.left = '0';
+      clone.style.width = '1000px';
+      clone.style.opacity = '1';
+      clone.style.backgroundColor = '#ffffff';
+      clone.style.zIndex = '999998';
+
+      const hiddenChildren = clone.querySelectorAll('.hidden');
+      hiddenChildren.forEach((child: any) => child.classList.remove('hidden'));
+
+      document.body.appendChild(clone);
+      window.scrollTo(0, 0);
+
+      const html2pdf = (await import('html2pdf.js')).default;
+      const opt: any = {
+        margin:       0.4,
+        filename:     'inspection.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, scrollY: 0, windowWidth: 1050 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      const pdfBlob = await html2pdf().from(clone).set(opt).output('blob');
+
+      const formDataUpload = new FormData();
+      formDataUpload.append('pdf', pdfBlob, 'inspection.pdf');
+
+      await axiosInstance.post(endpoint, formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+    } catch (err) {
+      console.error("Failed to send PDF email:", err);
+    } finally {
+      if (clone && document.body.contains(clone)) document.body.removeChild(clone);
+      if (overlay && document.body.contains(overlay)) document.body.removeChild(overlay);
+      window.scrollTo(0, currentScrollY);
+    }
   };
 
   const handleSave = async (isFinal = false) => {
     try {
       setLoading(true);
       const payload = restructureDataForSave();
-      
+
       if (isFinal) {
         payload.status = "Completed";
       }
@@ -176,15 +310,21 @@ export default function Inspection36Form() {
         setToast({ message: "Inspection created successfully", type: 'success' });
         router.push(`/master/inspection36?id=${data.id}`);
       }
-      
+
+      if (isFinal) {
+        // Generate PDF server-side from formData and email it
+        await axiosInstance.post('/inspection36/email-form-as-pdf', formData);
+        setToast({ message: "Inspection submitted & PDF report emailed successfully!", type: 'success' });
+      }
+
       setTimeout(() => setToast(null), 4000);
       setFormData({});
       setCurrentStep(0);
       localStorage.removeItem("ieimpact_uad36_inspect");
       localStorage.removeItem("ieimpact_uad36_step");
-      
+
       if (isFinal || inspectionId) {
-        router.push("/master/inspection36/records");
+        router.push("/master/inspections/records");
       }
     } catch (error) {
       console.error(error);
@@ -195,14 +335,14 @@ export default function Inspection36Form() {
     }
   };
 
-  const renderInput = (name: string, label: string, type = "text", className="sm:w-1/2 md:w-1/3 lg:w-1/4", required=false) => (
+  const renderInput = (name: string, label: string, type = "text", className = "sm:w-1/2 md:w-1/3 lg:w-1/4", required = false) => (
     <div className={`mb-4.5 px-2 ${className}`}>
       <label className="mb-2.5 block text-sm font-bold text-dark dark:text-white">
         {required && <span className="text-orange-500 mr-1">&#9733;</span>}
         {label}
       </label>
       {type === "textarea" ? (
-         <textarea
+        <textarea
           name={name}
           value={formData[name] || ""}
           onChange={handleChange}
@@ -214,11 +354,10 @@ export default function Inspection36Form() {
           type="button"
           disabled={isViewMode}
           onClick={() => handleDropdownChange(name, !formData[name])}
-          className={`flex cursor-pointer w-fit items-center gap-2 rounded-lg border-[1.5px] px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
-            formData[name]
-              ? "border-green bg-green/10 text-green"
-              : "border-stroke bg-white text-dark hover:border-green dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-          }`}
+          className={`flex cursor-pointer w-fit items-center gap-2 rounded-lg border-[1.5px] px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${formData[name]
+            ? "border-green bg-green/10 text-green"
+            : "border-stroke bg-white text-dark hover:border-green dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+            }`}
         >
           <div className={`flex h-4 w-4 items-center justify-center rounded-sm border ${formData[name] ? "border-green bg-green text-white" : "border-stroke dark:border-dark-3"}`}>
             {formData[name] && <>&#x2713;</>}
@@ -236,8 +375,8 @@ export default function Inspection36Form() {
       )}
     </div>
   );
-  
-  const renderDropdown = (name: string, label: string, options: string[], className="sm:w-1/2 md:w-1/3 lg:w-1/4", required=false) => (
+
+  const renderDropdown = (name: string, label: string, options: string[], className = "sm:w-1/2 md:w-1/3 lg:w-1/4", required = false) => (
     <div className={`mb-4.5 px-2 w-full`}>
       <label className="mb-2 flex items-center gap-2 text-sm font-bold text-dark dark:text-white">
         {required && <span className="text-orange-500">&#9733;</span>} {label}
@@ -247,7 +386,7 @@ export default function Inspection36Form() {
           const isSelected = formData[name] === opt;
           const isYes = opt === "Yes";
           const isNo = opt === "No";
-          
+
           let selectedClasses = "border-primary bg-primary text-white"; // default selected
           if (isYes) selectedClasses = "border-green bg-green text-white";
           if (isNo) selectedClasses = "border-red bg-red text-white";
@@ -258,11 +397,10 @@ export default function Inspection36Form() {
               disabled={isViewMode}
               key={opt}
               onClick={() => handleDropdownChange(name, isSelected ? "" : opt)}
-              className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:opacity-60 ${
-                isSelected
-                  ? selectedClasses
-                  : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-              }`}
+              className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:opacity-60 ${isSelected
+                ? selectedClasses
+                : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                }`}
             >
               {opt}
             </button>
@@ -313,9 +451,8 @@ export default function Inspection36Form() {
                 }
                 setFormData((prev: any) => ({ ...prev, [name]: newArr }));
               }}
-              className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:opacity-60 ${
-                isSelected ? "border-primary bg-primary text-white" : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-              }`}
+              className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:opacity-60 ${isSelected ? "border-primary bg-primary text-white" : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                }`}
             >
               {opt}
             </button>
@@ -385,41 +522,41 @@ export default function Inspection36Form() {
   const renderExterior = () => (
     <div className="flex flex-wrap -mx-2">
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">clockwise around dwelling</span></div>
-      
+
       {renderSectionHeader("Materials")}
       {renderDropdown("extwalls", "Exterior Walls", ["Brick", "Vinyl", "Wood", "Aluminum", "Stucco", "Cement Board", "Stone", "Log", "Other"], "w-full")}
       {renderDropdown("fndtype", "Foundation Type", ["Slab", "Crawl Space", "Basement", "Post & Pier", "Other"], "w-full")}
       {renderDropdown("fndmat", "Foundation Material", ["Poured Concrete", "Block", "Stone", "Brick", "Wood", "Other"], "w-full", true)}
       {renderDropdown("roofmat", "Roof Material", ["Asphalt", "Metal", "Tile", "Slate", "Wood", "Other"], "w-full")}
-      
+
       {renderSectionHeader("&#9733; Condition Status per Feature", "Note: end of branch feature pulls its own condition rating.")}
       {renderDropdown("cond_walls", "Exterior Walls", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
       {renderDropdown("cond_fnd", "Foundation", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
       {renderDropdown("cond_roof", "Roof", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
       {renderDropdown("cond_win", "Windows", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
-      
+
       {renderDropdown("fndaccess", "Foundation accessible to observe?", ["Yes", "No"], "w-full", true)}
       {renderDropdown("roofage", "Estimated Roof Age", ["< 1 yr", "1-10 yr", "10-20 yr", ">20 yr"], "w-full", true)}
       {renderDropdown("roofobs", "Roof observable?", ["Yes", "No"], "w-full", true)}
-      
+
       {renderSectionHeader("&#9733; Look for these while walking")}
       {renderDropdown("converted", "Any converted areas? (garage/patio/porch -> living area)", ["Yes", "No"], "w-full", true)}
       {renderDropdown("convfinish", "Converted finish vs rest of home", ["Inferior", "Similar", "Superior", "N/A"], "w-full", true)}
       {renderInput("noncontig", "Non-continuous finished area SF", "text", "w-full", true)}
-      
+
       {renderDropdown("attic", "Attic access?", ["Yes", "No"], "w-full", true)}
       {renderDropdown("atticdet", "Attic", ["Accessible", "Not Accessible", "Observed", "Not Observed"], "w-full")}
-      
+
       {renderSectionHeader("&#9733; Disaster mitigation")}
       {renderMultiSelect("mitigation", "Features", ["Flood vents", "Impact glass", "Fortified roof", "Fire storm walls", "Fire storm deck", "Enclosed soffits", "Storm shutters", "None", "Other"], true)}
-      
+
       {renderSectionHeader("&#9733; Renewable Energy")}
       {renderDropdown("renewable", "Renewable energy visible?", ["Yes", "No"], "w-full", true)}
       {renderDropdown("renewtype", "Type", ["Solar Panels", "Wind Turbine", "Geothermal", "Other"], "w-full", true)}
       {renderDropdown("renewown", "Ownership", ["Owned", "Leased", "PPA", "Other"], "w-full", true)}
-      
+
       {renderDropdown("extdefects", "Any exterior defects?", ["Yes", "No"], "w-full")}
-      
+
       <div className="w-full px-2 mb-4">
         <div className="border border-orange-200 bg-orange-50/30 rounded-xl p-4">
           {renderDropdown("extdef1_feat", "Defect Feature", ["Foundation", "Roof", "Walls", "Windows", "Mech", "Floor", "Other"], "w-full")}
@@ -457,33 +594,33 @@ export default function Inspection36Form() {
   const renderYard = () => (
     <div className="flex flex-wrap -mx-2">
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">walk the property grounds</span></div>
-      
+
       {renderDropdown("topo", "Topography", ["Flat", "Sloping", "Rolling", "Rocky", "Other"], "w-full")}
       {renderDropdown("drainage", "Drainage Issues?", ["None", "Standing Water", "Erosion", "Improper Grading", "Other"], "w-full")}
-      
+
       {renderSectionHeader("Utilities")}
       {renderDropdown("util_elec", "Electric", ["Public", "Private"], "w-full")}
       {renderDropdown("util_gas", "Gas", ["Public", "Private", "None"], "w-full")}
       {renderDropdown("util_water", "Water", ["Public", "Private: Well", "Private: Cistern", "Private: Other"], "w-full")}
       {renderDropdown("util_sewer", "Sewer", ["Public", "Private: Septic", "Private: Cesspool", "Private: Other"], "w-full")}
       {renderDropdown("broadband", "Broadband internet available at property?", ["Yes", "No"], "w-full", true)}
-      
+
       {renderSectionHeader("&#9733; Non-Residential Use")}
       {renderDropdown("primres", "Primarily residential?", ["Yes", "No"], "w-full", true)}
       {renderInput("respct", "Residential %", "text", "w-full", true)}
       {renderDropdown("nonres", "Non-residential use", ["None", "Agricultural", "Commercial", "Industrial", "Other"], "w-full", true)}
       {renderDropdown("nonresmod", "Non-residential modifications?", ["Yes", "No"], "w-full", true)}
-      
+
       {renderSectionHeader("Encumbrances")}
       {renderDropdown("restrict", "Restrictions", ["None", "Age", "Historic", "Income", "Land Use", "Rental", "Sale Price", "Other"], "w-full")}
       {renderDropdown("easement", "Easements", ["None", "Conservation", "Drainage", "Ingress/egress", "Utility", "Other"], "w-full")}
       {renderDropdown("encroach", "Encroachments", ["None", "Building", "Fence", "Driveway", "Overhang", "Other"], "w-full")}
-      
+
       {renderSectionHeader("&#9733; Amenities — count AND measure!", "Note: in UAD report COUNT and MEASURED AREA (SF) for each amenity.")}
       {renderDropdown("amen_out", "Outdoor", ["Fence", "Irrigation", "Outdoor Fireplace", "Outdoor Kitchen", "Sports Court", "None"], "w-full")}
       {renderDropdown("amen_living", "Outdoor Living", ["Deck", "Patio", "Porch", "Portico", "Balcony", "Gazebo", "None"], "w-full")}
       {renderDropdown("amen_water", "Water Features", ["Inground Pool", "Inground Spa", "Outdoor Shower", "Sauna", "None"], "w-full")}
-      
+
       <div className="w-full flex gap-2 px-2">
         {renderInput("amen1_name", "Amenity", "text", "w-1/4")}
         {renderInput("amen1_ct", "Count", "text", "w-1/4")}
@@ -498,7 +635,7 @@ export default function Inspection36Form() {
       </div>
 
       {renderDropdown("sitedefects", "Any site defects?", ["Yes", "No"], "w-full")}
-      
+
       <div className="w-full px-2 mb-4">
         <div className="border border-orange-200 bg-orange-50/30 rounded-xl p-4">
           {renderDropdown("sitedef1_feat", "Defect Feature", ["Foundation", "Roof", "Walls", "Windows", "Mech", "Floor", "Other"], "w-full")}
@@ -522,17 +659,17 @@ export default function Inspection36Form() {
   const renderOutbuildings = () => (
     <div className="flex flex-wrap -mx-2">
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">walk to each structure</span></div>
-      
+
       {renderSectionHeader("Vehicle Storage")}
       {renderDropdown("veh_type", "Type", ["Garage", "Carport", "Driveway", "Open Lot", "Parking Garage", "None", "Other"], "w-full")}
       {renderDropdown("veh_attach", "Attachment", ["Attached", "Built-In", "Detached"], "w-full")}
-      
+
       <div className="w-full flex gap-2 px-2">
         {renderInput("veh_spaces", "# Spaces", "text", "w-1/3")}
         {renderInput("veh_sf", "Area SF", "text", "w-1/3")}
         {renderInput("veh_surface", "Surface", "text", "w-1/3")}
       </div>
-      
+
       {renderSectionHeader("&#9733; Outbuildings", "Measure GBA from exterior walls. Include all floors.")}
       <div className="w-full flex gap-2 px-2">
         {renderInput("ob1_type", "#1 Type", "text", "w-1/3")}
@@ -545,7 +682,7 @@ export default function Inspection36Form() {
         {renderInput("ob1_utils", "Utilities", "text", "w-1/3", true)}
       </div>
       {renderDropdown("ob1_heat", "#1 Heating?", ["Yes", "No"], "w-full")}
-      
+
       <div className="w-full flex gap-2 px-2 mt-4">
         {renderInput("ob2_type", "#2 Type", "text", "w-1/3")}
         {renderInput("ob2_gba", "GBA SF", "text", "w-1/3", true)}
@@ -560,43 +697,44 @@ export default function Inspection36Form() {
   const renderMainLevel = () => (
     <div className="flex flex-wrap -mx-2">
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">front door &#8212; living area</span></div>
-      
+
       {renderDropdown("occupancy", "Occupancy", ["Owner", "Tenant", "Vacant"], "w-full")}
-      
+
+      {/* Header with Title and Global Actions */}
       <div className="w-full flex gap-2 px-2">
         {renderInput("levels", "Levels in Unit", "text", "w-1/4")}
         {renderInput("br", "Bedrooms", "text", "w-1/4")}
         {renderInput("fullba", "Full Baths", "text", "w-1/4")}
         {renderInput("halfba", "Half Baths", "text", "w-1/4")}
       </div>
-      
+
       {renderDropdown("intqual", "Interior Quality", ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"], "w-full")}
       {renderDropdown("intcond", "Interior Condition", ["C1", "C2", "C3", "C4", "C5", "C6"], "w-full")}
-      
+
       {renderSectionHeader("&#9733; Kitchen &#8212; record for EACH kitchen!", "#1 most-missed new field. Record update + time frame + condition for every kitchen.")}
       {renderInput("k1_level", "Kitchen 1 &#8212; Level", "text", "w-full")}
       {renderDropdown("k1_update", "K1 Update", ["Fully Updated", "Partially Updated", "Not Updated"], "w-full")}
       {renderDropdown("k1_time", "K1 Time Frame", ["< 1 yr", "1-5 yr", "5-10 yr", "10+ yr"], "w-full")}
       {renderDropdown("k1_cond", "K1 Condition", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
-      
+
       {renderInput("k2_level", "Kitchen 2 &#8212; Level (if applicable)", "text", "w-full")}
       {renderDropdown("k2_update", "K2 Update", ["Fully Updated", "Partially Updated", "Not Updated"], "w-full")}
-      
+
       {renderSectionHeader("&#9733; Flooring (this level)")}
       {renderMultiSelect("floor_types", "Flooring Types (select all)", ["Hardwood", "Carpet", "Ceramic", "Laminate", "Vinyl", "LVP", "Eng Wood", "Marble", "Concrete", "Other"], true)}
       {renderDropdown("floor_update", "Flooring Update", ["Fully", "Significantly", "Moderately", "Not Updated"], "w-full", true)}
       {renderDropdown("floor_cond", "Flooring Condition", ["New/Like New", "Typical Wear", "Damaged-Functional", "No Finish"], "w-full", true)}
-      
+
       {renderSectionHeader("&#9733; Ceiling (this level)")}
       {renderDropdown("ceil_ht", "Ceiling Height", ["< 7 ft", "7 ft", "8 ft", "9 ft", "10+ ft", "2+ Stories"], "w-full", true)}
       {renderDropdown("ceil_style", "Ceiling Style", ["Flat", "Cathedral", "Vaulted", "Tray", "Coffered", "Beams", "Other"], "w-full", true)}
       {renderDropdown("wallceil_cond", "Walls/Ceiling Condition", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full", true)}
-      
+
       {renderMultiSelect("wholehome", "Whole Home Features", ["Fireplace", "Elevator", "Fire Suppression", "EV Charging", "Multi-Zone HVAC", "Security", "Generator", "Smart Home", "None"])}
-      
+
       {renderSectionHeader("&#9733; Accessibility Features")}
       {renderMultiSelect("accessibility", "Features", ["Grab Bars", "Ramps", "Wide Doorways", "Low Counters", "Lever Handles", "Roll-In Shower", "Elevator", "Other", "None"])}
-      
+
       {renderPhotoCheckboxes(["8_Kitchen_s_", "8_Living_Family", "8_Dining", "8_Main_Level_Rooms"])}
     </div>
   );
@@ -604,31 +742,31 @@ export default function Inspection36Form() {
   const renderUpperLevel = () => (
     <div className="flex flex-wrap -mx-2">
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">go upstairs</span></div>
-      
+
       {renderSectionHeader("&#9733; Bathrooms &#8212; record EACH bathroom", "Most homes have 2-4 bathrooms. Record detail for each.")}
-      
+
       {renderInput("bath1_loc", "Bath 1 &#8212; Location/Level", "text", "w-full")}
       {renderDropdown("bath1_type", "Bath 1 Type", ["Full", "3/4", "Half"], "w-full")}
       {renderDropdown("bath1_update", "Bath 1 Update", ["Fully", "Significantly", "Moderately", "Not Updated"], "w-full")}
       {renderDropdown("bath1_cond", "Bath 1 Condition", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
-      
+
       {renderInput("bath2_loc", "Bath 2 &#8212; Location/Level", "text", "w-full")}
       {renderDropdown("bath2_type", "Bath 2 Type", ["Full", "3/4", "Half"], "w-full")}
       {renderDropdown("bath2_update", "Bath 2 Update", ["Fully", "Significantly", "Moderately", "Not Updated"], "w-full")}
       {renderDropdown("bath2_cond", "Bath 2 Condition", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
-      
+
       {renderInput("bath3_loc", "Bath 3 &#8212; Location/Level", "text", "w-full")}
       {renderDropdown("bath3_type", "Bath 3 Type", ["Full", "3/4", "Half"], "w-full")}
       {renderDropdown("bath3_update", "Bath 3 Update", ["Fully", "Significantly", "Moderately", "Not Updated"], "w-full")}
       {renderDropdown("bath3_cond", "Bath 3 Condition", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
-      
+
       {renderInput("bath4_loc", "Bath 4 &#8212; Location/Level", "text", "w-full")}
       {renderDropdown("bath4_type", "Bath 4 Type", ["Full", "3/4", "Half"], "w-full")}
       {renderDropdown("bath4_update", "Bath 4 Update", ["Fully", "Significantly", "Moderately", "Not Updated"], "w-full")}
       {renderDropdown("bath4_cond", "Bath 4 Condition", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
-      
+
       {renderSectionHeader("&#9733; Bedrooms &#8212; record EACH bedroom", "Most homes have 2-6 bedrooms. Note level, ceiling height, flooring for each.")}
-      
+
       <div className="w-full flex gap-2 px-2">
         {renderInput("br1_level", "BR 1 Level", "text", "w-1/4")}
         {renderInput("br1_ceil", "Ceiling Ht", "text", "w-1/4", true)}
@@ -665,7 +803,7 @@ export default function Inspection36Form() {
         {renderInput("br6_floor", "Flooring", "text", "w-1/4", true)}
         {renderInput("br6_notes", "Notes", "text", "w-1/4")}
       </div>
-      
+
       {renderSectionHeader("Upper Level Detail")}
       <div className="w-full flex gap-2 px-2">
         {renderInput("up1_ceilht", "Ceiling Height", "text", "w-1/3", true)}
@@ -676,7 +814,7 @@ export default function Inspection36Form() {
         {renderInput("up1_unfinsf", "Unfinished SF", "text", "w-1/2")}
         {renderInput("up1_rooms", "Rooms on this level", "text", "w-1/2")}
       </div>
-      
+
       {renderPhotoCheckboxes(["8_All_Bedrooms", "8_All_Baths", "8_Upper_Rooms", "8_Updates_Renovations"])}
     </div>
   );
@@ -692,7 +830,7 @@ export default function Inspection36Form() {
       {renderDropdown("bg_extaccess", "Exterior Access", ["Yes", "No"])}
       {renderInput("bg_ceilht", "Ceiling Height", "number")}
       {renderInput("bg_rooms", "Total Rooms", "number")}
-      
+
       <div className="w-full mt-4 mb-2">
         <h3 className="font-semibold text-dark dark:text-white">Mechanicals</h3>
       </div>
@@ -701,7 +839,7 @@ export default function Inspection36Form() {
       {renderDropdown("cooling", "Cooling System", ["Central", "Window Units", "Mini-Split", "Evaporative", "None"])}
       {renderDropdown("furnace_bg", "Furnace in Below Grade", ["Yes", "No"])}
       {renderInput("bg_defects", "Below Grade Defects")}
-      
+
       {renderPhotoCheckboxes(["8_BG_Finished", "8_BG_Unfinished", "8_Mechanicals", "8_BG_Defects"])}
     </div>
   );
@@ -709,14 +847,14 @@ export default function Inspection36Form() {
   const renderAdu = () => (
     <div className="flex flex-wrap -mx-2">
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">skip if no ADU</span></div>
-      
+
       {renderDropdown("adu_present", "ADU on the property?", ["Yes", "No"], "w-full", true)}
       {renderDropdown("adu_loc", "Location", ["In Dwelling", "In Outbuilding"], "w-full", true)}
       {renderDropdown("adu_access", "Access", ["Interior Only", "Exterior Only", "Both"], "w-full", true)}
       {renderDropdown("adu_rentable", "Legally rentable?", ["Yes", "No"], "w-full", true)}
       {renderDropdown("adu_typical", "Typical for market?", ["Yes", "No"], "w-full", true)}
       {renderDropdown("adu_address", "Separate postal address?", ["Yes", "No"], "w-full", true)}
-      
+
       <div className="w-full flex gap-2 px-2">
         {renderInput("adu_br", "Bedrooms", "text", "w-1/3")}
         {renderInput("adu_fullba", "Full Baths", "text", "w-1/3")}
@@ -726,10 +864,10 @@ export default function Inspection36Form() {
         {renderInput("adu_finsf", "Finished SF", "text", "w-1/2")}
         {renderInput("adu_unfinsf", "Unfinished SF", "text", "w-1/2")}
       </div>
-      
+
       {renderDropdown("adu_kitchen", "ADU Kitchen Update", ["Fully", "Partially", "Not Updated"], "w-full", true)}
       {renderDropdown("adu_bath", "ADU Bath Update", ["Fully", "Significantly", "Moderately", "Not Updated"], "w-full", true)}
-      
+
       {renderPhotoCheckboxes(["8_ADU_Exterior", "8_ADU_Interior", "8_ADU_Kitchen", "8_ADU_Bath"])}
     </div>
   );
@@ -758,13 +896,13 @@ export default function Inspection36Form() {
   const renderFinal = () => (
     <div className="flex flex-wrap -mx-2">
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">you have seen everything</span></div>
-      
+
       {renderSectionHeader("Overall Ratings")}
       {renderDropdown("ext_qual", "Exterior Quality", ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"], "w-full")}
       {renderDropdown("ext_cond", "Exterior Condition", ["C1", "C2", "C3", "C4", "C5", "C6"], "w-full")}
       {renderDropdown("ovr_qual", "Overall Quality", ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"], "w-full")}
       {renderDropdown("ovr_cond", "Overall Condition", ["C1", "C2", "C3", "C4", "C5", "C6"], "w-full")}
-      
+
       {renderSectionHeader("Area Summary")}
       <div className="w-full flex gap-2 px-2">
         {renderInput("fin_ag_std", "Fin AG (std) SF", "text", "w-1/3")}
@@ -772,14 +910,14 @@ export default function Inspection36Form() {
         {renderInput("unfin_ag", "Unfin AG SF", "text", "w-1/3")}
       </div>
       {renderInput("gba_total", "★ ★ GBA Finished All Units incl ADU (SF)", "text", "w-full")}
-      
+
       {renderSectionHeader("Measurement Standard")}
       {renderDropdown("measstd", "Measurement Standard", ["ANSI", "American Measurement Standard", "Other"], "w-full")}
-      
+
       {renderSectionHeader("Functional Issues")}
       {renderMultiSelect("func_issues", "Issues", ["None", "Floor Plan", "Ceiling Height", "Overimprovement", "Underimprovement", "Non-Conformity", "Other"])}
       {renderInput("sketch_notes", "Sketch / measurement notes", "textarea", "w-full")}
-      
+
       {renderSectionHeader("Before You Leave — check each item")}
       {renderChecklistCheckboxes([
         "★ Front door height above grade",
@@ -805,9 +943,9 @@ export default function Inspection36Form() {
         "All defects documented",
         "BR/BA counts confirmed"
       ])}
-      
+
       <div className="w-full px-2 mt-4">
-        {renderInput("team_notes", "Notes for ieIMPACT desktop team", "textarea", "w-full")}
+        {renderInput("team_notes", "Notes for Backbone desktop team", "textarea", "w-full")}
       </div>
     </div>
   );
@@ -860,146 +998,146 @@ export default function Inspection36Form() {
 
   return (
     <>
-    <div className="relative rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5 print:border-none print:p-0 print:shadow-none">
-      
-      {/* Nice Toast Notification */}
-      {toast && (
-        <div className={`fixed top-4 right-4 z-[999] flex items-center gap-3 rounded-lg px-6 py-4 shadow-xl transition-all animate-in slide-in-from-top-5 ${toast.type === 'success' ? 'bg-green text-white shadow-green/20' : 'bg-red text-white shadow-red/20'}`}>
-          <CheckCircle2 className="w-5 h-5" />
-          <p className="font-semibold">{toast.message}</p>
-        </div>
-      )}
+      <div className="relative rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5 print:border-none print:p-0 print:shadow-none">
 
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
-        <div>
-          <p className="text-sm text-dark-5">Overview</p>
-          <h2 className="text-xl font-semibold text-dark dark:text-white">
-            {inspectionId ? "Edit" : "Master"} <span className="font-normal">Inspection UAD 3.6</span>
-            {inspectionId && <span className="text-primary text-lg ml-3">#{inspectionId.slice(0,8)}</span>}
-          </h2>
-        </div>
-        <div className="flex items-center gap-3 print:hidden">
-          {saveStatus && (
-            <span className="flex items-center gap-1.5 text-sm font-medium text-green bg-green/10 px-3 py-1.5 rounded-full">
-              <CheckCircle2 className="w-4 h-4" />
-              <span dangerouslySetInnerHTML={{ __html: saveStatus }} />
-            </span>
-          )}
-          
-          {isViewMode ? (
-            <>
-              <button
-                onClick={() => router.push("/master/inspections/records")}
-                className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50 transition-all dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-              >
-                Back
-              </button>
-              <button
-                onClick={() => setIsViewMode(false)}
-                className="flex items-center gap-2 rounded-lg border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 hover:shadow-md transition-all dark:border-dark-3"
-              >
-                Edit Inspection
-              </button>
-            </>
-          ) : (
-            <>
-              {inspectionId && (
+        {/* Nice Toast Notification */}
+        {toast && (
+          <div className={`fixed top-4 right-4 z-[999] flex items-center gap-3 rounded-lg px-6 py-4 shadow-xl transition-all animate-in slide-in-from-top-5 ${toast.type === 'success' ? 'bg-green text-white shadow-green/20' : 'bg-red text-white shadow-red/20'}`}>
+            <CheckCircle2 className="w-5 h-5" />
+            <p className="font-semibold">{toast.message}</p>
+          </div>
+        )}
+
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between print:hidden">
+          <div>
+            <p className="text-sm text-dark-5">Overview</p>
+            <h2 className="text-xl font-semibold text-dark dark:text-white">
+              {inspectionId ? "Edit" : "Master"} <span className="font-normal">Inspection UAD 3.6</span>
+              {inspectionId && <span className="text-primary text-lg ml-3">#{inspectionId.slice(0, 8)}</span>}
+            </h2>
+          </div>
+          <div className="flex items-center gap-3 print:hidden">
+            {saveStatus && (
+              <span className="flex items-center gap-1.5 text-sm font-medium text-green bg-green/10 px-3 py-1.5 rounded-full">
+                <CheckCircle2 className="w-4 h-4" />
+                <span dangerouslySetInnerHTML={{ __html: saveStatus }} />
+              </span>
+            )}
+
+            {isViewMode ? (
+              <>
                 <button
-                  onClick={() => { 
-                    const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
-                    if (hasChanges) {
-                      setConfirmModal({
-                        title: "Discard Changes?",
-                        message: "You have unsaved changes. Are you sure you want to discard them?",
-                        onConfirm: () => {
-                          setIsViewMode(true); 
-                          fetchInspection(); 
-                          router.push(`/master/inspection36?id=${inspectionId}&mode=view`); 
-                        }
-                      });
-                    } else {
-                      setIsViewMode(true); 
-                      router.push(`/master/inspection36?id=${inspectionId}&mode=view`); 
-                    }
-                  }}
+                  onClick={() => router.push("/master/inspections/records")}
                   className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50 transition-all dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 >
-                  Cancel
+                  Back
                 </button>
-              )}
-              <button
-                onClick={() => setShowTemplateModal(true)}
-                className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50 hover:shadow-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3 transition-all"
-              >
-                <LayoutTemplate className="w-4 h-4 text-primary" />
-                Templates
-              </button>
-              <button
-                onClick={() => {
-                  setConfirmModal({
-                    title: 'Clear Data',
-                    message: 'Clear all data? This cannot be undone.',
-                    onConfirm: () => {
-                      setFormData({});
-                      setCurrentStep(0);
-                      localStorage.removeItem("ieimpact_uad36_inspect");
-                      localStorage.removeItem("ieimpact_uad36_step");
-                    }
-                  });
-                }}
-                className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-red hover:bg-red/5 hover:border-red/20 transition-all dark:border-dark-3 dark:bg-dark-2"
-              >
-                <Eraser className="w-4 h-4" />
-                Clear
-              </button>
-            </>
-          )}
+                <button
+                  onClick={() => setIsViewMode(false)}
+                  className="flex items-center gap-2 rounded-lg border border-transparent bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 hover:shadow-md transition-all dark:border-dark-3"
+                >
+                  Edit Inspection
+                </button>
+              </>
+            ) : (
+              <>
+                {inspectionId && (
+                  <button
+                    onClick={() => {
+                      const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
+                      if (hasChanges) {
+                        setConfirmModal({
+                          title: "Discard Changes?",
+                          message: "You have unsaved changes. Are you sure you want to discard them?",
+                          onConfirm: () => {
+                            setIsViewMode(true);
+                            fetchInspection();
+                            router.push(`/master/inspection36?id=${inspectionId}&mode=view`);
+                          }
+                        });
+                      } else {
+                        setIsViewMode(true);
+                        router.push(`/master/inspection36?id=${inspectionId}&mode=view`);
+                      }
+                    }}
+                    className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50 transition-all dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowTemplateModal(true)}
+                  className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50 hover:shadow-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3 transition-all"
+                >
+                  <LayoutTemplate className="w-4 h-4 text-primary" />
+                  Templates
+                </button>
+                <button
+                  onClick={() => {
+                    setConfirmModal({
+                      title: 'Clear Data',
+                      message: 'Clear all data? This cannot be undone.',
+                      onConfirm: () => {
+                        setFormData({});
+                        setCurrentStep(0);
+                        localStorage.removeItem("ieimpact_uad36_inspect");
+                        localStorage.removeItem("ieimpact_uad36_step");
+                      }
+                    });
+                  }}
+                  className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-red hover:bg-red/5 hover:border-red/20 transition-all dark:border-dark-3 dark:bg-dark-2"
+                >
+                  <Eraser className="w-4 h-4" />
+                  Clear
+                </button>
+              </>
+            )}
 
-          <button
-            onClick={() => setShowExportModal(true)}
-            className="flex items-center gap-2 rounded-lg border border-transparent bg-[#e67e22] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#e67e22]/90 hover:shadow-md transition-all dark:border-dark-3"
-          >
-            <Download className="w-4 h-4" />
-            Export
-          </button>
+            <button
+              onClick={() => setShowExportModal(true)}
+              className="flex items-center gap-2 rounded-lg border border-transparent bg-[#e67e22] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#e67e22]/90 hover:shadow-md transition-all dark:border-dark-3"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="mb-8 overflow-x-auto print:hidden">
-        <div className="flex gap-2 min-w-max pb-2">
-          {STEPS.map((step, index) => {
-            const active = currentStep === index;
-            
-            let btnClass = "border-stroke bg-white text-dark hover:shadow-md dark:border-dark-3 dark:bg-dark-2 dark:text-white transition-all duration-200 ease-in-out";
-            if (active) {
-              btnClass = "border-primary bg-primary text-white shadow-lg shadow-primary/30 transform scale-105";
-            }
+        <div className="mb-8 overflow-x-auto print:hidden">
+          <div className="flex gap-2 min-w-max pb-2">
+            {STEPS.map((step, index) => {
+              const active = currentStep === index;
 
-            return (
-              <button
-                key={step.id}
-                onClick={() => {
-                  setCurrentStep(index);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium ${btnClass}`}
-              >
-                <span dangerouslySetInnerHTML={{ __html: step.short }} />
-              </button>
-            );
-          })}
+              let btnClass = "border-stroke bg-white text-dark hover:shadow-md dark:border-dark-3 dark:bg-dark-2 dark:text-white transition-all duration-200 ease-in-out";
+              if (active) {
+                btnClass = "border-primary bg-primary text-white shadow-lg shadow-primary/30 transform scale-105";
+              }
+
+              return (
+                <button
+                  key={step.id}
+                  onClick={() => {
+                    setCurrentStep(index);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium ${btnClass}`}
+                >
+                  <span dangerouslySetInnerHTML={{ __html: step.short }} />
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Form Content */}
-      <div className="w-full">
-        <div className="h-full min-h-[600px] flex flex-col rounded-[10px] bg-transparent">
+        {/* Form Content */}
+        <div className="w-full">
+          <div className="h-full min-h-[600px] flex flex-col rounded-[10px] bg-transparent">
             <div className="border-b border-stroke px-6 py-4 dark:border-dark-3">
               <h3 className="text-lg font-semibold text-dark dark:text-white">
                 Step {currentStep + 1}: {STEPS[currentStep].label}
               </h3>
             </div>
-            
+
             <div className="p-6 flex-grow">
               <fieldset disabled={isViewMode} className="group-disabled:opacity-70">
                 {renderAllStepsForPrint()}
@@ -1018,7 +1156,7 @@ export default function Inspection36Form() {
                 <ChevronLeft className="w-4 h-4" />
                 Previous Step
               </button>
-              
+
               {currentStep === STEPS.length - 1 ? (
                 <div className="print:hidden">
                   <button
@@ -1049,6 +1187,41 @@ export default function Inspection36Form() {
         </div>
       </div>
 
+
+      {/* PRINT VIEW (All Steps Linearly) */}
+      <div id="inspection-form-pdf" className="hidden print:block text-black bg-white">
+        <div className="mb-6 text-center text-2xl font-bold">UAD 3.6 Field Inspection</div>
+        {STEPS.map((step, sIdx) => {
+          let content = null;
+          switch (step.id) {
+            case "general": content = renderGeneralInfo(); break;
+            case "arrive": content = renderArrive(); break;
+            case "curb": content = renderCurb(); break;
+            case "exterior": content = renderExterior(); break;
+            case "yard": content = renderYard(); break;
+            case "outbuildings": content = renderOutbuildings(); break;
+            case "mainlevel": content = renderMainLevel(); break;
+            case "upperlevel": content = renderUpperLevel(); break;
+            case "belowgrade": content = renderBelowGrade(); break;
+            case "adu": content = renderAdu(); break;
+            case "final": content = renderFinal(); break;
+            default: content = null;
+          }
+          return (
+            <div key={sIdx} className="mb-10 block">
+              {step.label && (
+                <h2 className="mb-4 text-xl font-bold border-b-2 border-black pb-2 text-black">
+                  {step.label}
+                </h2>
+              )}
+              <form>
+                {content}
+              </form>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Template Modal */}
       {showTemplateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -1060,7 +1233,7 @@ export default function Inspection36Form() {
             <p className="mb-6 text-center text-xs text-dark-5">
               Templates are saved on this device only.
             </p>
-            
+
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => {
@@ -1081,21 +1254,21 @@ export default function Inspection36Form() {
                   <button
                     onClick={() => {
                       setConfirmModal({
-      title: 'Load Template',
-      message: 'This will overwrite your current form data. Proceed?',
-      onConfirm: () => {
-                        const tpl = localStorage.getItem("ieimpact_uad36_template");
-                        if (tpl) {
-                          try {
-                            setFormData(JSON.parse(tpl));
-                            setToast({ message: "Template loaded successfully", type: 'success' });
-                            setTimeout(() => setToast(null), 3000);
-                          } catch(e) {}
+                        title: 'Load Template',
+                        message: 'This will overwrite your current form data. Proceed?',
+                        onConfirm: () => {
+                          const tpl = localStorage.getItem("ieimpact_uad36_template");
+                          if (tpl) {
+                            try {
+                              setFormData(JSON.parse(tpl));
+                              setToast({ message: "Template loaded successfully", type: 'success' });
+                              setTimeout(() => setToast(null), 3000);
+                            } catch (e) { }
+                          }
+                          setShowTemplateModal(false);
                         }
-                        setShowTemplateModal(false);
-                      }
-                    });
-                  }}
+                      });
+                    }}
                     className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
                   >
                     <Download className="w-5 h-5 text-primary" />
@@ -1104,16 +1277,16 @@ export default function Inspection36Form() {
                   <button
                     onClick={() => {
                       setConfirmModal({
-      title: 'Delete Template',
-      message: 'Delete saved template?',
-      onConfirm: () => {
-                        localStorage.removeItem("ieimpact_uad36_template");
-                        setHasTemplate(false);
-                        setToast({ message: "Template deleted", type: 'success' });
-                        setTimeout(() => setToast(null), 3000);
-                      }
-                    });
-                  }}
+                        title: 'Delete Template',
+                        message: 'Delete saved template?',
+                        onConfirm: () => {
+                          localStorage.removeItem("ieimpact_uad36_template");
+                          setHasTemplate(false);
+                          setToast({ message: "Template deleted", type: 'success' });
+                          setTimeout(() => setToast(null), 3000);
+                        }
+                      });
+                    }}
                     className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-red shadow-sm transition hover:bg-red/5 hover:border-red/20 dark:border-dark-3 dark:bg-gray-dark dark:hover:bg-dark-3"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -1122,7 +1295,7 @@ export default function Inspection36Form() {
                 </>
               )}
             </div>
-            
+
             <p className="my-4 text-center text-sm text-dark-5">
               {hasTemplate ? "You have a saved template." : "No template saved yet."}
             </p>
@@ -1145,7 +1318,7 @@ export default function Inspection36Form() {
             <p className="mb-6 text-sm text-dark-5">
               Your data is saved locally on this device. Choose how to export:
             </p>
-            
+
             <div className="flex flex-col gap-3">
               <button
                 onClick={() => {
@@ -1157,16 +1330,14 @@ export default function Inspection36Form() {
                 <Printer className="w-5 h-5" />
                 Print / Save as PDF
               </button>
-              
+
               <button
-                onClick={() => {
-                  window.location.href = `mailto:orders@backbonedatasolutions.com?subject=UAD 3.6%20Data&body=${encodeURIComponent(JSON.stringify(formData, null, 2))}`;
-                  setShowExportModal(false);
-                }}
-                className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                onClick={handleEmailJson}
+                disabled={isEmailing}
+                className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
               >
                 <Mail className="w-5 h-5 text-blue-500" />
-                Email to BackBone Data Solution
+                {isEmailing ? "Sending Data..." : "Email to BackBone Data Solution"}
               </button>
 
               <button
