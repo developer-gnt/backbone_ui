@@ -248,7 +248,7 @@ const Inspection26Form = () => {
       setIsEmailing(true);
       setToast({ message: "Sending form data to BackBone Data Solution...", type: 'success' });
 
-      await axiosInstance.post('/inspection26/email-json', formData);
+      await axiosInstance.post('/inspection26/email-form-as-pdf', formData);
 
       setToast({ message: "Form data sent to BackBone Data Solution successfully!", type: 'success' });
       setTimeout(() => setToast(null), 4000);
@@ -887,13 +887,25 @@ const Inspection26Form = () => {
                 className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 disabled:opacity-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
               >
                 <Mail className="w-5 h-5 text-blue-500" />
-                {isEmailing ? "Sending Data..." : "Email to BackBone Data Solution"}
+                {isEmailing ? "Sending Data..." : "Email to Backbone Team"}
               </button>
 
               <button
-                onClick={() => {
-                  alert("Blank PDF template is not currently available.");
-                  setShowExportModal(false);
+                onClick={async () => {
+                  try {
+                    const res = await axiosInstance.post('/inspection26/generate-pdf', {}, { responseType: 'blob' });
+                    const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'blank_inspection_26.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    setShowExportModal(false);
+                  } catch (err) {
+                    console.error("Failed to download blank PDF", err);
+                  }
                 }}
                 className="flex items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-4 py-3.5 text-sm font-semibold text-dark shadow-sm transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
               >
