@@ -20,12 +20,15 @@ const DOCUMENT_TYPES = [
   "Plat Map",
 ];
 
-type PackageOption = {
-  id: number | string;
-  title?: string;
-  duration?: string;
-  price?: number | string;
-  credit?: number | string;
+type TatPackageOption = {
+  packageId: number | string;
+  packageCode?: string;
+  displayLabel?: string;
+  tatHours?: number | string;
+  defaultPrice?: number | string;
+  effectivePrice?: number | string;
+  isOverridden?: boolean;
+  overrideId?: number | null;
 };
 
 type OrderTypeOption = {
@@ -109,35 +112,42 @@ const initialForm: FormState = {
   packageId: "",
 };
 
-const getDurationValue = (item?: PackageOption) => {
-  const raw = `${item?.duration ?? item?.title ?? ""}`;
+const getDurationValue = (item?: TatPackageOption) => {
+  const raw = `${item?.tatHours ?? item?.packageCode ?? item?.displayLabel ?? ""}`;
   const match = raw.match(/\d+/);
-  return match ? match[0].padStart(2, "0") : `${item?.id ?? ""}`;
+  return match ? match[0].padStart(2, "0") : `${item?.packageId ?? ""}`;
 };
 
-const getPackageCost = (item?: PackageOption) => Number(item?.credit ?? item?.price ?? 0);
-const getPackageTitle = (item?: PackageOption) => {
+const getPackageCost = (item?: TatPackageOption) =>
+  Number(item?.effectivePrice ?? item?.defaultPrice ?? 0);
+const getPackageTitle = (item?: TatPackageOption) => {
   const duration = getDurationValue(item);
-  return item?.title?.trim() || `${Number(duration)} hours TAT`;
+  return item?.displayLabel?.trim() || `${Number(duration)} hours TAT`;
 };
-const getEtaLabel = (item?: PackageOption, index = 0) => {
+const getEtaLabel = (item?: TatPackageOption, index = 0) => {
   const duration = getDurationValue(item);
-  const displayDuration = ETA_ORDER.find((value) => value === duration) ?? ETA_ORDER[index] ?? duration;
+  const displayDuration =
+    ETA_ORDER.find((value) => value === duration) ??
+    ETA_ORDER[index] ??
+    duration;
   return `${displayDuration} hours TAT`;
 };
 const ETA_ORDER = ["12", "06", "04"] as const;
-const getEtaPackages = (packages: PackageOption[]) => {
+const getEtaPackages = (packages: TatPackageOption[]) => {
   const preferred = ETA_ORDER.map((duration) =>
     packages.find((item) => getDurationValue(item) === duration),
-  ).filter((item): item is PackageOption => Boolean(item));
+  ).filter((item): item is TatPackageOption => Boolean(item));
 
-  if (preferred.length >= ETA_ORDER.length || packages.length <= ETA_ORDER.length) {
+  if (
+    preferred.length >= ETA_ORDER.length ||
+    packages.length <= ETA_ORDER.length
+  ) {
     return preferred.length ? preferred : packages.slice(0, ETA_ORDER.length);
   }
 
-  const selectedIds = new Set(preferred.map((item) => `${item.id}`));
+  const selectedIds = new Set(preferred.map((item) => `${item.packageId}`));
   const fallback = packages
-    .filter((item) => !selectedIds.has(`${item.id}`))
+    .filter((item) => !selectedIds.has(`${item.packageId}`))
     .slice(0, ETA_ORDER.length - preferred.length);
 
   return [...preferred, ...fallback];
@@ -147,7 +157,7 @@ export default function ClientEditOrderPage() {
   const params = useParams<{ id: string }>();
   const { user } = useAuth();
   const [form, setForm] = useState<FormState>(initialForm);
-  const [packages, setPackages] = useState<PackageOption[]>([]);
+  const [packages, setPackages] = useState<TatPackageOption[]>([]);
   const [orderTypes, setOrderTypes] = useState<OrderTypeOption[]>([]);
   const [financingOptions, setFinancingOptions] = useState<FinancingOption[]>([]);
   const [states, setStates] = useState<StateOption[]>([]);
@@ -179,7 +189,7 @@ export default function ClientEditOrderPage() {
       try {
         const [detailRes, packageRes, orderTypeRes, formRes, stateRes] = await Promise.all([
           axiosInstance.get(`/masters/reports/orders/${orderId}/details`),
-          axiosInstance.get("/masters/package", {
+          axiosInstance.get("/tat-packages", {
             params: { username: user?.username || user?.email || undefined },
           }),
           axiosInstance.get("/masters/order-type"),
@@ -195,12 +205,12 @@ export default function ClientEditOrderPage() {
         const preferredEtaPackages = getEtaPackages(nextPackages);
 
         const order = detail?.order;
-        const matchedPackage = preferredEtaPackages.find((item: PackageOption) => {
+        const matchedPackage = preferredEtaPackages.find((item: TatPackageOption) => {
           const packageValue = `${order?.package ?? ""}`.trim();
           return (
-            `${item.id}` === packageValue ||
+            `${item.packageId}` === packageValue ||
             getDurationValue(item) === packageValue.padStart(2, "0") ||
-            `${item.title ?? item.duration ?? ""}`.includes(packageValue)
+            `${item.displayLabel ?? item.packageCode ?? ""}`.includes(packageValue)
           );
         });
 
@@ -225,7 +235,7 @@ export default function ClientEditOrderPage() {
           sketch: order?.sketch ?? "YES",
           reoform: order?.reoform ?? "No",
           nonUad: order?.non_uad ?? "No",
-          packageId: `${matchedPackage?.id ?? preferredEtaPackages[0]?.id ?? ""}`,
+          packageId: `${matchedPackage?.packageId ?? preferredEtaPackages[0]?.packageId ?? ""}`,
         });
       } catch (error) {
         setFeedback({
@@ -263,7 +273,7 @@ export default function ClientEditOrderPage() {
   }, [form.subjectAddress]);
 
   const selectedPackage = useMemo(
-    () => etaPackages.find((item) => `${item.id}` === form.packageId) ?? etaPackages[0],
+    () => etaPackages.find((item) => `${item.packageId}` === form.packageId) ?? etaPackages[0],
     [form.packageId, etaPackages],
   );
 
@@ -316,7 +326,11 @@ export default function ClientEditOrderPage() {
       const payload = new FormData();
       payload.append("createdby", user?.username || user?.email || "");
       payload.append("package", getDurationValue(selectedPackage));
-      payload.append("package_id", `${selectedPackage.id ?? ""}`);
+      payload.append("package_id", `${selectedPackage.packageId ?? ""}`);
+      payload.append("tat_package_id", `${selectedPackage.packageId ?? ""}`);
+      payload.append("package_code", `${selectedPackage.packageCode ?? ""}`);
+      payload.append("tat_hours", getDurationValue(selectedPackage));
+      payload.append("charged_amount", `${getPackageCost(selectedPackage)}`);
       payload.append("amount", `${getPackageCost(selectedPackage)}`);
       payload.append("order_type", form.orderType);
       payload.append("financing", form.financing);
@@ -503,7 +517,7 @@ export default function ClientEditOrderPage() {
                   <label className="mb-2 block text-sm font-medium text-dark dark:text-white">Estimated ETA</label>
                   <select value={form.packageId} onChange={(e) => updateField("packageId", e.target.value)} className="w-full rounded-lg border border-stroke bg-transparent px-4 py-3 outline-none focus:border-primary dark:border-dark-3 dark:text-white">
                     {etaPackages.map((item, index) => (
-                      <option key={item.id} value={item.id}>{getEtaLabel(item, index)}</option>
+                      <option key={item.packageId} value={item.packageId}>{getEtaLabel(item, index)} - ${getPackageCost(item)}</option>
                     ))}
                   </select>
                 </div>
