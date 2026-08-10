@@ -1,0 +1,52 @@
+name: Deploy Backbone Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy Backbone frontend to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+
+          script: |
+            set -e
+
+            echo "=================================="
+            echo "Starting Backbone frontend deploy"
+            echo "=================================="
+
+            cd /root/backbone-ui
+
+            echo "Current directory:"
+            pwd
+
+            echo "Pulling latest code..."
+            git pull --ff-only origin main
+
+            echo "Installing dependencies..."
+            npm ci
+
+            echo "Building Next.js application..."
+            npm run build
+
+            echo "Reloading PM2..."
+            pm2 reload backbone-ui
+
+            echo "Saving PM2 process list..."
+            pm2 save
+
+            echo "=================================="
+            echo "Backbone frontend deployment done"
+            echo "=================================="

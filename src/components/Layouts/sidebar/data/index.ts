@@ -2,7 +2,7 @@ import * as Icons from "../icons";
 
 export const NAV_DATA = [
   {
-    label: "MAIN MENU",
+    label: "MAIN MENU11",
     items: [
       {
         title: "Dashboard",
