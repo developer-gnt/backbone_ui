@@ -16,6 +16,7 @@ interface PointsModel {
   id: number;
   username: string | null;
   points: number | string | null;
+  feedback_points?: number | string | null;
 }
 
 const PointsPage = () => {
@@ -181,6 +182,7 @@ const PointsPage = () => {
               <TableHead>Sr. No.</TableHead>
               <TableHead>User Name</TableHead>
               <TableHead>Bonus Points</TableHead>
+              <TableHead>Feedback Points</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -190,6 +192,7 @@ const PointsPage = () => {
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{item.username || "-"}</TableCell>
                 <TableCell>{item.points ?? 0}</TableCell>
+                <TableCell>{item.feedback_points ?? 0}</TableCell>
               </TableRow>
             ))}
           </TableBody>

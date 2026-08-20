@@ -14,6 +14,7 @@ export interface AuthUser {
   std_instr?: string | null;
   wallete_balance?: number | string | null;
   points?: number | null;
+  feedback_points?: number | null;
   free_trial?: string | null;
   expiry_date?: string | null;
   role: string | null;

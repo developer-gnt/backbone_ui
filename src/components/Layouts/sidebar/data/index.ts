@@ -118,6 +118,7 @@ export const CLIENT_NAV_DATA = [
         items: [
           { title: "Order Report", url: "/reports/order-reports" },
           { title: "Accounting Report", url: "/reports/account-report" },
+          { title: "Point History", url: "/reports/points-history" },
         ],
       },
       {

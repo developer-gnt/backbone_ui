@@ -15,6 +15,7 @@ import { compactFormat, standardFormat } from "@/lib/format-number";
 import { getAttachmentUrl } from "@/lib/attachmentUrl";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { OverviewCard } from "./_components/overview-cards/card";
 import * as icons from "./_components/overview-cards/icons";
 
@@ -245,7 +246,7 @@ const getSupervisorStatusOptions = (status?: string) => {
 };
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const role = `${user?.role ?? ""}`.trim().toLowerCase();
   const isClientUser = role === "client";
   const isSupervisorUser = role === "supervisor";
@@ -303,6 +304,7 @@ export default function Home() {
   const [isLoadingAdminTransactions, setIsLoadingAdminTransactions] =
     useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRedeemingPoints, setIsRedeemingPoints] = useState(false);
   const [supervisorFeedback, setSupervisorFeedback] = useState<{
     type: "success" | "error";
     text: string;
@@ -1055,6 +1057,56 @@ export default function Home() {
       safeClientPage * clientPageSize,
     );
 
+    const executeRedeem = async () => {
+      setIsRedeemingPoints(true);
+      try {
+        const response = await axiosInstance.post("/masters/points/client-redeem");
+        toast.success(response.data?.message || "Points redeemed successfully!");
+        setClientFeedback({ type: "success", text: response.data?.message || "Points redeemed successfully!" });
+        await refreshUser();
+      } catch (err: any) {
+        toast.error(getApiErrorMessage(err, "Failed to redeem points."));
+        setClientFeedback({ type: "error", text: getApiErrorMessage(err, "Failed to redeem points.") });
+      } finally {
+        setIsRedeemingPoints(false);
+      }
+    };
+
+    const handleRedeemPoints = () => {
+      toast(
+        ({ closeToast }) => (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm font-medium text-dark dark:text-white">
+              Are you sure you want to redeem your feedback points for wallet credits?
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (closeToast) closeToast();
+                  executeRedeem();
+                }}
+                className="rounded-md bg-primary px-4 py-1.5 text-xs font-semibold text-white transition-all hover:bg-primary/90"
+              >
+                Yes, Redeem
+              </button>
+              <button
+                onClick={closeToast}
+                className="rounded-md border border-stroke bg-gray-1 px-4 py-1.5 text-xs font-semibold text-dark transition-all hover:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ),
+        {
+          position: "top-center",
+          autoClose: false,
+          closeOnClick: false,
+          draggable: false,
+        }
+      );
+    };
+
     return (
       <div className="space-y-6">
         {error && (
@@ -1126,8 +1178,9 @@ export default function Home() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <Link
+        <div className="overflow-x-auto pb-4">
+          <div className="grid min-w-[1300px] gap-4 grid-cols-6">
+            <Link
             href="/client/add-credit"
             className="rounded-xl border border-stroke bg-white p-5 shadow-1 transition duration-200 hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
           >
@@ -1138,6 +1191,27 @@ export default function Home() {
               ({walletBalance} Credits)
             </p>
           </Link>
+          <div
+            className="flex flex-col justify-between rounded-xl border border-stroke bg-white p-5 shadow-1 dark:border-dark-3 dark:bg-gray-dark"
+          >
+            <div>
+              <p className="text-sm font-medium text-dark-5 dark:text-dark-6">
+                Feedback Points
+              </p>
+              <p className="mt-1 text-xl font-bold text-primary">
+                ({user?.feedback_points || 0} Points)
+              </p>
+            </div>
+            {Number(user?.feedback_points || 0) >= 10 && (
+              <button
+                onClick={handleRedeemPoints}
+                disabled={isRedeemingPoints}
+                className="mt-3 w-full rounded-md bg-primary py-1.5 text-xs font-medium text-white transition hover:bg-opacity-90 disabled:opacity-50"
+              >
+                {isRedeemingPoints ? "Redeeming..." : "Redeem"}
+              </button>
+            )}
+          </div>
           <Link
             href="/client/new-order"
             className="rounded-xl border border-stroke bg-white p-5 shadow-1 transition duration-200 hover:-translate-y-0.5 hover:shadow-card dark:border-dark-3 dark:bg-gray-dark"
@@ -1171,7 +1245,7 @@ export default function Home() {
               ({completedCount})
             </p>
           </Link>
-          <div className="rounded-xl border border-stroke bg-white p-5 shadow-1 dark:border-dark-3 dark:bg-gray-dark sm:col-span-2 xl:col-span-1">
+          <div className="rounded-xl border border-stroke bg-white p-5 shadow-1 dark:border-dark-3 dark:bg-gray-dark">
             <p className="mb-2 font-semibold text-dark dark:text-white">
               Notes
             </p>
@@ -1187,6 +1261,7 @@ export default function Home() {
               </li>
             </ol>
           </div>
+        </div>
         </div>
 
         {/* Latest Orders Table */}

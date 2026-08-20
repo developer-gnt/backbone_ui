@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
+import { toast } from "react-toastify";
 
 type CurrentUser = {
     username: string;
@@ -9,6 +10,7 @@ type CurrentUser = {
     lastname: string;
     email: string;
     wallete_balance: number;
+    feedback_points: number;
 };
 
 const CREDIT_PACKAGES = [
@@ -53,6 +55,7 @@ export default function ClientAddCreditPage() {
     const [customCredits, setCustomCredits] = useState("");
     const [useCustomCredits, setUseCustomCredits] = useState(false);
     const [error, setError] = useState("");
+    const [redeeming, setRedeeming] = useState(false);
 
     useEffect(() => {
         loadCurrentUser();
@@ -70,6 +73,20 @@ export default function ClientAddCreditPage() {
             setError("Unable to load your account information.");
         } finally {
             setLoadingUser(false);
+        }
+    };
+
+    const handleRedeemPoints = async () => {
+        try {
+            setRedeeming(true);
+            const response = await axiosInstance.post("/masters/points/client-redeem");
+            toast.success(response.data?.message || "Points successfully redeemed!");
+            loadCurrentUser();
+        } catch (err: any) {
+            console.log(err);
+            toast.error(err?.response?.data?.message || "Failed to redeem points.");
+        } finally {
+            setRedeeming(false);
         }
     };
 
@@ -117,7 +134,7 @@ export default function ClientAddCreditPage() {
         const selected = getCredits();
 
         if (!selected || selected <= 0 || Number.isNaN(selected)) {
-            alert("Please select valid credits.");
+            toast.error("Please select valid credits.");
             return;
         }
 
@@ -139,7 +156,7 @@ export default function ClientAddCreditPage() {
         } catch (err: any) {
             console.log(err);
 
-            alert(
+            toast.error(
                 err?.response?.data?.message ||
                 "Unable to create PayPal payment."
             );
@@ -218,15 +235,35 @@ export default function ClientAddCreditPage() {
                                         </div>
                                     </div>
 
-                                    <div className="rounded-2xl border border-primary/15 bg-white/80 px-5 py-4 backdrop-blur-sm dark:border-primary/20 dark:bg-dark-2/80">
-                                        <div className="text-xs font-medium uppercase tracking-[0.18em] text-dark-5">
-                                            Current Wallet Balance
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <div className="rounded-2xl border border-primary/15 bg-white/80 px-5 py-4 backdrop-blur-sm dark:border-primary/20 dark:bg-dark-2/80">
+                                            <div className="text-xs font-medium uppercase tracking-[0.18em] text-dark-5">
+                                                Current Wallet Balance
+                                            </div>
+                                            <div className="mt-2 text-3xl font-bold text-primary [font-variant-numeric:tabular-nums]">
+                                                {Number(user?.wallete_balance || 0).toFixed(2)}
+                                            </div>
+                                            <div className="mt-1 text-sm text-dark-5">
+                                                Available credits
+                                            </div>
                                         </div>
-                                        <div className="mt-2 text-3xl font-bold text-primary [font-variant-numeric:tabular-nums]">
-                                            {Number(user?.wallete_balance || 0).toFixed(2)}
-                                        </div>
-                                        <div className="mt-1 text-sm text-dark-5">
-                                            Available credits
+
+                                        <div className="rounded-2xl border border-primary/15 bg-white/80 px-5 py-4 backdrop-blur-sm dark:border-primary/20 dark:bg-dark-2/80">
+                                            <div className="text-xs font-medium uppercase tracking-[0.18em] text-dark-5">
+                                                Feedback Reward Points
+                                            </div>
+                                            <div className="mt-2 text-3xl font-bold text-primary [font-variant-numeric:tabular-nums]">
+                                                {Number(user?.feedback_points || 0)}
+                                            </div>
+                                            <div className="mt-1 text-sm text-dark-5 h-[20px]">
+                                                {(user?.feedback_points || 0) >= 10 ? (
+                                                    <button onClick={handleRedeemPoints} disabled={redeeming} className="text-primary hover:underline font-semibold transition-all">
+                                                        {redeeming ? "Redeeming..." : "Redeem Points"}
+                                                    </button>
+                                                ) : (
+                                                    "Min 10 to redeem"
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
