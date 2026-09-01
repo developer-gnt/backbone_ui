@@ -1201,7 +1201,7 @@ export default function Home() {
                   <polyline points="10 9 9 9 8 9" />
                 </svg>
                 <span className="text-sm font-semibold sm:text-base">
-                  UAD 2.6
+                  UAD 2.6 PLACE NEW ORDER
                 </span>
               </Link>
 
@@ -1226,17 +1226,17 @@ export default function Home() {
                   <polyline points="10 9 9 9 8 9" />
                 </svg>
                 <span className="text-sm font-semibold sm:text-base">
-                  UAD 3.6
+                  UAD 3.6 PLACE NEW ORDER
                 </span>
               </Link>
 
-              <Link
+              {/* <Link
                 href="/client/new-order"
                 className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
+                  className="h-5 w-5" 
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -1250,7 +1250,7 @@ export default function Home() {
                 <span className="text-sm font-bold sm:text-base">
                   PLACE NEW ORDER
                 </span>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>
@@ -2341,7 +2341,7 @@ export default function Home() {
                 <polyline points="10 9 9 9 8 9" />
               </svg>
               <span className="text-sm font-semibold sm:text-base">
-                UAD 2.6
+                UAD 2.6 PLACE NEW ORDER
               </span>
             </Link>
 
@@ -2366,11 +2366,11 @@ export default function Home() {
                 <polyline points="10 9 9 9 8 9" />
               </svg>
               <span className="text-sm font-semibold sm:text-base">
-                UAD 3.6
+                UAD 3.6 PLACE NEW ORDER
               </span>
             </Link>
 
-            <Link
+            {/* <Link
               href="/orders/place-new-order"
               className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-white shadow-sm transition-all hover:bg-primary/90 hover:shadow-md"
             >
@@ -2390,7 +2390,7 @@ export default function Home() {
               <span className="text-sm font-bold sm:text-base">
                 PLACE NEW ORDER
               </span>
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>
