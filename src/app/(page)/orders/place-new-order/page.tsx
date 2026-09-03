@@ -96,6 +96,20 @@ const AVAILABILITY_COLORS = [
 ] as const;
 const ETA_ORDER = ["12", "06", "04"] as const;
 
+const US_STATE_ABBR: Record<string, string> = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+  HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+  KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi",
+  MO: "Missouri", MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire",
+  NJ: "New Jersey", NM: "New Mexico", NY: "New York", NC: "North Carolina",
+  ND: "North Dakota", OH: "Ohio", OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania",
+  RI: "Rhode Island", SC: "South Carolina", SD: "South Dakota", TN: "Tennessee",
+  TX: "Texas", UT: "Utah", VT: "Vermont", VA: "Virginia", WA: "Washington",
+  WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming", DC: "District of Columbia",
+};
+
 const getEtaPackages = (packages: TatPackageOption[]) => {
   const preferred = ETA_ORDER.map((duration) =>
     packages.find((item) => getDurationValue(item) === duration),
@@ -191,27 +205,32 @@ export default function PlaceNewOrderPage() {
     if (addressSelected) {
       return;
     }
-    if (form.fullAddress.trim().length < 3) {
+    const query = form.fullAddress.trim();
+    if (query.length < 3) {
       setSuggestions([]);
       return;
     }
 
+    const controller = new AbortController();
     const timeout = setTimeout(async () => {
       try {
         setLoadingAddress(true);
-
-        const results = await searchAddress(form.fullAddress);
-
+        const results = await searchAddress(query, controller.signal);
         setSuggestions(results);
-      } catch (e) {
-        console.error(e);
+      } catch (e: any) {
+        if (e?.name !== "CanceledError") {
+          console.error(e);
+        }
       } finally {
         setLoadingAddress(false);
       }
-    }, 400);
+    }, 200);
 
-    return () => clearTimeout(timeout);
-  }, [form.fullAddress]);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [form.fullAddress, addressSelected]);
 
   const etaAvailabilityRows = useMemo(
     () =>
@@ -251,7 +270,10 @@ export default function PlaceNewOrderPage() {
           ? orderTypeRes.data
           : [];
         const nextForms = Array.isArray(formRes.data) ? formRes.data : [];
-        const nextStates = Array.isArray(stateRes.data) ? stateRes.data : [];
+        const allUsStates = Object.values(US_STATE_ABBR).sort().map((name, idx) => ({ id: idx + 1, city: name }));
+        const nextStates = Array.isArray(stateRes.data) && stateRes.data.length > 0
+          ? stateRes.data
+          : allUsStates;
         const nextAvailability = Array.isArray(availabilityRes.data)
           ? availabilityRes.data
           : [];
@@ -271,7 +293,7 @@ export default function PlaceNewOrderPage() {
             prev.orderType || `${nextOrderTypes[0]?.order_type ?? "1004"}`,
           financing:
             prev.financing || `${nextForms[0]?.form ?? "CONVENTIONAL"}`,
-          state: prev.state || `${nextStates[0]?.city ?? ""}`,
+          state: prev.state || "",
         }));
       } catch (error) {
         //  catch (error) {
@@ -404,18 +426,55 @@ export default function PlaceNewOrderPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const matchStateToOptions = (rawState: string): string => {
+    if (!rawState) return "";
+    // Try exact match first
+    const exact = states.find(
+      (s) => (s.city || "").toLowerCase() === rawState.toLowerCase()
+    );
+    if (exact) return exact.city || "";
+    // Try abbreviation expansion (e.g. "IL" -> "Illinois")
+    const expanded = US_STATE_ABBR[rawState.toUpperCase()];
+    if (expanded) {
+      const abbMatch = states.find(
+        (s) => (s.city || "").toLowerCase() === expanded.toLowerCase()
+      );
+      if (abbMatch) return abbMatch.city || "";
+    }
+    // Try partial / starts-with match
+    const partial = states.find((s) =>
+      (s.city || "").toLowerCase().startsWith(rawState.toLowerCase().slice(0, 4))
+    );
+    if (partial) return partial.city || "";
+    // Return the raw value as fallback — it'll show as the typed state
+    return rawState;
+  };
+
   const handleSelectAddress = (item: any) => {
     updateField("fullAddress", item.display_name);
 
-    updateField(
-      "subjectAddress",
-      `${item.address.house_number ?? ""} ${item.address.road ?? ""}`.trim(),
-    );
+    const houseNumber = item.address?.house_number ?? "";
+    const road = item.address?.road || item.address?.street || item.address?.pedestrian || "";
+    const streetAddress = `${houseNumber} ${road}`.trim() || item.display_place || item.display_name?.split(",")[0] || "";
 
-    updateField("city", item.address.city || item.address.town || "");
-    updateField("state", item.address.state || "");
-    updateField("zipcode", item.address.postcode || "");
-    updateField("country", item.address.country || "");
+    const rawCity =
+      item.address?.city ||
+      item.address?.town ||
+      item.address?.village ||
+      item.address?.municipality ||
+      item.address?.suburb ||
+      item.address?.hamlet ||
+      "";
+
+    const rawState = item.address?.state || item.address?.county || "";
+    const rawZip = item.address?.postcode?.split("-")[0] || item.address?.postcode || "";
+    const rawCountry = item.address?.country || "United States";
+
+    updateField("subjectAddress", streetAddress);
+    updateField("city", rawCity);
+    updateField("state", matchStateToOptions(rawState));
+    updateField("zipcode", rawZip);
+    updateField("country", rawCountry);
 
     setSuggestions([]);
     setAddressSelected(true);
@@ -732,46 +791,66 @@ export default function PlaceNewOrderPage() {
 
             <div>
               <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
-                *Address
+                *Property Address Search
               </label>
 
               <div className="relative">
-                <input
-                  value={form.fullAddress}
-                  onChange={(e) => {
-                    setAddressSelected(false);
-                    updateField("fullAddress", e.target.value);
-                  }}
-                  placeholder="e.g. 1234 Main St"
-                  className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm"
-                />
-
-                {loadingAddress && (
-                  <div className="mt-2 text-sm">Searching...</div>
-                )}
+                <div className="relative flex items-center">
+                  <input
+                    value={form.fullAddress}
+                    onChange={(e) => {
+                      setAddressSelected(false);
+                      updateField("fullAddress", e.target.value);
+                    }}
+                    placeholder="Start typing a US property address…"
+                    className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 pr-10 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                  />
+                  {loadingAddress && (
+                    <span className="absolute right-3 text-xs text-dark-5 dark:text-dark-6 animate-pulse">Searching…</span>
+                  )}
+                  {form.fullAddress && !loadingAddress && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateField("fullAddress", "");
+                        updateField("subjectAddress", "");
+                        updateField("city", "");
+                        updateField("state", "");
+                        updateField("zipcode", "");
+                        updateField("country", "United States");
+                        setSuggestions([]);
+                        setAddressSelected(false);
+                      }}
+                      className="absolute right-3 text-dark-5 hover:text-red-500 dark:text-dark-6"
+                      title="Clear address"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
 
                 {suggestions.length > 0 && (
-                  <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border bg-white shadow-lg">
+                  <div className="absolute z-50 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-stroke bg-white shadow-lg dark:border-dark-3 dark:bg-dark-2">
                     {suggestions.map((item, index) => (
                       <button
                         key={index}
                         type="button"
                         onClick={() => handleSelectAddress(item)}
-                        className="block w-full border-b px-4 py-3 text-left hover:bg-gray-100"
+                        className="block w-full border-b border-stroke px-4 py-3 text-left text-sm text-dark hover:bg-gray-100 dark:border-dark-3 dark:text-white dark:hover:bg-dark-3"
                       >
-                        {item.display_name}
+                        <span className="font-medium">{item.display_name.split(",")[0]}</span>
+                        <span className="ml-1 text-xs text-dark-5 dark:text-dark-6">{item.display_name.split(",").slice(1).join(",")}</span>
                       </button>
                     ))}
                   </div>
                 )}
-              </div>
 
-              {/* <input
-                value={form.fullAddress}
-                onChange={(event) => updateField("fullAddress", event.target.value)}
-                placeholder="e.g. 1234 Main St"
-                className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-              /> */}
+                {addressSelected && form.state && (
+                  <p className="mt-1.5 text-xs text-green-600 dark:text-green-400">
+                    {/* ✓ Address selected — State: <strong>{form.state}</strong>, City: <strong>{form.city}</strong>, Zip: <strong>{form.zipcode}</strong> */}
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -804,6 +883,7 @@ export default function PlaceNewOrderPage() {
                   onChange={(event) => updateField("state", event.target.value)}
                   className="w-full rounded-md border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 >
+                  <option value="">— Select State —</option>
                   {states.map((item, index) => (
                     <option
                       key={`${item.id ?? item.city ?? index}`}
@@ -812,6 +892,10 @@ export default function PlaceNewOrderPage() {
                       {item.city || "State"}
                     </option>
                   ))}
+                  {/* If the state from address search doesn't exist in the DB list, still show it */}
+                  {form.state && !states.some((s) => (s.city || "") === form.state) && (
+                    <option value={form.state}>{form.state} (auto-detected)</option>
+                  )}
                 </select>
               </div>
             </div>

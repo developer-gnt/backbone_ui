@@ -1181,7 +1181,7 @@ export default function Home() {
 
             <div className="flex flex-wrap items-center gap-4">
               <Link
-                href="/master/inspection26"
+                href="/client/new-order"
                 className="inline-flex items-center justify-center gap-2 rounded-md bg-green px-4 py-2.5 text-white shadow-sm transition-all hover:bg-green-dark hover:shadow-md"
               >
                 <svg
@@ -2321,7 +2321,7 @@ export default function Home() {
 
           <div className="flex flex-wrap items-center gap-4">
             <Link
-              href="/master/inspection26"
+              href="/orders/place-new-order"
               className="inline-flex items-center justify-center gap-2 rounded-md bg-green px-4 py-2.5 text-white shadow-sm transition-all hover:bg-green-dark hover:shadow-md"
             >
               <svg

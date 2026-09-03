@@ -50,7 +50,7 @@ const STEPS = [
       { type: "radio", id: "streetpub", label: "Street", options: ["Public", "Private"] },
       { type: "radio", id: "streetlights", label: "Street Lights", options: ["Wood Pole", "Aluminum Pole", "Electric", "None"] },
       { type: "yn", id: "alley", label: "Alley?" },
-      { type: "radio", id: "driveway", label: "Driveway Surface", options: ["Concrete", "Asphalt", "Gravel", "Dirt", "Other"] },
+      { type: "radio", id: "driveway", label: "Driveway Surface", multi: true, options: ["Concrete", "Asphalt", "Gravel", "Dirt", "Other"] },
       { type: "sub", label: "Utilities" },
       { type: "radio", id: "electric", label: "Electric", options: ["Yes", "No"] },
       { type: "radio", id: "gas", label: "Gas", options: ["Natural", "Propane", "None"] },
@@ -77,18 +77,18 @@ const STEPS = [
     id: "s2", num: "2", title: "Exterior", where: "walk all four sides",
     fields: [
       { type: "sub", label: "Materials" },
-      { type: "radio", id: "extfront", label: "Ext Walls (front)", options: ["Wood", "Vinyl", "Brick", "Stucco", "Stone", "Cement Board", "Composite", "Other"] },
-      { type: "radio", id: "extside", label: "Ext Walls (sides)", options: ["Same as Front", "Wood", "Vinyl", "Brick", "Stucco", "Stone", "Cement Board", "Other"] },
-      { type: "radio", id: "roof", label: "Roof Material", options: ["Asphalt Shingles", "Wood Shake", "Metal", "Tile", "Tar/Gravel", "Comp", "Other"] },
-      { type: "radio", id: "gutters", label: "Gutters", options: ["Aluminum", "Vinyl", "Galvanized", "Copper", "None"] },
-      { type: "radio", id: "windows", label: "Windows", options: ["Aluminum", "Vinyl", "Wood", "Other"] },
+      { type: "radio", id: "extfront", label: "Ext Walls (front)", multi: true, options: ["Wood", "Vinyl", "Brick", "Stucco", "Stone", "Cement Board", "Composite", "Other"] },
+      { type: "radio", id: "extside", label: "Ext Walls (sides)", multi: true, options: ["Same as Front", "Wood", "Vinyl", "Brick", "Stucco", "Stone", "Cement Board", "Other"] },
+      { type: "radio", id: "roof", label: "Roof Material", multi: true, options: ["Asphalt Shingles", "Wood Shake", "Metal", "Tile", "Tar/Gravel", "Comp", "Other"] },
+      { type: "radio", id: "gutters", label: "Gutters", multi: true, options: ["Aluminum", "Vinyl", "Galvanized", "Copper", "None"] },
+      { type: "radio", id: "windows", label: "Windows", multi: true, options: ["Aluminum", "Vinyl", "Wood", "Other"] },
       { type: "yn", id: "stormwindows", label: "Storm windows?" },
       { type: "yn", id: "screens", label: "Window screens?" },
-      { type: "radio", id: "fence", label: "Fence", options: ["Metal", "Wood", "Wrought Iron", "Chain Link", "None", "Other"] },
+      { type: "radio", id: "fence", label: "Fence", multi: true, options: ["Metal", "Wood", "Wrought Iron", "Chain Link", "None", "Other"] },
       { type: "sub", label: "Outdoor Features" },
-      { type: "radio", id: "patio", label: "Patio Material", options: ["Concrete", "Brick", "Stone", "Pavers", "None", "Other"] },
+      { type: "radio", id: "patio", label: "Patio Material", multi: true, options: ["Concrete", "Brick", "Stone", "Pavers", "None", "Other"] },
       { type: "radio", id: "decksize", label: "Deck", options: ["Large", "Average", "Small", "None"] },
-      { type: "radio", id: "deckmat", label: "Deck Material", options: ["Wood", "Trex/Composite", "Vinyl", "None", "Other"] },
+      { type: "radio", id: "deckmat", label: "Deck Material", multi: true, options: ["Wood", "Trex/Composite", "Vinyl", "None", "Other"] },
       { type: "yn", id: "coverporch", label: "Covered porch?" },
       { type: "radio", id: "porchloc", label: "  Porch Location", options: ["Front", "Rear", "Side", "Wrap"] },
       { type: "yn", id: "screenporch", label: "Screened porch?" },
@@ -96,14 +96,14 @@ const STEPS = [
       { type: "yn", id: "gazebo", label: "Gazebo?" },
       { type: "yn", id: "balcony", label: "Balcony?" },
       { type: "yn", id: "sprinklers", label: "Sprinkler system?" },
-      { type: "radio", id: "pool", label: "Pool", options: ["None", "In-Ground", "Above-Ground", "Hot Tub"] },
+      { type: "radio", id: "pool", label: "Pool", multi: true, options: ["None", "In-Ground", "Above-Ground", "Hot Tub"] },
       { type: "sub", label: "Outbuildings + Garage" },
       { type: "yn", id: "shed", label: "Shed / outbuilding?" },
       { type: "text", id: "sheddesc", label: "  Size / description" },
       { type: "text-row", cols: 2, fields: [{ id: "garagecars", label: "Garage # cars" }, { id: "garagesize", label: "Garage size" }] },
-      { type: "radio", id: "garagetype", label: "Garage Type", options: ["Attached", "Detached", "Built-In", "Carport", "None"] },
+      { type: "radio", id: "garagetype", label: "Garage Type", multi: true, options: ["Attached", "Detached", "Built-In", "Carport", "None"] },
       { type: "radio", id: "garageloc", label: "Garage Location", options: ["Front", "Side", "Rear", "Alley"] },
-      { type: "radio", id: "parking", label: "Other Parking", options: ["Driveway", "Open Lot", "Assigned", "None"] },
+      { type: "radio", id: "parking", label: "Other Parking", multi: true, options: ["Driveway", "Open Lot", "Assigned", "None"] },
       { type: "sub", label: "Exterior Quality" },
       { type: "radio", id: "extquality", label: "Quality of Construction", options: ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6"] },
       { type: "radio", id: "extcond", label: "Condition", options: ["C1", "C2", "C3", "C4", "C5", "C6"] },
@@ -121,17 +121,17 @@ const STEPS = [
       { type: "text-row", cols: 2, fields: [{ id: "halfbaths", label: "Half Baths" }, { id: "laundry", label: "Laundry Location" }] },
       { type: "sub", label: "Finishes" },
       { type: "radio", id: "flooring", label: "Flooring (circle all)", multi: true, options: ["Hardwood", "Laminate", "Carpet", "Vinyl", "Tile", "LVP", "Engineered Wood", "Other"] },
-      { type: "radio", id: "walls", label: "Walls", options: ["Drywall", "Plaster", "Paneling", "Other"] },
-      { type: "radio", id: "trim", label: "Trim", options: ["Wood", "MDF", "Other"] },
-      { type: "radio", id: "doors", label: "Doors", options: ["Wood", "Paneled", "Hollow Core", "Other"] },
+      { type: "radio", id: "walls", label: "Walls", multi: true, options: ["Drywall", "Plaster", "Paneling", "Other"] },
+      { type: "radio", id: "trim", label: "Trim", multi: true, options: ["Wood", "MDF", "Other"] },
+      { type: "radio", id: "doors", label: "Doors", multi: true, options: ["Wood", "Paneled", "Hollow Core", "Other"] },
       { type: "sub", label: "Bath Detail" },
-      { type: "radio", id: "bathfloor", label: "Bath Floor", options: ["Vinyl", "Tile", "Carpet", "Hardwood", "LVP", "Other"] },
-      { type: "radio", id: "bathwainscot", label: "Bath Wainscot", options: ["Tile", "Fiberglass", "Cultured Marble", "Other"] },
+      { type: "radio", id: "bathfloor", label: "Bath Floor", multi: true, options: ["Vinyl", "Tile", "Carpet", "Hardwood", "LVP", "Other"] },
+      { type: "radio", id: "bathwainscot", label: "Bath Wainscot", multi: true, options: ["Tile", "Fiberglass", "Cultured Marble", "Other"] },
       { type: "text", id: "bathnotes", label: "Bath notes (updates, condition)" },
       { type: "sub", label: "Kitchen" },
       { type: "radio", id: "appliances", label: "Appliances (circle all)", multi: true, options: ["Range/Oven", "Disposal", "Dishwasher", "Fan/Hood", "Microwave", "Washer/Dryer", "Refrigerator"] },
-      { type: "radio", id: "counters", label: "Countertops", options: ["Laminate", "Tile", "Granite", "Quartz", "Corian", "Butcher Block", "Other"] },
-      { type: "radio", id: "backsplash", label: "Backsplash", options: ["Tile", "Laminate", "Stone", "None", "Other"] },
+      { type: "radio", id: "counters", label: "Countertops", multi: true, options: ["Laminate", "Tile", "Granite", "Quartz", "Corian", "Butcher Block", "Other"] },
+      { type: "radio", id: "backsplash", label: "Backsplash", multi: true, options: ["Tile", "Laminate", "Stone", "None", "Other"] },
       { type: "text", id: "kitchennotes", label: "Kitchen update notes" },
       { type: "sub", label: "Other Features" },
       { type: "yn", id: "fireplace", label: "Fireplace?" },
@@ -141,9 +141,9 @@ const STEPS = [
       { type: "yn", id: "intercom", label: "Intercom?" },
       { type: "yn", id: "centralvac", label: "Central vacuum?" },
       { type: "sub", label: "Heating + Cooling" },
-      { type: "radio", id: "heating", label: "Heating", options: ["Forced Warm Air", "Heat Pump", "Radiant", "Baseboard", "Wall", "Other"] },
-      { type: "radio", id: "fuel", label: "Fuel", options: ["Gas", "Electric", "Oil", "Propane", "Wood", "Solar", "Other"] },
-      { type: "radio", id: "cooling", label: "Cooling", options: ["Central AC", "Window AC", "Mini Split", "None"] },
+      { type: "radio", id: "heating", label: "Heating", multi: true, options: ["Forced Warm Air", "Heat Pump", "Radiant", "Baseboard", "Wall", "Other"] },
+      { type: "radio", id: "fuel", label: "Fuel", multi: true, options: ["Gas", "Electric", "Oil", "Propane", "Wood", "Solar", "Other"] },
+      { type: "radio", id: "cooling", label: "Cooling", multi: true, options: ["Central AC", "Window AC", "Mini Split", "None"] },
       { type: "sub", label: "Attic" },
       { type: "yn", id: "attic", label: "Attic?" },
       { type: "radio", id: "atticfeat", label: "Attic Features (circle all)", multi: true, options: ["Fan", "Scuttle", "Floor", "Drop Stairs", "Finished", "Insulated"] },
@@ -159,9 +159,9 @@ const STEPS = [
   {
     id: "s4", num: "4", title: "Basement / Below Grade", where: "go downstairs",
     fields: [
-      { type: "radio", id: "basetype", label: "Type", options: ["Full Basement", "Partial Basement", "Crawl Space", "Slab", "Other"] },
+      { type: "radio", id: "basetype", label: "Type", multi: true, options: ["Full Basement", "Partial Basement", "Crawl Space", "Slab", "Other"] },
       { type: "radio", id: "baseentrance", label: "Outside Entrance", options: ["Walkout", "Daylight", "Bilco Door", "None"] },
-      { type: "radio", id: "foundation", label: "Foundation Material", options: ["Concrete", "Block", "Stone", "Brick", "Other"] },
+      { type: "radio", id: "foundation", label: "Foundation Material", multi: true, options: ["Concrete", "Block", "Stone", "Brick", "Other"] },
       { type: "yn", id: "sumppump", label: "Sump pump?" },
       { type: "yn", id: "basefinished", label: "Basement finished?" },
       { type: "text-row", cols: 3, fields: [{ id: "basepct", label: "% Finished" }, { id: "basefinsf", label: "Finished SF" }, { id: "baseunfinsf", label: "Unfinished SF" }] },
@@ -270,7 +270,7 @@ const Inspection26Form = () => {
   const fetchInspection = () => {
     axiosInstance.get(`/inspection26/${editId}`).then(res => {
       const flatData = { ...res.data };
-      ["site", "exterior", "interior", "basement", "measurements"].forEach(key => {
+      ["site", "exterior", "interior", "basement", "measurements", "other_data"].forEach(key => {
         if (flatData[key]) {
           Object.assign(flatData, flatData[key]);
           delete flatData[key];
@@ -335,7 +335,10 @@ const Inspection26Form = () => {
 
   const handleToggleMulti = (id: string, option: string) => {
     setFormData((prev) => {
-      const current = Array.isArray(prev[id]) ? prev[id] : [];
+      let current = prev[id];
+      if (!Array.isArray(current)) {
+        current = current ? [current] : [];
+      }
       if (current.includes(option)) {
         return { ...prev, [id]: current.filter((x: string) => x !== option) };
       }
@@ -345,13 +348,15 @@ const Inspection26Form = () => {
 
 
   const submitToBackend = async () => {
-    const payload: Record<string, any> = { site: {}, exterior: {}, interior: {}, basement: {}, measurements: {} };
+    const payload: Record<string, any> = { site: {}, exterior: {}, interior: {}, basement: {}, measurements: {}, other_data: {} };
 
     const departureObj: Record<string, boolean> = {};
 
     Object.keys(formData).forEach(key => {
       if (key.startsWith('departure_')) {
         if (formData[key]) departureObj[key] = true;
+      } else if (key.endsWith('_other')) {
+        payload.other_data[key] = formData[key];
       } else {
         const stepIndex = FIELD_MAP[key];
         if (stepIndex === 0) payload[key] = formData[key];
@@ -403,15 +408,13 @@ const Inspection26Form = () => {
             <label className="mb-2 block text-sm font-medium text-dark dark:text-white">{f.label}</label>
             <div className="flex flex-wrap gap-2">
               {f.options.map((opt: string) => {
-                const isSelected = f.multi
-                  ? Array.isArray(formData[f.id]) && formData[f.id].includes(opt)
-                  : formData[f.id] === opt;
+                const isSelected = Array.isArray(formData[f.id]) ? formData[f.id].includes(opt) : formData[f.id] === opt;
                 return (
                   <div
                     key={opt}
                     onClick={() => {
                       if (!isViewMode) {
-                        f.multi ? handleToggleMulti(f.id, opt) : handleChange(f.id, opt);
+                        handleToggleMulti(f.id, opt);
                       }
                     }}
                     className={`rounded-full border-[1.5px] px-4 py-2 text-sm font-medium transition ${isViewMode ? "cursor-default opacity-70" : "cursor-pointer hover:border-primary hover:bg-gray-2"
@@ -425,6 +428,16 @@ const Inspection26Form = () => {
                 );
               })}
             </div>
+            {f.options.includes("Other") && Array.isArray(formData[f.id]) && formData[f.id].includes("Other") && (
+              <input
+                type="text"
+                value={formData[`${f.id}_other`] || ""}
+                disabled={isViewMode}
+                onChange={(e) => handleChange(`${f.id}_other`, e.target.value)}
+                placeholder="Please specify"
+                className={`mt-3 w-full rounded-lg border-[1.5px] border-stroke bg-transparent px-4 py-2 text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary ${isViewMode ? "opacity-70 cursor-not-allowed bg-gray-50" : ""}`}
+              />
+            )}
           </div>
         );
       case "yn":

@@ -134,6 +134,11 @@ export default function Inspection36Form() {
           });
         }
       });
+      if (data.other_data) {
+        Object.keys(data.other_data).forEach((key) => {
+          flatData[key] = data.other_data[key];
+        });
+      }
       setFormData(flatData);
       setOriginalData(flatData);
     } catch (error) {
@@ -175,6 +180,10 @@ export default function Inspection36Form() {
       if (key.startsWith('c_')) {
         payload.final = payload.final || {};
         payload.final[key] = payload[key];
+        delete payload[key];
+      } else if (key.endsWith('_other')) {
+        payload.other_data = payload.other_data || {};
+        payload.other_data[key] = payload[key];
         delete payload[key];
       }
     });
@@ -376,14 +385,19 @@ export default function Inspection36Form() {
     </div>
   );
 
-  const renderDropdown = (name: string, label: string, options: string[], className = "sm:w-1/2 md:w-1/3 lg:w-1/4", required = false) => (
+  const renderDropdown = (name: string, label: string, options: string[], className = "sm:w-1/2 md:w-1/3 lg:w-1/4", required = false) => {
+    const isYesNo = options.length === 2 && options.includes("Yes") && options.includes("No");
+    return (
     <div className={`mb-4.5 px-2 w-full`}>
       <label className="mb-2 flex items-center gap-2 text-sm font-bold text-dark dark:text-white">
         {required && <span className="text-orange-500">&#9733;</span>} {label}
       </label>
       <div className="flex flex-wrap gap-3">
         {options.map((opt) => {
-          const isSelected = formData[name] === opt;
+          let selectedArray = formData[name];
+          if (!Array.isArray(selectedArray)) selectedArray = selectedArray ? [selectedArray] : [];
+          
+          const isSelected = isYesNo ? formData[name] === opt : selectedArray.includes(opt);
           const isYes = opt === "Yes";
           const isNo = opt === "No";
 
@@ -396,7 +410,16 @@ export default function Inspection36Form() {
               type="button"
               disabled={isViewMode}
               key={opt}
-              onClick={() => handleDropdownChange(name, isSelected ? "" : opt)}
+              onClick={() => {
+                if (isYesNo) {
+                  handleDropdownChange(name, isSelected ? "" : opt);
+                } else {
+                  let newArr = [...selectedArray];
+                  if (isSelected) newArr = newArr.filter((i: string) => i !== opt);
+                  else newArr.push(opt);
+                  setFormData((prev: any) => ({ ...prev, [name]: newArr }));
+                }
+              }}
               className={`rounded-full border-[1.5px] px-6 py-2 text-sm font-medium transition cursor-pointer hover:border-primary disabled:cursor-not-allowed disabled:opacity-60 ${isSelected
                 ? selectedClasses
                 : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
@@ -407,8 +430,18 @@ export default function Inspection36Form() {
           );
         })}
       </div>
+      {options.includes("Other") && Array.isArray(formData[name]) && formData[name].includes("Other") && (
+        <input
+          type="text"
+          value={formData[`${name}_other`] || ""}
+          disabled={isViewMode}
+          onChange={(e) => handleDropdownChange(`${name}_other`, e.target.value)}
+          placeholder="Please specify"
+          className="mt-3 w-full rounded-[7px] border-[1.5px] border-stroke bg-transparent px-5 py-3 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+        />
+      )}
     </div>
-  );
+  )};
 
   const renderGeneralInfo = () => (
     <div className="flex flex-wrap -mx-2">
@@ -459,6 +492,16 @@ export default function Inspection36Form() {
           );
         })}
       </div>
+      {options.includes("Other") && (formData[name] || []).includes("Other") && (
+        <input
+          type="text"
+          value={formData[`${name}_other`] || ""}
+          disabled={isViewMode}
+          onChange={(e) => handleDropdownChange(`${name}_other`, e.target.value)}
+          placeholder="Please specify"
+          className="mt-3 w-full rounded-[7px] border-[1.5px] border-stroke bg-transparent px-5 py-3 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+        />
+      )}
     </div>
   );
 
@@ -524,10 +567,10 @@ export default function Inspection36Form() {
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">clockwise around dwelling</span></div>
 
       {renderSectionHeader("Materials")}
-      {renderDropdown("extwalls", "Exterior Walls", ["Brick", "Vinyl", "Wood", "Aluminum", "Stucco", "Cement Board", "Stone", "Log", "Other"], "w-full")}
-      {renderDropdown("fndtype", "Foundation Type", ["Slab", "Crawl Space", "Basement", "Post & Pier", "Other"], "w-full")}
-      {renderDropdown("fndmat", "Foundation Material", ["Poured Concrete", "Block", "Stone", "Brick", "Wood", "Other"], "w-full", true)}
-      {renderDropdown("roofmat", "Roof Material", ["Asphalt", "Metal", "Tile", "Slate", "Wood", "Other"], "w-full")}
+      {renderMultiSelect("extwalls", "Exterior Walls", ["Brick", "Vinyl", "Wood", "Aluminum", "Stucco", "Cement Board", "Stone", "Log", "Other"])}
+      {renderMultiSelect("fndtype", "Foundation Type", ["Slab", "Crawl Space", "Basement", "Post & Pier", "Other"])}
+      {renderMultiSelect("fndmat", "Foundation Material", ["Poured Concrete", "Block", "Stone", "Brick", "Wood", "Other"], true)}
+      {renderMultiSelect("roofmat", "Roof Material", ["Asphalt", "Metal", "Tile", "Slate", "Wood", "Other"])}
 
       {renderSectionHeader("&#9733; Condition Status per Feature", "Note: end of branch feature pulls its own condition rating.")}
       {renderDropdown("cond_walls", "Exterior Walls", ["New/Like New", "Typical Wear", "Damaged-Functional", "Damaged-Nonfunctional"], "w-full")}
@@ -612,14 +655,14 @@ export default function Inspection36Form() {
       {renderDropdown("nonresmod", "Non-residential modifications?", ["Yes", "No"], "w-full", true)}
 
       {renderSectionHeader("Encumbrances")}
-      {renderDropdown("restrict", "Restrictions", ["None", "Age", "Historic", "Income", "Land Use", "Rental", "Sale Price", "Other"], "w-full")}
-      {renderDropdown("easement", "Easements", ["None", "Conservation", "Drainage", "Ingress/egress", "Utility", "Other"], "w-full")}
-      {renderDropdown("encroach", "Encroachments", ["None", "Building", "Fence", "Driveway", "Overhang", "Other"], "w-full")}
+      {renderMultiSelect("restrict", "Restrictions", ["None", "Age", "Historic", "Income", "Land Use", "Rental", "Sale Price", "Other"])}
+      {renderMultiSelect("easement", "Easements", ["None", "Conservation", "Drainage", "Ingress/egress", "Utility", "Other"])}
+      {renderMultiSelect("encroach", "Encroachments", ["None", "Building", "Fence", "Driveway", "Overhang", "Other"])}
 
       {renderSectionHeader("&#9733; Amenities — count AND measure!", "Note: in UAD report COUNT and MEASURED AREA (SF) for each amenity.")}
-      {renderDropdown("amen_out", "Outdoor", ["Fence", "Irrigation", "Outdoor Fireplace", "Outdoor Kitchen", "Sports Court", "None"], "w-full")}
-      {renderDropdown("amen_living", "Outdoor Living", ["Deck", "Patio", "Porch", "Portico", "Balcony", "Gazebo", "None"], "w-full")}
-      {renderDropdown("amen_water", "Water Features", ["Inground Pool", "Inground Spa", "Outdoor Shower", "Sauna", "None"], "w-full")}
+      {renderMultiSelect("amen_out", "Outdoor", ["Fence", "Irrigation", "Outdoor Fireplace", "Outdoor Kitchen", "Sports Court", "None"])}
+      {renderMultiSelect("amen_living", "Outdoor Living", ["Deck", "Patio", "Porch", "Portico", "Balcony", "Gazebo", "None"])}
+      {renderMultiSelect("amen_water", "Water Features", ["Inground Pool", "Inground Spa", "Outdoor Shower", "Sauna", "None"])}
 
       <div className="w-full flex gap-2 px-2">
         {renderInput("amen1_name", "Amenity", "text", "w-1/4")}
@@ -661,7 +704,7 @@ export default function Inspection36Form() {
       <div className="w-full px-2 mb-4"><span className="text-dark-5 italic text-sm">walk to each structure</span></div>
 
       {renderSectionHeader("Vehicle Storage")}
-      {renderDropdown("veh_type", "Type", ["Garage", "Carport", "Driveway", "Open Lot", "Parking Garage", "None", "Other"], "w-full")}
+      {renderMultiSelect("veh_type", "Type", ["Garage", "Carport", "Driveway", "Open Lot", "Parking Garage", "None", "Other"])}
       {renderDropdown("veh_attach", "Attachment", ["Attached", "Built-In", "Detached"], "w-full")}
 
       <div className="w-full flex gap-2 px-2">
