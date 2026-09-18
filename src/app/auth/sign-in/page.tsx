@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Sign in",
+  title: "Sign In | BackBone Data Solutions",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function SignIn() {
