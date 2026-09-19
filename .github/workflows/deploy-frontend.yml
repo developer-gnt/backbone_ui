@@ -25,7 +25,7 @@ jobs:
 
             echo "=================================="
             echo "Starting Backbone frontend deploy"
-            echo "=================================="
+            echo "==================================="
 
             cd /root/backbone-ui
 
