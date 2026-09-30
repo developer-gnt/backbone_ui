@@ -62,6 +62,7 @@ type OrderDetailResponse = {
     financing?: string;
     reoform?: string;
     non_uad?: string;
+    uad_version?: string;
     borrower_name?: string;
     subject_address?: string;
     subject_state?: string;
@@ -91,6 +92,7 @@ type FormState = {
   sketch: string;
   reoform: string;
   nonUad: string;
+  uadVersion: string;
   packageId: string;
 };
 
@@ -109,6 +111,7 @@ const initialForm: FormState = {
   sketch: "YES",
   reoform: "No",
   nonUad: "No",
+  uadVersion: "UAD 3.6",
   packageId: "",
 };
 
@@ -235,6 +238,9 @@ export default function ClientEditOrderPage() {
           sketch: order?.sketch ?? "YES",
           reoform: order?.reoform ?? "No",
           nonUad: order?.non_uad ?? "No",
+          uadVersion:
+            order?.uad_version ??
+            (order?.non_uad === "Yes" ? "NON UAD" : "UAD 2.6"),
           packageId: `${matchedPackage?.packageId ?? preferredEtaPackages[0]?.packageId ?? ""}`,
         });
       } catch (error) {
@@ -333,9 +339,10 @@ export default function ClientEditOrderPage() {
       payload.append("charged_amount", `${getPackageCost(selectedPackage)}`);
       payload.append("amount", `${getPackageCost(selectedPackage)}`);
       payload.append("order_type", form.orderType);
+      payload.append("uad_version", form.uadVersion);
       payload.append("financing", form.financing);
       payload.append("reoform", form.reoform);
-      payload.append("non_uad", form.nonUad);
+      payload.append("non_uad", form.uadVersion === "NON UAD" ? "Yes" : "No");
       payload.append("borrower_name", form.borrowerName.trim());
       payload.append("subject_address", form.subjectAddress.trim());
       payload.append("subject_state", form.state.trim());
@@ -488,10 +495,18 @@ export default function ClientEditOrderPage() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium text-dark dark:text-white">NON UAD</label>
-                <select value={form.nonUad} onChange={(e) => updateField("nonUad", e.target.value)} className="w-full rounded-lg border border-stroke bg-transparent px-4 py-3 outline-none focus:border-primary dark:border-dark-3 dark:text-white">
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
+                <label className="mb-2 block text-sm font-medium text-dark dark:text-white">UAD Version</label>
+                <select
+                  value={form.uadVersion}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    updateField("uadVersion", val);
+                    updateField("nonUad", "No");
+                  }}
+                  className="w-full rounded-lg border border-stroke bg-transparent px-4 py-3 outline-none focus:border-primary dark:border-dark-3 dark:text-white"
+                >
+                  <option value="UAD 3.6">UAD 3.6</option>
+                  <option value="UAD 2.6">UAD 2.6</option>
                 </select>
               </div>
             </div>

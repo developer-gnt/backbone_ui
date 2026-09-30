@@ -59,6 +59,7 @@ type FormState = {
   sketch: string;
   reoform: boolean;
   nonUad: boolean;
+  uadVersion: string;
   packageId: string;
 };
 
@@ -147,6 +148,7 @@ const initialForm: FormState = {
   sketch: "YES",
   reoform: false,
   nonUad: false,
+  uadVersion: "UAD 3.6",
   packageId: "",
 };
 
@@ -355,8 +357,8 @@ export default function PlaceNewOrderPage() {
         const response = await axiosInstance.get("/tat-packages", {
           params: pricingUsername
             ? {
-                username: pricingUsername,
-              }
+              username: pricingUsername,
+            }
             : undefined,
         });
         const nextPackages = Array.isArray(response.data) ? response.data : [];
@@ -566,9 +568,10 @@ export default function PlaceNewOrderPage() {
       payload.append("amount", `${selectedPackageCost}`);
       payload.append("status", "New Order");
       payload.append("order_type", form.orderType);
+      payload.append("uad_version", form.uadVersion);
       payload.append("financing", form.financing);
       payload.append("reoform", form.reoform ? "Yes" : "No");
-      payload.append("non_uad", form.nonUad ? "Yes" : "No");
+      payload.append("non_uad", form.uadVersion === "NON UAD" || form.nonUad ? "Yes" : "No");
       payload.append("borrower_name", form.borrowerName.trim());
       payload.append("subject_address", subjectAddress);
       payload.append("subject_state", form.state);
@@ -600,10 +603,10 @@ export default function PlaceNewOrderPage() {
       setClientInfo((prev) =>
         prev
           ? {
-              ...prev,
-              wallete_balance:
-                response.data?.wallete_balance ?? prev.wallete_balance ?? 0,
-            }
+            ...prev,
+            wallete_balance:
+              response.data?.wallete_balance ?? prev.wallete_balance ?? 0,
+          }
           : prev,
       );
       setForm((prev) => ({
@@ -712,7 +715,35 @@ export default function PlaceNewOrderPage() {
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-[170px_minmax(0,1fr)_170px] md:items-start">
+            <div className="grid gap-3 md:grid-cols-[170px_minmax(0,1fr)] md:items-center">
+              <label className="text-sm font-bold text-dark dark:text-white">
+                UAD Version
+              </label>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-md border border-stroke px-3 py-2 dark:border-dark-3">
+                {["UAD 3.6", "UAD 2.6"].map((opt) => (
+                  <label
+                    key={opt}
+                    className="flex cursor-pointer items-center gap-2 text-sm font-bold text-dark dark:text-white"
+                  >
+                    <input
+                      type="radio"
+                      name="uadVersion"
+                      value={opt}
+                      checked={form.uadVersion === opt}
+                      onChange={() => {
+                        updateField("uadVersion", opt);
+                        updateField("nonUad", false);
+                      }}
+                    />
+                    <span className="font-bold text-dark dark:text-white">
+                      {opt}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-[170px_minmax(0,1fr)] md:items-center">
               <div className="flex items-center gap-3 text-sm text-dark dark:text-white">
                 <label className="font-medium">REO Form</label>
                 <input
@@ -724,8 +755,8 @@ export default function PlaceNewOrderPage() {
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="text-sm font-medium text-dark dark:text-white">
                   Transaction :
                 </label>
                 <div className="flex flex-wrap gap-x-5 gap-y-2 rounded-md border border-stroke px-3 py-2 dark:border-dark-3">
@@ -746,17 +777,6 @@ export default function PlaceNewOrderPage() {
                     </label>
                   ))}
                 </div>
-              </div>
-
-              <div className="flex items-center gap-3 text-sm text-dark dark:text-white">
-                <label className="font-medium">NON UAD</label>
-                <input
-                  type="checkbox"
-                  checked={form.nonUad}
-                  onChange={(event) =>
-                    updateField("nonUad", event.target.checked)
-                  }
-                />
               </div>
             </div>
 

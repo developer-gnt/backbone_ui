@@ -37,6 +37,7 @@ type OrderDetailResponse = {
     order_type?: string;
     reoform?: string;
     non_uad?: string;
+    uad_version?: string;
     financing?: string;
     borrower_name?: string;
     subject_address?: string;
@@ -152,7 +153,7 @@ export default function OrderDetailsPage() {
           <div><span className="text-sm text-dark-5">File #</span><p className="font-medium text-dark dark:text-white">{order.id}</p></div>
           <div><span className="text-sm text-dark-5">Form Type</span><p className="font-medium text-dark dark:text-white">{order.order_type || "-"}</p></div>
           <div><span className="text-sm text-dark-5">REO Form</span><p className="font-medium text-dark dark:text-white">{order.reoform || "-"}</p></div>
-          <div><span className="text-sm text-dark-5">NON UAD</span><p className="font-medium text-dark dark:text-white">{order.non_uad || "-"}</p></div>
+          <div><span className="text-sm text-dark-5">UAD Version</span><p className="font-medium text-dark dark:text-white">{order.uad_version || "-"}</p></div>
           <div><span className="text-sm text-dark-5">Transaction</span><p className="font-medium text-dark dark:text-white">{order.financing || "-"}</p></div>
           <div><span className="text-sm text-dark-5">Sketch</span><p className="font-medium text-dark dark:text-white">{order.sketch || "-"}</p></div>
           <div><span className="text-sm text-dark-5">Borrower Name</span><p className="font-medium text-dark dark:text-white">{order.borrower_name || "-"}</p></div>

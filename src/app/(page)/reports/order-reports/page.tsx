@@ -57,6 +57,7 @@ type OrderDetailResponse = {
     order_type?: string;
     reoform?: string;
     non_uad?: string;
+    uad_version?: string;
     financing?: string;
     borrower_name?: string;
     subject_address?: string;
@@ -884,7 +885,7 @@ export default function OrderReport() {
                     <div><span className="text-dark-5">Assigned Team Member</span><p className="font-medium text-dark dark:text-white">{details.order.team_member_name || "—"}</p></div>
                     <div><span className="text-dark-5">Order Type</span><p className="font-medium text-dark dark:text-white">{details.order.order_type || "—"}</p></div>
                     <div><span className="text-dark-5">REO Form</span><p className="font-medium text-dark dark:text-white">{details.order.reoform || "—"}</p></div>
-                    <div><span className="text-dark-5">Non UAD</span><p className="font-medium text-dark dark:text-white">{details.order.non_uad || "—"}</p></div>
+                    <div><span className="text-dark-5">UAD Version</span><p className="font-medium text-dark dark:text-white">{details.order.uad_version || "—"}</p></div>
                     <div><span className="text-dark-5">Financing</span><p className="font-medium text-dark dark:text-white">{details.order.financing || "—"}</p></div>
                     <div><span className="text-dark-5">Borrower Name</span><p className="font-medium text-dark dark:text-white">{details.order.borrower_name || "—"}</p></div>
                     <div><span className="text-dark-5">Sketch</span><p className="font-medium text-dark dark:text-white">{details.order.sketch || "—"}</p></div>
