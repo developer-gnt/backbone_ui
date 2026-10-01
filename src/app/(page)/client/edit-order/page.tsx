@@ -67,6 +67,7 @@ type OrderDetailResponse = {
     order_type?: string;
     reoform?: string;
     non_uad?: string;
+    uad_version?: string;
     financing?: string;
     borrower_name?: string;
     subject_address?: string;
@@ -98,6 +99,7 @@ type FormState = {
   sketch: string;
   reoform: boolean;
   nonUad: boolean;
+  uadVersion: string;
   packageId: string;
 };
 
@@ -200,6 +202,7 @@ export default function EditOrderPage() {
     sketch: "YES",
     reoform: false,
     nonUad: false,
+    uadVersion: "",
     packageId: "",
   });
 
@@ -343,6 +346,9 @@ export default function EditOrderPage() {
           sketch: order.sketch || "YES",
           reoform: (order.reoform || "").toLowerCase() === "yes",
           nonUad: (order.non_uad || "").toLowerCase() === "yes",
+          uadVersion:
+            `${order.uad_version ?? ""}`.trim() ||
+            ((order.non_uad || "").toLowerCase() === "yes" ? "NON UAD" : ""),
           packageId,
         });
       } catch (error) {
@@ -381,14 +387,23 @@ export default function EditOrderPage() {
       return;
     }
 
+    if (!form.uadVersion.trim()) {
+      setFeedback({
+        type: "error",
+        text: "Please select a UAD Version.",
+      });
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const payload = new FormData();
       payload.append("order_type", form.orderType);
+      payload.append("uad_version", form.uadVersion);
       payload.append("financing", form.financing);
       payload.append("reoform", form.reoform ? "Yes" : "No");
-      payload.append("non_uad", form.nonUad ? "Yes" : "No");
+      payload.append("non_uad", form.uadVersion === "NON UAD" || form.nonUad ? "Yes" : "No");
       payload.append("borrower_name", form.borrowerName.trim());
       payload.append("subject_address", form.subjectAddress.trim());
       payload.append("subject_state", form.state);
@@ -520,6 +535,35 @@ export default function EditOrderPage() {
               </div>
             )}
 
+            {/* UAD Version */}
+            <div className="grid gap-3 md:grid-cols-[170px_minmax(0,1fr)] md:items-center">
+              <label className="text-sm font-bold text-dark dark:text-white">
+                UAD Version <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-md border border-stroke px-3 py-2 dark:border-dark-3">
+                {["UAD 3.6", "UAD 2.6"].map((opt) => (
+                  <label
+                    key={opt}
+                    className="flex cursor-pointer items-center gap-2 text-sm font-bold text-dark dark:text-white"
+                  >
+                    <input
+                      type="radio"
+                      name="uadVersion"
+                      value={opt}
+                      checked={form.uadVersion === opt}
+                      onChange={() => {
+                        updateField("uadVersion", opt);
+                        updateField("nonUad", false);
+                      }}
+                    />
+                    <span className="font-bold text-dark dark:text-white">
+                      {opt}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             {/* Financing */}
             <div className="grid gap-3 md:grid-cols-[170px_minmax(0,1fr)] md:items-start">
               <label className="pt-2 text-sm font-medium text-dark dark:text-white">
@@ -636,7 +680,7 @@ export default function EditOrderPage() {
               </div>
             </div>
 
-            {/* REO Form & Non-UAD */}
+            {/* REO Form */}
             <div className="grid gap-3 md:grid-cols-2">
               <label className="flex items-center gap-3 text-sm text-dark dark:text-white">
                 <input
@@ -646,16 +690,6 @@ export default function EditOrderPage() {
                   className="h-4 w-4 cursor-pointer"
                 />
                 REO Form
-              </label>
-
-              <label className="flex items-center gap-3 text-sm text-dark dark:text-white">
-                <input
-                  type="checkbox"
-                  checked={form.nonUad}
-                  onChange={(e) => updateField("nonUad", e.target.checked)}
-                  className="h-4 w-4 cursor-pointer"
-                />
-                NON UAD
               </label>
             </div>
           </div>

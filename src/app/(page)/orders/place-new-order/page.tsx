@@ -148,7 +148,7 @@ const initialForm: FormState = {
   sketch: "YES",
   reoform: false,
   nonUad: false,
-  uadVersion: "UAD 3.6",
+  uadVersion: "",
   packageId: "",
 };
 
@@ -534,6 +534,11 @@ export default function PlaceNewOrderPage() {
       return;
     }
 
+    if (!form.uadVersion.trim()) {
+      notifyError("Please select a UAD Version.");
+      return;
+    }
+
     if (selectedPackageCost > clientWallet) {
       // setFeedback({
       // type: "error",
@@ -717,7 +722,7 @@ export default function PlaceNewOrderPage() {
 
             <div className="grid gap-3 md:grid-cols-[170px_minmax(0,1fr)] md:items-center">
               <label className="text-sm font-bold text-dark dark:text-white">
-                UAD Version
+                UAD Version <span className="text-red-500">*</span>
               </label>
               <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-md border border-stroke px-3 py-2 dark:border-dark-3">
                 {["UAD 3.6", "UAD 2.6"].map((opt) => (
