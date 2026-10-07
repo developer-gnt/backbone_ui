@@ -368,7 +368,7 @@ export default function ClientRegistrationPage() {
               required
             />
             <p className={`mt-2 text-xs ${usernameHelperClass}`}>
-              {usernameStatus?.text || "Use 6-10 letters and numbers only."}
+              {usernameStatus?.text || "Choose a unique login name."}
             </p>
           </div>
 

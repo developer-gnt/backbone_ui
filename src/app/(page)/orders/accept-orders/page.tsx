@@ -30,6 +30,8 @@ type OrderRow = {
   assigner_name?: string;
   assigned_supervisor?: string;
   assigned_team_member?: string;
+  uad_version?: string;
+  non_uad?: string;
 };
 
 type SupervisorOption = {
@@ -439,6 +441,7 @@ function LegacyAcceptedOrdersPage() {
             <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-semibold [&>th]:text-dark [&>th]:dark:text-white sticky top-0 z-10">
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
+              <TableHead>UAD Version</TableHead>
               <TableHead>TAT</TableHead>
               <TableHead>Property Address</TableHead>
               <TableHead>Order Date</TableHead>
@@ -494,6 +497,7 @@ function LegacyAcceptedOrdersPage() {
                         {order.id}
                       </Link>
                     </TableCell>
+                    <TableCell className="whitespace-nowrap font-medium">{order.uad_version || "-"}</TableCell>
                     <TableCell>
                       <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getTatBadgeClassName(order.package)}`}>
                         {order.package || "-"}

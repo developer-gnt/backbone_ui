@@ -37,6 +37,8 @@ type OrderRow = {
   assigner_name?: string;
   assigned_supervisor?: string;
   assigned_team_member?: string;
+  uad_version?: string;
+  non_uad?: string;
 };
 
 type AttachmentRow = {
@@ -138,6 +140,7 @@ const exportRows = (rows: OrderRow[], filename: string) => {
   const headers = [
     "Sr. No.",
     "File#",
+    "UAD Version",
     "TAT",
     "Credit",
     "Order Date",
@@ -155,6 +158,7 @@ const exportRows = (rows: OrderRow[], filename: string) => {
   const csvRows = rows.map((row, index) => [
     index + 1,
     row.id,
+    row.uad_version || "",
     formatTat(row.package || row.tat),
     Number(row.amount ?? 0),
     formatDateTime(row.created_date),
@@ -665,6 +669,7 @@ export default function OrderWorkflowPage({ mode }: Props) {
             <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-medium">
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
+              <TableHead>UAD Version</TableHead>
               <TableHead>TAT</TableHead>
               {mode === "pending" && <TableHead>Credit</TableHead>}
               <TableHead>Order Date</TableHead>
@@ -712,6 +717,7 @@ export default function OrderWorkflowPage({ mode }: Props) {
                       {order.id}
                     </Link>
                   </TableCell>
+                  <TableCell className="whitespace-nowrap font-medium">{order.uad_version || "-"}</TableCell>
                   <TableCell>{formatTat(order.package || order.tat)}</TableCell>
                   {mode === "pending" && (
                     <TableCell>${standardFormat(Number(order.amount ?? 0))}</TableCell>

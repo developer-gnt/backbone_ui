@@ -35,6 +35,8 @@ type OrderRow = {
   remark?: string;
   emp_remark?: string;
   modify_date?: string;
+  uad_version?: string;
+  non_uad?: string;
 };
 
 type AttachmentRow = {
@@ -133,6 +135,7 @@ const exportRows = (rows: OrderRow[], filename: string) => {
   const headers = [
     "Sr. No.",
     "File#",
+    "UAD Version",
     "TAT",
     "Order Date",
     "Status",
@@ -148,6 +151,7 @@ const exportRows = (rows: OrderRow[], filename: string) => {
   const csvRows = rows.map((row, index) => [
     index + 1,
     row.id,
+    row.uad_version || "",
     formatTat(row.package || row.tat),
     formatDateTime(row.created_date),
     row.status || "",
@@ -688,6 +692,7 @@ export default function AssignedOrdersPage() {
             <TableRow>
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
+              <TableHead>UAD Version</TableHead>
               <TableHead>TAT</TableHead>
               <TableHead>Order Date</TableHead>
               <TableHead>Status</TableHead>
@@ -723,6 +728,7 @@ export default function AssignedOrdersPage() {
                       {row.id}
                     </Link>
                   </TableCell>
+                  <TableCell className="whitespace-nowrap font-medium">{row.uad_version || "-"}</TableCell>
                   <TableCell className={getTatTextClassName(row.package || row.tat)}>
                     {formatTat(row.package || row.tat)}
                   </TableCell>

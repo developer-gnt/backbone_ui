@@ -34,6 +34,8 @@ type OrderRow = {
   assigner_name?: string;
   assigned_supervisor?: string;
   assigned_team_member?: string;
+  uad_version?: string;
+  non_uad?: string;
 };
 
 type SupervisorOption = {
@@ -94,6 +96,7 @@ const exportRows = (rows: OrderRow[]) => {
   const headers = [
     "Sr. No.",
     "File#",
+    "UAD Version",
     "TAT",
     "credit",
     "Order Date",
@@ -110,6 +113,7 @@ const exportRows = (rows: OrderRow[]) => {
   const csvRows = rows.map((row, index) => [
     index + 1,
     row.id,
+    row.uad_version || "",
     row.package || "",
     Number(row.amount ?? 0),
     formatDateTime(row.created_date),
@@ -547,6 +551,7 @@ function LegacyAdminNewOrdersPage() {
             <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-medium [&>th]:text-dark [&>th]:dark:text-white sticky top-0 z-10">
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
+              <TableHead>UAD Version</TableHead>
               <TableHead>TAT</TableHead>
               {showCreditAndFeedback && <TableHead>Credit</TableHead>}
               <TableHead>Order Date</TableHead>
@@ -602,6 +607,7 @@ function LegacyAdminNewOrdersPage() {
                         {order.id}
                       </Link>
                     </TableCell>
+                    <TableCell className="whitespace-nowrap font-medium">{order.uad_version || "-"}</TableCell>
                     <TableCell>{order.package || "-"}</TableCell>
                     {showCreditAndFeedback && (
                       <TableCell>${standardFormat(Number(order.amount ?? 0))}</TableCell>
@@ -631,6 +637,7 @@ function LegacyAdminNewOrdersPage() {
                         type="button"
                         className="rounded bg-yellow-500 px-3 py-1 text-xs text-white hover:bg-yellow-600"
                         onClick={() => {
+                          setMessage(null);
                           setReplyOrder(order);
                           setReplyMessage(order.reply || "");
                         }}
@@ -646,6 +653,7 @@ function LegacyAdminNewOrdersPage() {
                             setMessage({ type: "error", text: "Action denied: This order is already cancelled or completed." });
                             return;
                           }
+                          setMessage(null);
                           setAcceptOrder(order);
                           setAcceptDocs([]);
                           setAcceptMessage(order.reply || "");
@@ -668,6 +676,7 @@ function LegacyAdminNewOrdersPage() {
                             setMessage({ type: "error", text: "Action denied: This order is already cancelled or completed." });
                             return;
                           }
+                          setMessage(null);
                           setCancelOrder(order);
                           setCancelRemark(order.remark || "");
                         }}
@@ -719,6 +728,11 @@ function LegacyAdminNewOrdersPage() {
         onClose={() => setReplyOrder(null)}
       >
         <div className="space-y-4">
+          {message?.type === "error" && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
+              {message.text}
+            </div>
+          )}
           <textarea
             value={replyMessage}
             onChange={(e) => setReplyMessage(e.target.value)}
@@ -751,6 +765,11 @@ function LegacyAdminNewOrdersPage() {
         open={Boolean(acceptOrder)}
         onClose={() => setAcceptOrder(null)}
       >
+        {message?.type === "error" && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
+            {message.text}
+          </div>
+        )}
         <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-2">
             {DOC_OPTIONS.map((item) => (
@@ -823,6 +842,11 @@ function LegacyAdminNewOrdersPage() {
         onClose={() => setAssignOrder(null)}
       >
         <div className="space-y-4">
+          {message?.type === "error" && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
+              {message.text}
+            </div>
+          )}
           <div>
             <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
               {isSupervisorUser ? "Select Team Member" : "Select Supervisor"}
@@ -867,6 +891,11 @@ function LegacyAdminNewOrdersPage() {
         onClose={() => setCancelOrder(null)}
       >
         <div className="space-y-4">
+          {message?.type === "error" && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
+              {message.text}
+            </div>
+          )}
           <div>
             <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
               Enter Remark For Cancellation
@@ -1154,6 +1183,7 @@ function LegacyTeamMemberNewOrdersPage() {
             <TableRow className="bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-3 [&>th]:text-sm [&>th]:font-medium [&>th]:text-dark [&>th]:dark:text-white">
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
+              <TableHead>UAD Version</TableHead>
               <TableHead>TAT</TableHead>
               <TableHead>Order Date</TableHead>
               <TableHead>Status</TableHead>
@@ -1191,6 +1221,7 @@ function LegacyTeamMemberNewOrdersPage() {
                         {order.id}
                       </Link>
                     </TableCell>
+                    <TableCell className="whitespace-nowrap font-medium">{order.uad_version || "-"}</TableCell>
                     <TableCell>{order.package || "-"}</TableCell>
                     <TableCell>{formatDateTime(order.created_date)}</TableCell>
                     <TableCell>{order.status || "-"}</TableCell>

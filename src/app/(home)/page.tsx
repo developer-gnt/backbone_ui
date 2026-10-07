@@ -41,6 +41,8 @@ type ClientDashboardOrder = {
   remark?: string;
   reply?: string;
   message?: string;
+  uad_version?: string;
+  non_uad?: string;
 };
 
 type ClientDashboardTransaction = {
@@ -68,6 +70,8 @@ type AdminDashboardOrder = {
   feedback_rating?: string | number | null;
   remaining_tat?: string;
   remark?: string;
+  uad_version?: string;
+  non_uad?: string;
 };
 
 type AdminDashboardTransaction = {
@@ -625,6 +629,7 @@ export default function Home() {
     const headers = [
       "Sr. No.",
       "File#",
+      "UAD Version",
       "TAT",
       "Amount",
       "Order Date",
@@ -644,6 +649,7 @@ export default function Home() {
       [
         index + 1,
         order.id,
+        order.uad_version || "",
         order.package || order.tat || "",
         Number(order.amount ?? 0).toFixed(2),
         formatDateTime(order.created_date),
@@ -694,6 +700,7 @@ export default function Home() {
     const headers = [
       "Sr. No.",
       "File#",
+      "UAD Version",
       "TAT",
       "Order Date",
       "Status",
@@ -710,6 +717,7 @@ export default function Home() {
       [
         index + 1,
         order.id,
+        order.uad_version || "",
         order.package || order.tat || "",
         formatDateTime(order.created_date),
         order.status || "",
@@ -1351,6 +1359,7 @@ export default function Home() {
                     }
                     const headers = [
                       "File#",
+                      "UAD Version",
                       "Property Address",
                       "TAT",
                       "Order Date",
@@ -1359,6 +1368,7 @@ export default function Home() {
                     ];
                     const csvRows = filteredClientOrders.map((o) => [
                       o.id,
+                      o.uad_version || "",
                       o.subject_address || "",
                       o.package || "",
                       formatDateTime(o.created_date),
@@ -1396,6 +1406,7 @@ export default function Home() {
                 <TableHeader>
                   <TableRow className="bg-gray-2 dark:bg-dark-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:[&>th]:text-white">
                     <TableHead>File#</TableHead>
+                    <TableHead>UAD Version</TableHead>
                     <TableHead>Property Address</TableHead>
                     <TableHead>TAT</TableHead>
                     <TableHead>Order Date</TableHead>
@@ -1411,7 +1422,7 @@ export default function Home() {
                   {isLoading ? (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={11}
                         className="py-8 text-center text-dark-5"
                       >
                         Loading orders...
@@ -1420,7 +1431,7 @@ export default function Home() {
                   ) : visibleClientOrders.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={10}
+                        colSpan={11}
                         className="py-8 text-center text-dark-5"
                       >
                         No Data Found !
@@ -1452,6 +1463,9 @@ export default function Home() {
                             >
                               {order.id}
                             </Link>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap font-medium">
+                            {order.uad_version || "—"}
                           </TableCell>
                           <TableCell className="max-w-[220px] whitespace-normal">
                             {order.subject_address || "—"}
@@ -1920,6 +1934,7 @@ export default function Home() {
                   <TableRow className="bg-gray-2 dark:bg-dark-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:[&>th]:text-white">
                     <TableHead>Sr. No.</TableHead>
                     <TableHead>File#</TableHead>
+                    <TableHead>UAD Version</TableHead>
                     <TableHead>TAT</TableHead>
                     <TableHead>Order Date</TableHead>
                     <TableHead>Status</TableHead>
@@ -1941,7 +1956,7 @@ export default function Home() {
                   {isLoadingSupervisorOrders ? (
                     <TableRow>
                       <TableCell
-                        colSpan={15}
+                        colSpan={17}
                         className="py-6 text-center text-dark-5"
                       >
                         Loading dashboard orders...
@@ -1950,7 +1965,7 @@ export default function Home() {
                   ) : supervisorOrdersError ? (
                     <TableRow>
                       <TableCell
-                        colSpan={15}
+                        colSpan={17}
                         className="py-6 text-center text-red-600"
                       >
                         {supervisorOrdersError}
@@ -1959,7 +1974,7 @@ export default function Home() {
                   ) : visibleSupervisorOrders.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={15}
+                        colSpan={17}
                         className="py-6 text-center text-dark-5"
                       >
                         No Data Found !
@@ -1985,6 +2000,9 @@ export default function Home() {
                             >
                               {order.id}
                             </Link>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap font-medium">
+                            {order.uad_version || "-"}
                           </TableCell>
                           <TableCell>
                             {order.package || order.tat || "-"}
@@ -2217,6 +2235,7 @@ export default function Home() {
               <TableHeader>
                 <TableRow>
                   <TableHead>File #</TableHead>
+                  <TableHead>UAD Version</TableHead>
                   <TableHead>Address</TableHead>
                   <TableHead>Package</TableHead>
                   <TableHead>Status</TableHead>
@@ -2227,7 +2246,7 @@ export default function Home() {
                 {memberOrders.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={6}
                       className="py-6 text-center text-dark-5"
                     >
                       {isLoading
@@ -2239,6 +2258,9 @@ export default function Home() {
                   memberOrders.slice(0, 8).map((order) => (
                     <TableRow key={order.id}>
                       <TableCell>#{order.id}</TableCell>
+                      <TableCell className="whitespace-nowrap font-medium">
+                        {order.uad_version || "-"}
+                      </TableCell>
                       <TableCell>{order.subject_address || "-"}</TableCell>
                       <TableCell>{order.package || "-"}</TableCell>
                       <TableCell>{order.status || "-"}</TableCell>
@@ -2388,6 +2410,7 @@ export default function Home() {
                 <TableRow className="bg-gray-2 dark:bg-dark-2 [&>th]:whitespace-nowrap [&>th]:text-dark dark:[&>th]:text-white">
                   <TableHead>Sr. No.</TableHead>
                   <TableHead>File#</TableHead>
+                  <TableHead>UAD Version</TableHead>
                   <TableHead>TAT</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Order Date</TableHead>
@@ -2408,7 +2431,7 @@ export default function Home() {
                 {isLoadingAdminOrders ? (
                   <TableRow>
                     <TableCell
-                      colSpan={16}
+                      colSpan={17}
                       className="py-6 text-center text-dark-5"
                     >
                       Loading dashboard orders...
@@ -2417,7 +2440,7 @@ export default function Home() {
                 ) : adminOrdersError ? (
                   <TableRow>
                     <TableCell
-                      colSpan={16}
+                      colSpan={17}
                       className="py-6 text-center text-red-600"
                     >
                       {adminOrdersError}
@@ -2426,7 +2449,7 @@ export default function Home() {
                 ) : visibleAdminOrders.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={16}
+                      colSpan={17}
                       className="py-6 text-center text-dark-5"
                     >
                       No Data Found !
@@ -2446,6 +2469,9 @@ export default function Home() {
                         >
                           {order.id}
                         </Link>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap font-medium">
+                        {order.uad_version || "-"}
                       </TableCell>
                       <TableCell>{order.package || order.tat || "-"}</TableCell>
                       <TableCell>{formatCurrency(order.amount)}</TableCell>

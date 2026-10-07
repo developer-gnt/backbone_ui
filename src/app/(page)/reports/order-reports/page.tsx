@@ -33,6 +33,8 @@ type OrderReportRow = {
   assigned_supervisor?: string;
   remark?: string;
   reply?: string;
+  uad_version?: string;
+  non_uad?: string;
 };
 
 type AttachmentRow = {
@@ -127,6 +129,7 @@ const exportRows = (rows: OrderReportRow[], isTeamMember: boolean, isSupervisor:
   const headers = [
     "Sr. No.",
     "File#",
+    "UAD Version",
     "TAT",
     "Order Date",
     "Status",
@@ -143,6 +146,7 @@ const exportRows = (rows: OrderReportRow[], isTeamMember: boolean, isSupervisor:
   const csvRows = rows.map((row, index) => [
     index + 1,
     row.id,
+    row.uad_version || "",
     row.tat || "",
     formatDate(row.created_date, true),
     row.status || "",
@@ -178,6 +182,7 @@ const exportClientRows = (rows: OrderReportRow[]) => {
   const headers = [
     "Sr. No.",
     "File#",
+    "UAD Version",
     "TAT",
     "Order Date",
     "Status",
@@ -189,6 +194,7 @@ const exportClientRows = (rows: OrderReportRow[]) => {
   const csvRows = rows.map((row, index) => [
     index + 1,
     row.id,
+    row.uad_version || "",
     row.tat || row.package || "",
     formatDate(row.created_date, true),
     row.status || "",
@@ -484,6 +490,7 @@ export default function OrderReport() {
                 <TableRow className="bg-[#F7F9FC] text-sm dark:bg-dark-2 [&>th]:py-3 [&>th]:font-medium">
                   <TableHead>Sr. No.</TableHead>
                   <TableHead>File#</TableHead>
+                  <TableHead>UAD Version</TableHead>
                   <TableHead>TAT</TableHead>
                   <TableHead>Order Date</TableHead>
                   <TableHead>Status</TableHead>
@@ -497,7 +504,7 @@ export default function OrderReport() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-8 text-center text-dark-5">
+                    <TableCell colSpan={10} className="py-8 text-center text-dark-5">
                       Loading orders...
                     </TableCell>
                   </TableRow>
@@ -519,6 +526,7 @@ export default function OrderReport() {
                             {order.id}
                           </a>
                         </TableCell>
+                        <TableCell className="whitespace-nowrap font-medium">{order.uad_version || "—"}</TableCell>
                         <TableCell>{order.package || order.tat || "—"}</TableCell>
                         <TableCell>{formatDate(order.created_date, true)}</TableCell>
                         <TableCell>
@@ -558,7 +566,7 @@ export default function OrderReport() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={9} className="py-8 text-center text-dark-5">
+                    <TableCell colSpan={10} className="py-8 text-center text-dark-5">
                       No Data Found !
                     </TableCell>
                   </TableRow>
@@ -720,6 +728,7 @@ export default function OrderReport() {
             <TableRow className="bg-[#F7F9FC] text-sm dark:bg-dark-2 [&>th]:py-3 [&>th]:font-medium">
               <TableHead>Sr. No.</TableHead>
               <TableHead>File#</TableHead>
+              <TableHead>UAD Version</TableHead>
               <TableHead>TAT</TableHead>
               <TableHead>Order Date</TableHead>
               <TableHead>Status</TableHead>
@@ -738,7 +747,7 @@ export default function OrderReport() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={isTeamMemberView ? 11 : 14} className="py-8 text-center text-dark-5">
+                <TableCell colSpan={isTeamMemberView ? 12 : 15} className="py-8 text-center text-dark-5">
                   Loading orders...
                 </TableCell>
               </TableRow>
@@ -765,6 +774,7 @@ export default function OrderReport() {
                         </button>
                       </div>
                     </TableCell>
+                    <TableCell className="whitespace-nowrap font-medium">{order.uad_version || "-"}</TableCell>
                     <TableCell>
                       <span
                         className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${tatClasses[order.package || ""] || "bg-gray-2 text-dark"}`}
