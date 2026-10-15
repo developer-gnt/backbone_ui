@@ -67,6 +67,12 @@ export const searchAddress = async (
     if (axios.isCancel(err) || err?.name === "CanceledError" || err?.code === "ERR_CANCELED") {
       return [];
     }
-    throw err;
+    // LocationIQ returns 404 when no address match is found
+    if (err?.response?.status === 404) {
+      return [];
+    }
+    console.warn("LocationIQ search address failed:", err?.message || err);
+    return [];
   }
 };
+
