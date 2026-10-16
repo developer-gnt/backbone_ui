@@ -5,7 +5,7 @@ import axiosInstance, { API_BASE_URL, getApiErrorMessage } from "@/lib/axiosInst
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type StateOption = {
   id?: number | string;
@@ -112,12 +112,84 @@ export default function ClientRegistrationPage() {
     return "text-red-600";
   }, [usernameStatus]);
 
+  const latestUsernameCheckRef = useRef<string>("");
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const checkAvailability = useCallback(async (candidate: string) => {
+    latestUsernameCheckRef.current = candidate;
+    setUsernameStatus({ type: "checking", text: "Checking username availability..." });
+
+    try {
+      const response = await axiosInstance.get("/auth/check-username", {
+        params: { username: candidate },
+      });
+
+      if (latestUsernameCheckRef.current === candidate) {
+        setUsernameStatus({
+          type: response.data?.available ? "success" : "error",
+          text: response.data?.message || "Unable to validate username.",
+        });
+      }
+      return !!response.data?.available;
+    } catch (error) {
+      if (latestUsernameCheckRef.current === candidate) {
+        setUsernameStatus({
+          type: "error",
+          text: getApiErrorMessage(error, "Unable to validate username."),
+        });
+      }
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    const username = form.username.trim();
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    if (!username) {
+      setUsernameStatus(null);
+      latestUsernameCheckRef.current = "";
+      return;
+    }
+
+    if (username.length < 3) {
+      setUsernameStatus({
+        type: "error",
+        text: "Username must be at least 3 characters long.",
+      });
+      latestUsernameCheckRef.current = username;
+      return;
+    }
+
+    if (username.length > 30) {
+      setUsernameStatus({
+        type: "error",
+        text: "Username cannot exceed 30 characters.",
+      });
+      latestUsernameCheckRef.current = username;
+      return;
+    }
+
+    setUsernameStatus({ type: "checking", text: "Checking username availability..." });
+
+    debounceTimerRef.current = setTimeout(() => {
+      void checkAvailability(username);
+    }, 400);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [form.username, checkAvailability]);
+
   const updateField = (key: keyof RegistrationForm, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [key]: value }));
-
-    if (key === "username") {
-      setUsernameStatus(null);
-    }
   };
 
   const handleUsernameBlur = async () => {
@@ -128,22 +200,29 @@ export default function ClientRegistrationPage() {
       return;
     }
 
-    setUsernameStatus({ type: "checking", text: "Checking username availability..." });
-
-    try {
-      const response = await axiosInstance.get("/auth/check-username", {
-        params: { username },
-      });
-
-      setUsernameStatus({
-        type: response.data?.available ? "success" : "error",
-        text: response.data?.message || "Unable to validate username.",
-      });
-    } catch (error) {
+    if (username.length < 3) {
       setUsernameStatus({
         type: "error",
-        text: getApiErrorMessage(error, "Unable to validate username."),
+        text: "Username must be at least 3 characters long.",
       });
+      return;
+    }
+
+    if (username.length > 30) {
+      setUsernameStatus({
+        type: "error",
+        text: "Username cannot exceed 30 characters.",
+      });
+      return;
+    }
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    if (usernameStatus?.type !== "success" || latestUsernameCheckRef.current !== username) {
+      await checkAvailability(username);
     }
   };
 
@@ -152,14 +231,65 @@ export default function ClientRegistrationPage() {
     setSubmitting(true);
     setFeedback(null);
 
+    const username = form.username.trim();
+
+    if (!username) {
+      setSubmitting(false);
+      setFeedback({ type: "error", text: "Please enter a login name." });
+      return;
+    }
+
+    if (username.length < 3) {
+      setSubmitting(false);
+      setFeedback({
+        type: "error",
+        text: "Username must be at least 3 characters long.",
+      });
+      return;
+    }
+
+    if (username.length > 30) {
+      setSubmitting(false);
+      setFeedback({
+        type: "error",
+        text: "Username cannot exceed 30 characters.",
+      });
+      return;
+    }
+
     if (!form.agreeToTerms) {
       setSubmitting(false);
       setFeedback({ type: "error", text: "Please accept the terms and privacy policy." });
       return;
     }
 
+    // Ensure username is verified before proceeding
+    let isAvailable =
+      usernameStatus?.type === "success" && latestUsernameCheckRef.current === username;
+
+    if (!isAvailable) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+
+      isAvailable = await checkAvailability(username);
+    }
+
+    if (!isAvailable) {
+      setSubmitting(false);
+      setFeedback({
+        type: "error",
+        text: usernameStatus?.text || "Please choose an available login name before submitting.",
+      });
+      return;
+    }
+
     try {
-      const response = await axiosInstance.post("/auth/client-registration", form);
+      const response = await axiosInstance.post("/auth/client-registration", {
+        ...form,
+        username,
+      });
       setFeedback({
         type: "success",
         text:
@@ -172,6 +302,7 @@ export default function ClientRegistrationPage() {
         state: prev.state || meta.states[0]?.city || "",
       }));
       setUsernameStatus(null);
+      latestUsernameCheckRef.current = "";
     } catch (error) {
       setFeedback({
         type: "error",
@@ -363,12 +494,16 @@ export default function ClientRegistrationPage() {
               value={form.username}
               onChange={(event) => updateField("username", event.target.value.replace(/\s+/g, ""))}
               onBlur={handleUsernameBlur}
+              minLength={3}
+              maxLength={30}
+              autoComplete="username"
+              spellCheck={false}
               className="w-full rounded-lg border border-stroke bg-transparent px-4 py-2.5 text-sm outline-none focus:border-primary dark:border-dark-3 dark:text-white"
               placeholder="Eg. Brock123"
               required
             />
             <p className={`mt-2 text-xs ${usernameHelperClass}`}>
-              {usernameStatus?.text || "Choose a unique login name."}
+              {usernameStatus?.text || "Choose a unique login name (minimum 3 characters)."}
             </p>
           </div>
 
@@ -391,7 +526,12 @@ export default function ClientRegistrationPage() {
 
             <button
               type="submit"
-              disabled={submitting || loadingMeta || usernameStatus?.type === "error"}
+              disabled={
+                submitting ||
+                loadingMeta ||
+                usernameStatus?.type === "error" ||
+                usernameStatus?.type === "checking"
+              }
               className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? "Submitting..." : "Submit"}
