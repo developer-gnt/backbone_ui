@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
 import { getAttachmentUrl as getAttachmentLink } from "@/lib/attachmentUrl";
@@ -166,6 +166,8 @@ export default function ClientEditOrderPage() {
   const [states, setStates] = useState<StateOption[]>([]);
   const [downloads, setDownloads] = useState<AttachmentRow[]>([]);
   const [attachmentsByType, setAttachmentsByType] = useState<Record<string, File[]>>({});
+  const [fileInputKey, setFileInputKey] = useState(0);
+  const fileSectionRef = useRef<HTMLDivElement | null>(null);
   const [duplicateInfo, setDuplicateInfo] = useState<{ exists: boolean; count: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -373,6 +375,16 @@ export default function ClientEditOrderPage() {
         text: "Your Order has been successfully updated and received by us!",
       });
       setAttachmentsByType({});
+      setFileInputKey((prev) => prev + 1);
+      if (fileSectionRef.current) {
+        const fileInputs =
+          fileSectionRef.current.querySelectorAll<HTMLInputElement>(
+            'input[type="file"]',
+          );
+        fileInputs.forEach((input) => {
+          input.value = "";
+        });
+      }
     } catch (error) {
       setFeedback({
         type: "error",
@@ -547,13 +559,23 @@ export default function ClientEditOrderPage() {
             </div>
           </div>
 
-          <div className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark">
+          <div
+            ref={fileSectionRef}
+            key={`documents-section-${fileInputKey}`}
+            className="rounded-[10px] border border-stroke bg-white p-6 shadow-1 dark:border-dark-3 dark:bg-gray-dark"
+          >
             <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">Required Documents For Completion of Assignment</h3>
             <div className="grid gap-4 md:grid-cols-2">
               {DOCUMENT_TYPES.map((label) => (
                 <div key={label}>
                   <label className="mb-2 block text-sm font-medium text-dark dark:text-white">{label}</label>
-                  <input type="file" multiple onChange={(e) => updateFiles(label, e.target.files)} className="w-full rounded-lg border border-stroke bg-transparent px-4 py-3 outline-none focus:border-primary dark:border-dark-3 dark:text-white" />
+                  <input
+                    key={`${label}-${fileInputKey}`}
+                    type="file"
+                    multiple
+                    onChange={(e) => updateFiles(label, e.target.files)}
+                    className="w-full rounded-lg border border-stroke bg-transparent px-4 py-3 outline-none focus:border-primary dark:border-dark-3 dark:text-white"
+                  />
                 </div>
               ))}
             </div>

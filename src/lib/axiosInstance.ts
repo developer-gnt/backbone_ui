@@ -113,6 +113,11 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      // In browser, removing Content-Type allows the browser to set multipart/form-data with the correct boundary
+      delete config.headers["Content-Type"];
+    }
+
     return config;
   },
   (error) => Promise.reject(error),

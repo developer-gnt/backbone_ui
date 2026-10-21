@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
@@ -214,6 +214,8 @@ export default function EditOrderPage() {
   const [states, setStates] = useState<StateOption[]>([]);
   const [files, setFiles] = useState<AttachmentRow[]>([]);
   const [filesByType, setFilesByType] = useState<Record<string, File[]>>({});
+  const [fileInputKey, setFileInputKey] = useState(0);
+  const fileSectionRef = useRef<HTMLDivElement | null>(null);
   const [availabilityRows, setAvailabilityRows] = useState<
     Array<{
       package?: string;
@@ -434,6 +436,17 @@ export default function EditOrderPage() {
         type: "success",
         text: "Your order has been successfully updated!",
       });
+      setFilesByType({});
+      setFileInputKey((prev) => prev + 1);
+      if (fileSectionRef.current) {
+        const fileInputs =
+          fileSectionRef.current.querySelectorAll<HTMLInputElement>(
+            'input[type="file"]',
+          );
+        fileInputs.forEach((input) => {
+          input.value = "";
+        });
+      }
 
       // Redirect to order reports after success
       setTimeout(() => {
@@ -696,7 +709,11 @@ export default function EditOrderPage() {
         </div>
 
         {/* Upload Documents */}
-        <div className="overflow-hidden rounded-md border border-stroke dark:border-dark-3">
+        <div
+          ref={fileSectionRef}
+          key={`documents-section-${fileInputKey}`}
+          className="overflow-hidden rounded-md border border-stroke dark:border-dark-3"
+        >
           <div className="border-b border-stroke bg-white px-4 py-3 font-semibold text-dark dark:border-dark-3 dark:bg-gray-dark dark:text-white">
             Required Documents For Completion of Assignment
           </div>
@@ -711,6 +728,7 @@ export default function EditOrderPage() {
                   {field.label}
                 </label>
                 <input
+                  key={`${field.key}-${fileInputKey}`}
                   type="file"
                   multiple
                   onChange={(e) => updateFiles(field.key, e.target.files)}

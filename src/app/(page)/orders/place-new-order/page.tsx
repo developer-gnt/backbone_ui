@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/Auth/AuthProvider";
 import axiosInstance, { getApiErrorMessage } from "@/lib/axiosInstance";
 import { LocationIQResult, searchAddress } from "@/lib/locationiq";
@@ -187,11 +187,14 @@ export default function PlaceNewOrderPage() {
   } | null>(null);
   const [filesByType, setFilesByType] = useState<Record<string, File[]>>({});
   const [extraUploadSlots, setExtraUploadSlots] = useState<number[]>([0]);
+  const [fileInputKey, setFileInputKey] = useState(0);
+  const fileSectionRef = useRef<HTMLDivElement | null>(null);
   const [availabilityRows, setAvailabilityRows] = useState<
     Array<{ package?: string; msg?: string }>
   >([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   // const [feedback, setFeedback] = useState<{
   //   type: "success" | "error";
   //   text: string;
@@ -596,15 +599,35 @@ export default function PlaceNewOrderPage() {
         });
       });
 
+      setUploadProgress(0);
+
       const response = await axiosInstance.post("/masters/orders", payload, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+        timeout: 900000, // 15-minute timeout for large files
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
+            setUploadProgress(percent);
+          }
         },
       });
 
       setFilesByType({});
       setExtraUploadSlots([0]);
+      setFileInputKey((prev) => prev + 1);
+      if (fileSectionRef.current) {
+        const fileInputs =
+          fileSectionRef.current.querySelectorAll<HTMLInputElement>(
+            'input[type="file"]',
+          );
+        fileInputs.forEach((input) => {
+          input.value = "";
+        });
+      }
       setDuplicateInfo(null);
+      setAddressSelected(false);
+      setSuggestions([]);
       setClientInfo((prev) =>
         prev
           ? {
@@ -638,6 +661,7 @@ export default function PlaceNewOrderPage() {
       notifyError(getApiErrorMessage(error, "Failed to place the new order."));
     } finally {
       setSubmitting(false);
+      setUploadProgress(null);
     }
   };
 
@@ -969,7 +993,11 @@ export default function PlaceNewOrderPage() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-md border border-stroke dark:border-dark-3">
+        <div
+          ref={fileSectionRef}
+          key={`upload-docs-section-${fileInputKey}`}
+          className="overflow-hidden rounded-md border border-stroke dark:border-dark-3"
+        >
           <div className="border-b border-stroke bg-white px-4 py-3 font-semibold text-dark dark:border-dark-3 dark:bg-gray-dark dark:text-white">
             Upload Working Docs
           </div>
@@ -982,6 +1010,7 @@ export default function PlaceNewOrderPage() {
                     {field.label}
                   </label>
                   <input
+                    key={`${field.key}-${fileInputKey}`}
                     type="file"
                     multiple
                     onChange={(event) =>
@@ -1006,8 +1035,9 @@ export default function PlaceNewOrderPage() {
 
               <div className="space-y-2">
                 {extraUploadSlots.map((slot, index) => (
-                  <div key={slot} className="flex flex-wrap items-center gap-2">
+                  <div key={`${slot}-${fileInputKey}`} className="flex flex-wrap items-center gap-2">
                     <input
+                      key={`more-${slot}-${fileInputKey}`}
                       type="file"
                       onChange={(event) =>
                         updateFiles(
@@ -1036,11 +1066,16 @@ export default function PlaceNewOrderPage() {
                     {extraUploadSlots.length > 1 && (
                       <button
                         type="button"
-                        onClick={() =>
+                        onClick={() => {
                           setExtraUploadSlots((prev) =>
                             prev.filter((item) => item !== slot),
-                          )
-                        }
+                          );
+                          setFilesByType((prev) => {
+                            const updated = { ...prev };
+                            delete updated[`More Files or .zip ${slot}`];
+                            return updated;
+                          });
+                        }}
                         className="rounded-md bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
                       >
                         Remove
@@ -1190,13 +1225,32 @@ export default function PlaceNewOrderPage() {
           </div>
         </div>
 
+        {uploadProgress !== null && (
+          <div className="rounded-md border border-primary/20 bg-primary/5 p-4">
+            <div className="mb-2 flex items-center justify-between text-sm font-medium text-primary">
+              <span>Uploading order files & submitting...</span>
+              <span>{uploadProgress}%</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-stroke dark:bg-dark-3">
+              <div
+                className="h-full bg-primary transition-all duration-200"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         <div className="pt-1">
           <button
             type="submit"
             disabled={loading || submitting}
             className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {submitting ? "Submitting..." : "SUBMIT"}
+            {submitting
+              ? uploadProgress !== null
+                ? `Uploading (${uploadProgress}%)...`
+                : "Submitting..."
+              : "SUBMIT"}
           </button>
         </div>
       </form>
